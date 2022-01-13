@@ -39,6 +39,7 @@
     ],
     // We will use TypeScript's types for component props instead
     "react/prop-types": "off",
+    "react/require-default-props": "off",
     // We don"t want unused vars
     "@typescript-eslint/no-unused-vars": ["error"]
   }
