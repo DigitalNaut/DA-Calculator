@@ -1,3 +1,3 @@
-# Geomania
+# Dimensional Analysis Calculator
 
-Learn the world's countries!
+Do basic conversions using the factor-label method
