@@ -1,4 +1,7 @@
 import React from 'react';
+import { faEquals } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+
 import { IExpression } from 'src/components/types';
 import Unit from 'src/components/Unit';
 
@@ -12,8 +15,10 @@ export function Expression({ input }: ExpressionProps) {
       {input.map((aUnit) => (
         <Unit key={aUnit.toString()} input={aUnit} />
       ))}
-      <button type="button">=</button>
-      Result
+      <button type="button">
+        <FontAwesomeIcon icon={faEquals} />
+      </button>
+      <div>Result</div>
     </div>
   );
 }
