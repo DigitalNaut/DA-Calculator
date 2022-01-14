@@ -1,5 +1,5 @@
 export type ISubunit = {
-  input: [number, string];
+  input: string | [number, string?];
 };
 
 export type IUnit = {
