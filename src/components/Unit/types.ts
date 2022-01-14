@@ -8,7 +8,7 @@ type ICustomChangeEventHandler<T = Element> = (
 export type CustomInputChangeHandler = ICustomChangeEventHandler<HTMLInputElement>;
 
 type IInputHandler = {
-  onChangeInput: CustomInputChangeHandler;
+  onChangeInput?: CustomInputChangeHandler;
   index?: number;
 };
 
@@ -19,6 +19,7 @@ export type IUnit = IInputHandler & {
 export type ISubunit = IInputHandler & {
   input: IInput;
   subunit?: 0 | 1;
+  display?: true;
 };
 
 export type ISimpleInput = string;
