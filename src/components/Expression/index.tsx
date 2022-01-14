@@ -43,7 +43,7 @@ export default function Expression({ input }: Props) {
     return removeOverlap(upperLabels, lowerLabels);
   }
 
-  const onClick = () => {
+  const onClickResults = () => {
     setEnumerator(reduceFactors(0));
     setDenominator(reduceFactors(1));
     setLabels(joinLabels());
@@ -53,15 +53,12 @@ export default function Expression({ input }: Props) {
     return !!enumerator && !!denominator
       ? [
           (enumerator / denominator).toFixed(2),
-          labels?.[0],
+          labels?.[0].join(' • '),
           labels?.[1].length ? '/' : '',
-          labels?.[1],
+          labels?.[1].join(' • '),
         ].join(' ')
       : 'Result';
   }, [enumerator, denominator, labels]);
-
-  const trace: CustomInputChangeHandler = (newValue, index, subunit) =>
-    console.log(newValue, index, subunit);
 
   const updateExpression: CustomInputChangeHandler = (userInput, index, subunit) => {
     const areVariablesPosInts =
@@ -89,10 +86,10 @@ export default function Expression({ input }: Props) {
           index={unitIndex}
         />
       ))}
-      <button type="button" className="p-2" onClick={onClick}>
+      <button type="button" className="p-2" onClick={onClickResults}>
         <FontAwesomeIcon icon={faEquals} size="2x" />
       </button>
-      <Subunit input={result} onChangeInput={trace} />
+      <Subunit display input={result} />
     </div>
   );
 }
