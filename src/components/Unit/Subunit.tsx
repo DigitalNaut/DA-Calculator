@@ -1,20 +1,46 @@
-import React from 'react';
+import React, { ChangeEventHandler, useMemo, useState } from 'react';
 
-import { ISubunit } from './types';
+import { ICompoundInput, ISubunit } from './types';
 
-export default function Subunit({ input }: ISubunit) {
-  if (typeof input === 'string')
+export function makeCompoundValue(haystack: string): ICompoundInput {
+  const needle = /^(\d+)\s?(.+)$/;
+  const results = needle.exec(haystack);
+
+  return [Number(results?.[1] || 1), results?.[2]];
+}
+
+export function stringifyValue(userInput: string | ICompoundInput) {
+  if (typeof userInput === 'string') return userInput;
+  return userInput.join(' ');
+}
+
+export default function Subunit({ index = -1, subunit, input, onChangeInput }: ISubunit) {
+  const [userInput, setInput] = useState(input);
+
+  const stringifiedValue = useMemo(() => stringifyValue(userInput), [userInput]);
+
+  if (!userInput[1]?.length && userInput[0] === 1) return <></>;
+
+  if (typeof userInput === 'string')
     return (
-      <input disabled className="w-min p-2 bg-green-100 text-green-900 text-center" value={input} />
+      <input
+        disabled
+        className="p-2 text-center text-green-900 bg-green-100 w-min"
+        value={userInput}
+      />
     );
 
-  if (!input[1]?.length && input[0] === 1) return <></>;
+  const onChange: ChangeEventHandler<HTMLInputElement> = (e) =>
+    setInput(makeCompoundValue(e.currentTarget.value));
+
+  const submitInput = () => onChangeInput(stringifyValue(userInput), index, subunit);
 
   return (
     <input
-      disabled
-      className="w-full p-2 bg-green-700 text-center"
-      value={input[1]?.length ? `${input[0]} ${input[1]}` : input[0]}
+      className="w-full p-2 text-center bg-green-700"
+      value={stringifiedValue}
+      onChange={onChange}
+      onBlur={submitInput}
     />
   );
 }
