@@ -5,5 +5,3 @@ export type ISubunit = {
 export type IUnit = {
   input: [ISubunit['input'], ISubunit['input']?];
 };
-
-export type IExpression = IUnit['input'][];

@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { faEquals } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
-import { IExpression } from 'src/components/types';
+import { IExpression } from 'src/components/Expression/types';
 import Unit, { Subunit } from 'src/components/Unit';
 import { removeOverlap } from 'src/utils';
 
