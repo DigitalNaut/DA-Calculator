@@ -1,6 +1,6 @@
 import React from 'react';
 
-import Expression from 'src/components/Expression/Expression';
+import Expression from 'src/components/Expression';
 import { IExpression } from 'src/components/Expression/types';
 
 const expression1: IExpression = [
