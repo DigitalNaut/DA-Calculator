@@ -1,9 +1,7 @@
 import React from 'react';
-import { faEquals } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
+import Expression from 'src/components/Expression';
 import { IExpression } from 'src/components/types';
-import Unit from 'src/components/Unit';
 
 type ExpressionProps = {
   input: IExpression;
