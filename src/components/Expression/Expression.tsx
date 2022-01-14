@@ -3,7 +3,8 @@ import { faEquals } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import { IExpression } from 'src/components/Expression/types';
-import Unit, { Subunit } from 'src/components/Unit';
+import Unit from 'src/components/Unit';
+import Subunit from 'src/components/Unit/Subunit';
 import { removeOverlap } from 'src/utils';
 
 type Props = {

@@ -1,34 +1,9 @@
 import React from 'react';
-import { ISubunit, IUnit } from './types';
 
-export function Separator() {
-  return <div className="w-full h-[1px] bg-white" />;
-}
+import Separator from './Separator';
+import Subunit from './Subunit';
 
-export function Subunit({ input }: ISubunit) {
-  if (typeof input === 'string')
-    return (
-      <input disabled className="w-min p-2 bg-green-100 text-green-900 text-center" value={input} />
-    );
-
-  if (!input[1]?.length && input[0] === 1) return <></>;
-
-  return (
-    <input
-      disabled
-      className="w-full p-2 bg-green-700 text-center"
-      value={input[1]?.length ? `${input[0]} ${input[1]}` : input[0]}
-    />
-  );
-}
-
-type LabelProps = {
-  input: string;
-};
-
-export function Label({ input }: LabelProps) {
-  return <input disabled className="w-full p-2 bg-green-700 text-center" value={input} />;
-}
+import { IUnit } from './types';
 
 export default function Unit({ input }: IUnit) {
   return (
