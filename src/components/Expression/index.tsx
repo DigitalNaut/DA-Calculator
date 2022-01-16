@@ -89,7 +89,7 @@ export default function Expression({ input }: Props) {
       ))}
       <button type="button" className="flex items-center p-2" onClick={onClickResults}>
         <FontAwesomeIcon icon={faEquals} size="2x" />
-        <Output>{result}</Output>
+        <Output dimmed={result === 'Result'}>{result}</Output>
       </button>
     </div>
   );
