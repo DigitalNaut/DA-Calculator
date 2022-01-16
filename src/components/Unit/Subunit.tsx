@@ -26,7 +26,7 @@ export default function Subunit({
     <input
       placeholder="Factor label"
       className={[
-        `w-full p-2 text-cente bg-gray-800 grow focus:bg-blue-50 border-2 border-transparent text-center`,
+        `w-full p-2 text-cente bg-gray-800 grow focus:bg-blue-50 border-2 border-transparent text-center rounded-2xl`,
         allValidInputNeedle.test(stringifyInput(userInput))
           ? ' focus:text-blue-900 focus:border-blue-900'
           : 'focus:text-red-700 focus:border-red-500',
