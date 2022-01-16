@@ -1,7 +1,11 @@
 import React, { ChangeEventHandler, useState } from 'react';
 
 import { ISubunit } from './types';
-import { allLegalInputNeedle, allValidInputNeedle, stringifyValue } from './validation';
+import {
+  allLegalInputNeedle,
+  allValidInputNeedle,
+  stringifyIntoLabel as stringifyInput,
+} from './validation';
 
 export default function Subunit({
   index = -1,
