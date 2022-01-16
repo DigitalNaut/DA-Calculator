@@ -13,7 +13,7 @@ export default function Subunit({
   input,
   onChangeInput,
 }: ISubunit): JSX.Element | null {
-  const [userInput, setInput] = useState(stringifyValue(input) || '1');
+  const [userInput, setInput] = useState(stringifyInput(input) || '1');
 
   const onChange: ChangeEventHandler<HTMLInputElement> = (e) => {
     const newUserInput = e.currentTarget.value;
@@ -24,13 +24,14 @@ export default function Subunit({
 
   return (
     <input
+      placeholder="Factor label"
       className={[
-        `w-full p-2 text-cente bg-green-900 grow focus:bg-yellow-200`,
-        allValidInputNeedle.test(stringifyValue(userInput))
-          ? 'focus:text-blue-900'
-          : 'focus:text-red-700',
+        `w-full p-2 text-cente bg-gray-800 grow focus:bg-blue-50 border-2 border-transparent text-center`,
+        allValidInputNeedle.test(stringifyInput(userInput))
+          ? ' focus:text-blue-900 focus:border-blue-900'
+          : 'focus:text-red-700 focus:border-red-500',
       ].join(' ')}
-      value={stringifyValue(userInput)}
+      value={stringifyInput(userInput)}
       onChange={onChange}
       onBlur={submitInput}
     />
