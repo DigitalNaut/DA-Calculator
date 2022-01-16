@@ -4,9 +4,10 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import { IExpression } from 'src/components/Expression/types';
 import Unit from 'src/components/Unit';
-import Subunit, { makeCompoundValue } from 'src/components/Unit/Subunit';
 import { removeOverlap } from 'src/utils';
 import { CustomInputChangeHandler, IInput } from 'src/components/Unit/types';
+import { makeCompoundValue } from '../Unit/validation';
+import Output from '../Output';
 
 type Props = {
   input: IExpression;
@@ -61,10 +62,10 @@ export default function Expression({ input }: Props) {
   }, [enumerator, denominator, labels]);
 
   const updateExpression: CustomInputChangeHandler = (userInput, index, subunit) => {
-    const areVariablesPosInts =
+    const areVariablesPositiveIntegers =
       index !== undefined && index >= 0 && subunit !== undefined && subunit >= 0;
 
-    if (areVariablesPosInts) {
+    if (areVariablesPositiveIntegers) {
       setExpression((prevInput) => {
         const newExpression = prevInput;
         const newValue: IInput = makeCompoundValue(userInput);
@@ -77,7 +78,7 @@ export default function Expression({ input }: Props) {
   };
 
   return (
-    <div className="flex items-center justify-center w-full p-3">
+    <div className="flex items-center justify-center w-full h-full p-3">
       {expression.map((aUnit, unitIndex) => (
         <Unit
           key={aUnit.toString()}
@@ -86,10 +87,10 @@ export default function Expression({ input }: Props) {
           index={unitIndex}
         />
       ))}
-      <button type="button" className="p-2" onClick={onClickResults}>
+      <button type="button" className="flex items-center p-2" onClick={onClickResults}>
         <FontAwesomeIcon icon={faEquals} size="2x" />
+        <Output>{result}</Output>
       </button>
-      <Subunit display input={result} />
     </div>
   );
 }
