@@ -30,7 +30,7 @@ export default function Subunit({
     <input
       placeholder="No value"
       className={[
-        `w-full p-2 text-cente grow focus:bg-white border-2 border-transparent text-center bg-transparent rounded-md z-10`,
+        `w-full p-2 text-center grow focus:bg-white border-2 border-transparent bg-transparent rounded-md z-10`,
         allValidInputNeedle.test(stringifyInput(userInput))
           ? ' focus:text-blue-900 focus:border-blue-900'
           : 'focus:text-red-700 focus:border-red-500',

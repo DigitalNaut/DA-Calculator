@@ -16,7 +16,7 @@ type Props = {
 export default function Expression({ input }: Props) {
   const [expression, setExpression] = useState(input);
   const [update, setUpdate] = useState(0);
-  const [enumerator, setEnumerator] = useState(0);
+  const [numerator, setNumerator] = useState(0);
   const [denominator, setDenominator] = useState(0);
   const [labels, setLabels] = useState<string[][]>();
   const [wasChanged, setWasChanged] = useState(false);
