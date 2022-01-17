@@ -12,9 +12,9 @@ export default function Unit({ index, input, onChangeInput }: IUnit) {
   const identity = identityNeedle.test(stringValue);
 
   return (
-    <div className="flex items-center m-0.5 group">
+    <div className="flex items-center group">
       {identity || <Parenthesis />}
-      <div className="flex flex-col h-full p-0.5 -max bg-gray-800 rounded-2xl hover:bg-gray-700">
+      <div className="flex flex-col h-full bg-gray-700 rounded-2xl hover:bg-gray-600">
         <div className="flex h-full grow">
           <Subunit input={input[0]} onChangeInput={onChangeInput} index={index} subunit={0} />
         </div>
