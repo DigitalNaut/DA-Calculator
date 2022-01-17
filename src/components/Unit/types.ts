@@ -1,4 +1,4 @@
-import { ChangeEvent, ChangeEventHandler } from 'react';
+import { ChangeEvent, ChangeEventHandler, KeyboardEventHandler } from 'react';
 
 type ICustomChangeEventHandler<T = Element> = (
   userInput: string,
@@ -8,8 +8,8 @@ type ICustomChangeEventHandler<T = Element> = (
 export type CustomInputChangeHandler = ICustomChangeEventHandler<HTMLInputElement>;
 
 type IInputHandler = {
-  onChangeInput?: CustomInputChangeHandler;
   index?: number;
+  onChangeInput?: CustomInputChangeHandler;
 };
 
 export type IUnit = IInputHandler & {
