@@ -7,13 +7,13 @@ type Props = {
 
 export default function Output({ children, dimmed }: Props) {
   return (
-    <input
-      disabled
+    <p
       className={[
-        'p-2 m-1.5 text-center text-white bg-gray-800 rounded-2xl',
+        'p-4 m-1.5 text-center text-white bg-gray-800 rounded-2xl',
         dimmed ? 'text-gray-400 italic' : '',
       ].join(' ')}
-      value={children}
-    />
+    >
+      {children}
+    </p>
   );
 }
