@@ -6,8 +6,10 @@ import { IExpression } from 'src/components/Expression/types';
 import Unit from 'src/components/Unit';
 import { removeOverlap } from 'src/utils';
 import { CustomInputChangeHandler, IInput } from 'src/components/Unit/types';
+import Output from 'src/components/Output';
+
 import { makeCompoundValue, stringifyIntoLabel } from '../Unit/validation';
-import Output from '../Output';
+import Separator from './Separator';
 
 type Props = {
   input: IExpression;
@@ -85,16 +87,24 @@ export default function Expression({ input }: Props) {
     setUpdate((prev) => prev + 1);
   };
 
+  const insertExpression = (index: number) => {
+    console.log('Clicked', index);
+    expression.splice(index, 0, [[1]]);
+    setUpdate((prev) => prev + 1);
+  };
+
   return (
-    <div className="flex items-center justify-center w-full h-full p-3">
-      {expression.map((aUnit, unitIndex) => (
-        <Unit
-          key={aUnit.toString()}
-          input={aUnit}
-          onChangeInput={updateExpression}
-          index={unitIndex}
-        />
-      ))}
+    <div className="flex items-center justify-center w-max h-full m-1 bg-gray-800 rounded-md shadow-md">
+      <Separator onClick={() => insertExpression(0)} />
+      {expression.map((aUnit, unitIndex) => {
+        const keyHash = aUnit.toString() + unitIndex;
+        return (
+          <div className="flex items-center justify-center h-full" key={keyHash}>
+            <Unit input={aUnit} onChangeInput={updateExpression} index={unitIndex} />
+            <Separator onClick={() => insertExpression(unitIndex + 1)} />
+          </div>
+        );
+      })}
       <button type="button" className="flex items-center p-2" onClick={onClickResults}>
         <FontAwesomeIcon icon={faEquals} size="2x" />
         <Output dimmed={result === 'Result' || wasChanged}>{result}</Output>
