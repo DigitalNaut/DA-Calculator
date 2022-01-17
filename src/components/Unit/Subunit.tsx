@@ -1,4 +1,4 @@
-import React, { ChangeEventHandler, useState } from 'react';
+import React, { ChangeEventHandler, KeyboardEventHandler, useState } from 'react';
 
 import { ISubunit } from './types';
 import {
@@ -22,11 +22,15 @@ export default function Subunit({
 
   const submitInput = () => onChangeInput?.(userInput.trim(), index, subunit);
 
+  const blur: KeyboardEventHandler<HTMLInputElement> = (e) => {
+    if (e.key === 'Enter') e.currentTarget.blur();
+  };
+
   return (
     <input
-      placeholder="Factor label"
+      placeholder="No value"
       className={[
-        `w-full p-2 text-cente bg-gray-800 grow focus:bg-blue-50 border-2 border-transparent text-center rounded-2xl`,
+        `w-full p-2 text-cente grow focus:bg-white border-2 border-transparent text-center bg-transparent rounded-md z-10`,
         allValidInputNeedle.test(stringifyInput(userInput))
           ? ' focus:text-blue-900 focus:border-blue-900'
           : 'focus:text-red-700 focus:border-red-500',
@@ -34,6 +38,8 @@ export default function Subunit({
       value={stringifyInput(userInput)}
       onChange={onChange}
       onBlur={submitInput}
+      onKeyDown={blur}
+      size={userInput.length || 5}
     />
   );
 }
