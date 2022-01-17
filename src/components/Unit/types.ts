@@ -14,6 +14,7 @@ type IInputHandler = {
 
 export type IUnit = IInputHandler & {
   input: [IInput, IInput?];
+  onDeleteUnit?(): void;
 };
 
 export type ISubunit = IInputHandler & {

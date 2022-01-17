@@ -7,9 +7,10 @@ import Unit from 'src/components/Unit';
 import { removeOverlap } from 'src/utils';
 import { CustomInputChangeHandler, IInput } from 'src/components/Unit/types';
 import Output from 'src/components/Output';
+import { makeCompoundValue, stringifyIntoLabel } from 'src/components/Unit/validation';
 
-import { makeCompoundValue, stringifyIntoLabel } from '../Unit/validation';
-import Separator from './Separator';
+import Inserter from './Separator';
+import { cleanUpExpression, removeUnits } from './utility';
 
 type Props = {
   input: IExpression;
@@ -21,7 +22,7 @@ export default function Expression({ input }: Props) {
   const [numerator, setNumerator] = useState(0);
   const [denominator, setDenominator] = useState(0);
   const [labels, setLabels] = useState<string[][]>();
-  const [wasChanged, setWasChanged] = useState(false);
+  const [wasInputChanged, setWasInputChanged] = useState(false);
 
   useEffect(() => {}, [expression, update]);
 
@@ -47,7 +48,7 @@ export default function Expression({ input }: Props) {
     return removeOverlap(upperLabels, lowerLabels);
   }
 
-  const calculateResult = () =>
+  const evaluateExpression = () =>
     !!numerator && !!denominator
       ? [
           (numerator / denominator).toFixed(2),
@@ -58,14 +59,17 @@ export default function Expression({ input }: Props) {
       : 'Result';
 
   const onClickResults = () => {
+    // Update data
     setNumerator(reduceFactors(0));
     setDenominator(reduceFactors(1));
     setLabels(joinLabels());
-
-    setWasChanged(false);
+    // Clean up
+    setExpression(cleanUpExpression(expression));
+    // Set flags
+    setWasInputChanged(false);
   };
 
-  const result = useMemo(calculateResult, [calculateResult]);
+  const result = useMemo(evaluateExpression, [evaluateExpression]);
 
   const updateExpression: CustomInputChangeHandler = (userInput, index, subunit) => {
     const areVariablesPositiveIntegers =
@@ -73,7 +77,7 @@ export default function Expression({ input }: Props) {
 
     if (areVariablesPositiveIntegers) {
       if (stringifyIntoLabel(userInput) !== stringifyIntoLabel(expression[index][subunit]))
-        setWasChanged(true);
+        setWasInputChanged(true);
 
       setExpression((prevInput) => {
         const newExpression = prevInput;
@@ -88,26 +92,46 @@ export default function Expression({ input }: Props) {
   };
 
   const insertExpression = (index: number) => {
-    console.log('Clicked', index);
     expression.splice(index, 0, [[1]]);
+    setUpdate((prev) => prev + 1);
+  };
+
+  const deleteUnit = (index: number) => {
+    setExpression(removeUnits(expression, index, () => setWasInputChanged(true)));
+
     setUpdate((prev) => prev + 1);
   };
 
   return (
     <div className="flex items-center justify-center w-max h-full m-1 bg-gray-800 rounded-md shadow-md">
-      <Separator onClick={() => insertExpression(0)} />
+      <Inserter
+        onClick={(e) => {
+          insertExpression(0);
+          e.currentTarget.blur();
+        }}
+      />
       {expression.map((aUnit, unitIndex) => {
         const keyHash = aUnit.toString() + unitIndex;
         return (
           <div className="flex items-center justify-center h-full" key={keyHash}>
-            <Unit input={aUnit} onChangeInput={updateExpression} index={unitIndex} />
-            <Separator onClick={() => insertExpression(unitIndex + 1)} />
+            <Unit
+              input={aUnit}
+              onChangeInput={updateExpression}
+              index={unitIndex}
+              onDeleteUnit={() => deleteUnit(unitIndex)}
+            />
+            <Inserter
+              onClick={(e) => {
+                insertExpression(unitIndex + 1);
+                e.currentTarget.blur();
+              }}
+            />
           </div>
         );
       })}
       <button type="button" className="flex items-center p-2" onClick={onClickResults}>
         <FontAwesomeIcon icon={faEquals} size="2x" />
-        <Output dimmed={result === 'Result' || wasChanged}>{result}</Output>
+        <Output dimmed={result === 'Result' || wasInputChanged}>{result}</Output>
       </button>
     </div>
   );
