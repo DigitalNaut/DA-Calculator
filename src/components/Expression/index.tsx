@@ -6,7 +6,7 @@ import { IExpression } from 'src/components/Expression/types';
 import Unit from 'src/components/Unit';
 import { removeOverlap } from 'src/utils';
 import { CustomInputChangeHandler, IInput } from 'src/components/Unit/types';
-import { makeCompoundValue } from '../Unit/validation';
+import { makeCompoundValue, stringifyIntoLabel } from '../Unit/validation';
 import Output from '../Output';
 
 type Props = {
@@ -19,6 +19,7 @@ export default function Expression({ input }: Props) {
   const [enumerator, setEnumerator] = useState(0);
   const [denominator, setDenominator] = useState(0);
   const [labels, setLabels] = useState<string[][]>();
+  const [wasChanged, setWasChanged] = useState(false);
 
   useEffect(() => {}, [expression, update]);
 
@@ -44,28 +45,34 @@ export default function Expression({ input }: Props) {
     return removeOverlap(upperLabels, lowerLabels);
   }
 
-  const onClickResults = () => {
-    setEnumerator(reduceFactors(0));
-    setDenominator(reduceFactors(1));
-    setLabels(joinLabels());
-  };
-
-  const result = useMemo(() => {
-    return !!enumerator && !!denominator
+  const calculateResult = () =>
+    !!numerator && !!denominator
       ? [
-          (enumerator / denominator).toFixed(2),
+          (numerator / denominator).toFixed(2),
           labels?.[0].join(' • '),
           labels?.[1].length ? '/' : '',
           labels?.[1].join(' • '),
         ].join(' ')
       : 'Result';
-  }, [enumerator, denominator, labels]);
+
+  const onClickResults = () => {
+    setNumerator(reduceFactors(0));
+    setDenominator(reduceFactors(1));
+    setLabels(joinLabels());
+
+    setWasChanged(false);
+  };
+
+  const result = useMemo(calculateResult, [calculateResult]);
 
   const updateExpression: CustomInputChangeHandler = (userInput, index, subunit) => {
     const areVariablesPositiveIntegers =
       index !== undefined && index >= 0 && subunit !== undefined && subunit >= 0;
 
     if (areVariablesPositiveIntegers) {
+      if (stringifyIntoLabel(userInput) !== stringifyIntoLabel(expression[index][subunit]))
+        setWasChanged(true);
+
       setExpression((prevInput) => {
         const newExpression = prevInput;
         const newValue: IInput = makeCompoundValue(userInput);
@@ -74,6 +81,7 @@ export default function Expression({ input }: Props) {
         return newExpression;
       });
     }
+
     setUpdate((prev) => prev + 1);
   };
 
@@ -89,7 +97,7 @@ export default function Expression({ input }: Props) {
       ))}
       <button type="button" className="flex items-center p-2" onClick={onClickResults}>
         <FontAwesomeIcon icon={faEquals} size="2x" />
-        <Output dimmed={result === 'Result'}>{result}</Output>
+        <Output dimmed={result === 'Result' || wasChanged}>{result}</Output>
       </button>
     </div>
   );
