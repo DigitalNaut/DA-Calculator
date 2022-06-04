@@ -3,15 +3,15 @@ import { ICompoundInput as ILabel } from './types';
 export const identityNeedle = /^1?$/;
 
 export const labelOnlyNeedle = /^_?[A-Za-zÀ-ÖØ-öø-ÿ][\wÀ-ÖØ-öø-ÿ -]*$/;
-export const factorOnlyneedle = /^(\d+(?:\.\d+)?) ?$/;
+export const factorOnlyNeedle = /^(\d+(?:\.\d+)?) ?$/;
 export const factorLabelNeedle = /^(\d+(?:\.\d+)?) ?(_?[A-Za-zÀ-ÖØ-öø-ÿ][\wÀ-ÖØ-öø-ÿ-]*)+ ?$/;
 
 export const allLegalInputNeedle = new RegExp(
-  `${/ ?/.source}|${labelOnlyNeedle.source}|${factorOnlyneedle.source}|${factorLabelNeedle.source}`,
+  `${/ ?/.source}|${labelOnlyNeedle.source}|${factorOnlyNeedle.source}|${factorLabelNeedle.source}`,
 );
 
 export const allValidInputNeedle = new RegExp(
-  `${factorOnlyneedle.source}|${factorLabelNeedle.source}`,
+  `${factorOnlyNeedle.source}|${factorLabelNeedle.source}`,
 );
 
 export function makeCompoundValue(haystack: string): ILabel {

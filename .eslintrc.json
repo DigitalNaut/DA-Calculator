@@ -9,12 +9,9 @@
     "plugin:react/recommended",
     "plugin:@typescript-eslint/recommended",
     "prettier",
-    "prettier/react",
-    "prettier/@typescript-eslint",
     "plugin:prettier/recommended",
     "plugin:css-modules/recommended",
-    "plugin:import/typescript",
-    "plugin:storybook/recommended"
+    "plugin:import/typescript"
   ],
   "env": {
     "browser": true,

@@ -103,7 +103,7 @@ export default function Expression({ input }: Props) {
   };
 
   return (
-    <div className="flex items-center justify-center w-max h-full m-1 bg-gray-800 rounded-md shadow-md">
+    <div className="flex items-center justify-center h-full m-1 bg-gray-800 rounded-md shadow-md w-max">
       <Inserter
         onClick={(e) => {
           insertExpression(0);

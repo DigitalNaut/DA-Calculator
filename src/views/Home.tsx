@@ -46,7 +46,7 @@ const expression3: IExpression = [
 
 export default function Home(): JSX.Element {
   return (
-    <div className="w-screen h-screen bg-gray-900">
+    <div className="w-screen h-screen bg-gray-900 p-6">
       <div className="flex flex-col items-center w-full h-24">
         <Expression input={expression1} />
         <Expression input={expression2} />
