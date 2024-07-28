@@ -1,46 +1,44 @@
-import React from 'react';
+import Expression from "src/components/Expression";
+import { type ExpressionType } from "src/components/Expression/types";
 
-import Expression from 'src/components/Expression';
-import { IExpression } from 'src/components/Expression/types';
-
-const expression1: IExpression = [
+const expression1: ExpressionType = [
   [
-    [2, 'grapes'],
-    [1, 'm'],
+    [2, "grapes"],
+    [1, "m"],
   ],
   [
-    [60, 'm'],
-    [1, 'h'],
+    [60, "m"],
+    [1, "h"],
   ],
   [
-    [24, 'h'],
-    [1, 'd'],
+    [24, "h"],
+    [1, "d"],
   ],
-  [[5, 'd'], [1]],
+  [[5, "d"], [1]],
 ];
-const expression2: IExpression = [
-  [[15, 'wood']],
+const expression2: ExpressionType = [
+  [[15, "wood"]],
   [
-    [4, 'planks'],
-    [1, 'wood'],
+    [4, "planks"],
+    [1, "wood"],
   ],
   [
-    [1, 'slabs'],
-    [3, 'planks'],
+    [1, "slabs"],
+    [3, "planks"],
   ],
 ];
-const expression3: IExpression = [
+const expression3: ExpressionType = [
   [
-    [2, 'grapes'],
-    [1, 'm'],
+    [2, "grapes"],
+    [1, "m"],
   ],
   [
-    [60, 'm'],
-    [1, 'h'],
+    [60, "m"],
+    [1, "h"],
   ],
   [
-    [24, 'h'],
-    [1, 'd'],
+    [24, "h"],
+    [1, "d"],
   ],
 ];
 

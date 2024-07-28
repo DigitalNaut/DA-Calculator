@@ -1,33 +1,36 @@
-import { ICompoundInput as ILabel } from './types';
+import { CompoundInput as Label } from "./types";
 
 export const identityNeedle = /^1?$/;
 
 export const labelOnlyNeedle = /^_?[A-Za-zÀ-ÖØ-öø-ÿ][\wÀ-ÖØ-öø-ÿ -]*$/;
 export const factorOnlyNeedle = /^(\d+(?:\.\d+)?) ?$/;
-export const factorLabelNeedle = /^(\d+(?:\.\d+)?) ?(_?[A-Za-zÀ-ÖØ-öø-ÿ][\wÀ-ÖØ-öø-ÿ-]*)+ ?$/;
+export const factorLabelNeedle =
+  /^(\d+(?:\.\d+)?) ?(_?[A-Za-zÀ-ÖØ-öø-ÿ][\wÀ-ÖØ-öø-ÿ-]*)+ ?$/;
 
 export const allLegalInputNeedle = new RegExp(
-  `${/ ?/.source}|${labelOnlyNeedle.source}|${factorOnlyNeedle.source}|${factorLabelNeedle.source}`,
+  `${/ ?/.source}|${labelOnlyNeedle.source}|${factorOnlyNeedle.source}|${
+    factorLabelNeedle.source
+  }`
 );
 
 export const allValidInputNeedle = new RegExp(
-  `${factorOnlyNeedle.source}|${factorLabelNeedle.source}`,
+  `${factorOnlyNeedle.source}|${factorLabelNeedle.source}`
 );
 
-export function makeCompoundValue(haystack: string): ILabel {
+export function makeCompoundValue(haystack: string): Label {
   if (haystack?.length === 0) return [1];
 
   const results = factorLabelNeedle.exec(haystack);
   return [Number(results?.[1] || 1), results?.[2]];
 }
 
-export function stringifyIntoLabel(userInput?: string | ILabel) {
-  if (typeof userInput === 'string') {
+export function stringifyIntoLabel(userInput?: string | Label) {
+  if (typeof userInput === "string") {
     if (labelOnlyNeedle.test(userInput)) return `1 ${userInput}`;
     return userInput;
   }
 
-  return userInput?.join(' ').trim() || '';
+  return userInput?.join(" ").trim() || "";
 }
 
 export default {

@@ -1,19 +1,22 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { faEquals } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { useEffect, useMemo, useState } from "react";
+import { faEquals } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
-import { IExpression } from 'src/components/Expression/types';
-import Unit from 'src/components/Unit';
-import { removeOverlap } from 'src/utils';
-import { CustomInputChangeHandler, IInput } from 'src/components/Unit/types';
-import Output from 'src/components/Output';
-import { makeCompoundValue, stringifyIntoLabel } from 'src/components/Unit/validation';
+import { type ExpressionType } from "src/components/Expression/types";
+import Unit from "src/components/Unit";
+import { removeOverlap } from "src/utils";
+import { CustomInputChangeHandler, Input } from "src/components/Unit/types";
+import Output from "src/components/Output";
+import {
+  makeCompoundValue,
+  stringifyIntoLabel,
+} from "src/components/Unit/validation";
 
-import Inserter from './Separator';
-import { cleanUpExpression, removeUnits } from './utility';
+import Inserter from "./Separator";
+import { cleanUpExpression, removeUnits } from "./utility";
 
 type Props = {
-  input: IExpression;
+  input: ExpressionType;
 };
 
 export default function Expression({ input }: Props) {
@@ -29,16 +32,16 @@ export default function Expression({ input }: Props) {
   const reduceFactors = (index: 0 | 1) =>
     expression.reduce((previousExpression, currentExpression) => {
       const factor = Number(currentExpression[index]?.[0]) || 1;
-      return typeof currentExpression[index]?.[0] === 'number'
+      return typeof currentExpression[index]?.[0] === "number"
         ? previousExpression * factor
         : previousExpression;
     }, 1);
 
   const reduceLabels = (index: 0 | 1) =>
     expression.reduce((previousExpression, currentExpression) => {
-      if (typeof currentExpression[index]?.[1] === 'string')
-        return [...previousExpression, currentExpression[index]?.[1] || ''];
-      return previousExpression || '';
+      if (typeof currentExpression[index]?.[1] === "string")
+        return [...previousExpression, currentExpression[index]?.[1] || ""];
+      return previousExpression || "";
     }, [] as string[]);
 
   function joinLabels() {
@@ -52,11 +55,11 @@ export default function Expression({ input }: Props) {
     !!numerator && !!denominator
       ? [
           (numerator / denominator).toFixed(2),
-          labels?.[0].join(' • '),
-          labels?.[1].length ? '/' : '',
-          labels?.[1].join(' • '),
-        ].join(' ')
-      : 'Result';
+          labels?.[0].join(" • "),
+          labels?.[1].length ? "/" : "",
+          labels?.[1].join(" • "),
+        ].join(" ")
+      : "Result";
 
   const onClickResults = () => {
     // Update data
@@ -71,17 +74,27 @@ export default function Expression({ input }: Props) {
 
   const result = useMemo(evaluateExpression, [evaluateExpression]);
 
-  const updateExpression: CustomInputChangeHandler = (userInput, index, subunit) => {
+  const updateExpression: CustomInputChangeHandler = (
+    userInput,
+    index,
+    subunit
+  ) => {
     const areVariablesPositiveIntegers =
-      index !== undefined && index >= 0 && subunit !== undefined && subunit >= 0;
+      index !== undefined &&
+      index >= 0 &&
+      subunit !== undefined &&
+      subunit >= 0;
 
     if (areVariablesPositiveIntegers) {
-      if (stringifyIntoLabel(userInput) !== stringifyIntoLabel(expression[index][subunit]))
+      if (
+        stringifyIntoLabel(userInput) !==
+        stringifyIntoLabel(expression[index][subunit])
+      )
         setWasInputChanged(true);
 
       setExpression((prevInput) => {
         const newExpression = prevInput;
-        const newValue: IInput = makeCompoundValue(userInput);
+        const newValue: Input = makeCompoundValue(userInput);
 
         newExpression[index][subunit] = newValue;
         return newExpression;
@@ -97,7 +110,9 @@ export default function Expression({ input }: Props) {
   };
 
   const deleteUnit = (index: number) => {
-    setExpression(removeUnits(expression, index, () => setWasInputChanged(true)));
+    setExpression(
+      removeUnits(expression, index, () => setWasInputChanged(true))
+    );
 
     setUpdate((prev) => prev + 1);
   };
@@ -113,7 +128,10 @@ export default function Expression({ input }: Props) {
       {expression.map((aUnit, unitIndex) => {
         const keyHash = aUnit.toString() + unitIndex;
         return (
-          <div className="flex items-center justify-center h-full" key={keyHash}>
+          <div
+            className="flex items-center justify-center h-full"
+            key={keyHash}
+          >
             <Unit
               input={aUnit}
               onChangeInput={updateExpression}
@@ -129,9 +147,15 @@ export default function Expression({ input }: Props) {
           </div>
         );
       })}
-      <button type="button" className="flex items-center p-2" onClick={onClickResults}>
+      <button
+        type="button"
+        className="flex items-center p-2"
+        onClick={onClickResults}
+      >
         <FontAwesomeIcon icon={faEquals} size="2x" />
-        <Output dimmed={result === 'Result' || wasInputChanged}>{result}</Output>
+        <Output dimmed={result === "Result" || wasInputChanged}>
+          {result}
+        </Output>
       </button>
     </div>
   );

@@ -1,15 +1,20 @@
-import { faTimesCircle } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import React, { useMemo } from 'react';
-import Parenthesis from '../Parenthesis';
+import { faTimesCircle } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useMemo } from "react";
+import Parenthesis from "../Parenthesis";
 
-import Separator from './Separator';
-import Subunit from './Subunit';
+import Separator from "./Separator";
+import Subunit from "./Subunit";
 
-import { IUnit } from './types';
-import { identityNeedle, stringifyIntoLabel } from './validation';
+import { type Unit } from "./types";
+import { identityNeedle, stringifyIntoLabel } from "./validation";
 
-export default function Unit({ index, input, onChangeInput, onDeleteUnit }: IUnit) {
+export default function Unit({
+  index,
+  input,
+  onChangeInput,
+  onDeleteUnit,
+}: Unit) {
   const stringValue = useMemo(() => stringifyIntoLabel(input[1]), [input]);
   const identity = identityNeedle.test(stringValue);
 
@@ -18,9 +23,18 @@ export default function Unit({ index, input, onChangeInput, onDeleteUnit }: IUni
       {identity || <Parenthesis />}
       <div className="flex flex-col h-full bg-gray-700 rounded-2xl hover:bg-gray-600">
         <div className="flex h-full grow">
-          <Subunit input={input[0]} onChangeInput={onChangeInput} index={index} subunit={0} />
+          <Subunit
+            input={input[0]}
+            onChangeInput={onChangeInput}
+            index={index}
+            subunit={0}
+          />
         </div>
-        <div className={identity ? 'hidden group-hover:block group-focus-within:block' : ''}>
+        <div
+          className={
+            identity ? "hidden group-hover:block group-focus-within:block" : ""
+          }
+        >
           <Separator />
           <Subunit
             input={stringifyIntoLabel(input[1])}

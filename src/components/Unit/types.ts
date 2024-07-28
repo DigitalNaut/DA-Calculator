@@ -1,29 +1,26 @@
-import { ChangeEvent, ChangeEventHandler, KeyboardEventHandler } from 'react';
-
-type ICustomChangeEventHandler<T = Element> = (
+export type CustomInputChangeHandler = (
   userInput: string,
   index?: number,
-  subunit?: 0 | 1,
+  subunit?: 0 | 1
 ) => void;
-export type CustomInputChangeHandler = ICustomChangeEventHandler<HTMLInputElement>;
 
-type IInputHandler = {
+type InputHandler = {
   index?: number;
   onChangeInput?: CustomInputChangeHandler;
 };
 
-export type IUnit = IInputHandler & {
-  input: [IInput, IInput?];
+export type Unit = InputHandler & {
+  input: [Input, Input?];
   onDeleteUnit?(): void;
 };
 
-export type ISubunit = IInputHandler & {
-  input: IInput;
+export type Subunit = InputHandler & {
+  input: Input;
   subunit?: 0 | 1;
   display?: true;
 };
 
-export type ISimpleInput = string;
-export type ICompoundInput = [number, string?];
+export type SimpleInput = string;
+export type CompoundInput = [number, string?];
 
-export type IInput = ISimpleInput | ICompoundInput;
+export type Input = SimpleInput | CompoundInput;
