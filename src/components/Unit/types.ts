@@ -9,6 +9,11 @@ type InputHandler = {
   onChangeInput?: CustomInputChangeHandler;
 };
 
+export type SimpleInput = string;
+export type CompoundInput = [number, string?];
+
+export type Input = SimpleInput | CompoundInput;
+
 export type Unit = InputHandler & {
   input: [Input, Input?];
   onDeleteUnit?(): void;
@@ -19,8 +24,3 @@ export type Subunit = InputHandler & {
   subunit?: 0 | 1;
   display?: true;
 };
-
-export type SimpleInput = string;
-export type CompoundInput = [number, string?];
-
-export type Input = SimpleInput | CompoundInput;

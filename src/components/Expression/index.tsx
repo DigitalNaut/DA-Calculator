@@ -1,48 +1,55 @@
-import { useEffect, useMemo, useState } from "react";
 import { faEquals } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useMemo, useState } from "react";
 
 import { type ExpressionType } from "src/components/Expression/types";
-import Unit from "src/components/Unit";
-import { removeOverlap } from "src/utils";
-import { CustomInputChangeHandler, Input } from "src/components/Unit/types";
 import Output from "src/components/Output";
+import Unit from "src/components/Unit";
+import { CustomInputChangeHandler, Input } from "src/components/Unit/types";
 import {
   makeCompoundValue,
   stringifyIntoLabel,
 } from "src/components/Unit/validation";
 
 import Inserter from "./Separator";
-import { cleanUpExpression, removeUnits } from "./utility";
+import { cleanUpExpression, removeOverlap, removeUnits } from "./utility";
 
-type Props = {
-  input: ExpressionType;
-};
-
-export default function Expression({ input }: Props) {
+export default function Expression({ input }: { input: ExpressionType }) {
   const [expression, setExpression] = useState(input);
-  const [update, setUpdate] = useState(0);
   const [numerator, setNumerator] = useState(0);
   const [denominator, setDenominator] = useState(0);
   const [labels, setLabels] = useState<string[][]>();
   const [wasInputChanged, setWasInputChanged] = useState(false);
 
-  useEffect(() => {}, [expression, update]);
+  const reduceFactors = (index: 0 | 1) => {
+    const reducedExpression = expression.reduce(
+      (previousExpression, currentExpression) => {
+        const factor = Number(currentExpression[index]?.[0]) || 1;
 
-  const reduceFactors = (index: 0 | 1) =>
-    expression.reduce((previousExpression, currentExpression) => {
-      const factor = Number(currentExpression[index]?.[0]) || 1;
-      return typeof currentExpression[index]?.[0] === "number"
-        ? previousExpression * factor
-        : previousExpression;
-    }, 1);
+        if (typeof currentExpression[index]?.[0] === "number")
+          return previousExpression * factor;
 
-  const reduceLabels = (index: 0 | 1) =>
-    expression.reduce((previousExpression, currentExpression) => {
-      if (typeof currentExpression[index]?.[1] === "string")
-        return [...previousExpression, currentExpression[index]?.[1] || ""];
-      return previousExpression || "";
-    }, [] as string[]);
+        return previousExpression;
+      },
+      1
+    );
+
+    return reducedExpression;
+  };
+
+  const reduceLabels = (index: 0 | 1) => {
+    const reducedExpression = expression.reduce(
+      (previousExpression, currentExpression) => {
+        if (typeof currentExpression[index]?.[1] === "string")
+          return [...previousExpression, currentExpression[index]?.[1] || ""];
+
+        return previousExpression || "";
+      },
+      [] as string[]
+    );
+
+    return reducedExpression;
+  };
 
   function joinLabels() {
     const upperLabels = reduceLabels(0);
@@ -51,70 +58,67 @@ export default function Expression({ input }: Props) {
     return removeOverlap(upperLabels, lowerLabels);
   }
 
-  const evaluateExpression = () =>
-    !!numerator && !!denominator
-      ? [
-          (numerator / denominator).toFixed(2),
-          labels?.[0].join(" • "),
-          labels?.[1].length ? "/" : "",
-          labels?.[1].join(" • "),
-        ].join(" ")
-      : "Result";
-
   const onClickResults = () => {
     // Update data
     setNumerator(reduceFactors(0));
     setDenominator(reduceFactors(1));
     setLabels(joinLabels());
+
     // Clean up
     setExpression(cleanUpExpression(expression));
+
     // Set flags
     setWasInputChanged(false);
   };
 
-  const result = useMemo(evaluateExpression, [evaluateExpression]);
+  const result = useMemo(() => {
+    if (!numerator || !denominator) return "Result";
+
+    const newResult = [`${(numerator / denominator).toFixed(2)}`];
+
+    if (labels?.[0]) newResult.push(labels[0].join(" • "));
+
+    if (labels?.[1]) {
+      newResult.push(labels[1].length ? "/" : "");
+      newResult.push(labels[1].join(" • "));
+    }
+
+    return newResult.join(" ");
+  }, [numerator, denominator, labels]);
 
   const updateExpression: CustomInputChangeHandler = (
     userInput,
     index,
     subunit
   ) => {
-    const areVariablesPositiveIntegers =
-      index !== undefined &&
-      index >= 0 &&
-      subunit !== undefined &&
-      subunit >= 0;
+    const isValidIndex = typeof index === "number" && index >= 0;
+    const isValidSubunit = typeof subunit === "number" && subunit >= 0;
 
-    if (areVariablesPositiveIntegers) {
-      if (
-        stringifyIntoLabel(userInput) !==
-        stringifyIntoLabel(expression[index][subunit])
-      )
-        setWasInputChanged(true);
+    if (!isValidIndex || !isValidSubunit) return;
 
-      setExpression((prevInput) => {
-        const newExpression = prevInput;
-        const newValue: Input = makeCompoundValue(userInput);
+    if (
+      stringifyIntoLabel(userInput) !==
+      stringifyIntoLabel(expression[index][subunit])
+    )
+      setWasInputChanged(true);
 
-        newExpression[index][subunit] = newValue;
-        return newExpression;
-      });
-    }
+    setExpression((prevInput) => {
+      const newExpression = prevInput;
+      const newValue: Input = makeCompoundValue(userInput);
 
-    setUpdate((prev) => prev + 1);
+      newExpression[index][subunit] = newValue;
+      return newExpression;
+    });
   };
 
   const insertExpression = (index: number) => {
     expression.splice(index, 0, [[1]]);
-    setUpdate((prev) => prev + 1);
   };
 
   const deleteUnit = (index: number) => {
     setExpression(
       removeUnits(expression, index, () => setWasInputChanged(true))
     );
-
-    setUpdate((prev) => prev + 1);
   };
 
   return (

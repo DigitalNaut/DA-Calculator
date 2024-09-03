@@ -1,6 +1,7 @@
 import { ChangeEventHandler, KeyboardEventHandler, useState } from "react";
+import { twMerge } from "tailwind-merge";
 
-import { Subunit as SubunitType } from "./types";
+import { type Subunit as SubunitType } from "./types";
 import {
   allLegalInputNeedle,
   allValidInputNeedle,
@@ -28,15 +29,17 @@ export default function Subunit({
     if (e.key === "Enter") e.currentTarget.blur();
   };
 
+  const isAllInputValid = allValidInputNeedle.test(stringifyInput(userInput));
+
   return (
     <input
       placeholder="No value"
-      className={[
-        `w-full p-2 text-center grow focus:bg-white border-2 border-transparent bg-transparent rounded-md z-10`,
-        allValidInputNeedle.test(stringifyInput(userInput))
+      className={twMerge(
+        "w-full p-2 text-center grow focus:bg-white border-2 border-transparent bg-transparent rounded-md z-10",
+        isAllInputValid
           ? " focus:text-blue-900 focus:border-blue-900"
-          : "focus:text-red-700 focus:border-red-500",
-      ].join(" ")}
+          : "focus:text-red-700 focus:border-red-500"
+      )}
       value={stringifyInput(userInput)}
       onChange={onChange}
       onBlur={submitInput}

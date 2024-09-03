@@ -1,12 +1,10 @@
 import LeftParen from "src/assets/LeftParen.svg?react";
 import RightParen from "src/assets/RightParen.svg?react";
 
-type Props = {
-  right?: true;
-};
-export default function Parenthesis({ right }: Props) {
-  const className = "w-2";
+const className = "w-2";
 
+export default function Parenthesis({ right }: { right?: true }) {
   if (right) return <RightParen className={className} />;
+
   return <LeftParen className={className} />;
 }

@@ -8,6 +8,7 @@ import Subunit from "./Subunit";
 
 import { type Unit } from "./types";
 import { identityNeedle, stringifyIntoLabel } from "./validation";
+import clsx from "clsx";
 
 export default function Unit({
   index,
@@ -31,9 +32,9 @@ export default function Unit({
           />
         </div>
         <div
-          className={
-            identity ? "hidden group-hover:block group-focus-within:block" : ""
-          }
+          className={clsx({
+            "hidden group-hover:block group-focus-within:block": identity,
+          })}
         >
           <Separator />
           <Subunit
