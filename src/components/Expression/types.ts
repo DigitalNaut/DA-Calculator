@@ -1,3 +1,3 @@
-import { type Unit } from "src/components/Unit/types";
+import { type UnitInput } from "src/components/Unit/types";
 
-export type ExpressionType = Unit["input"][];
+export type ExpressionType = UnitInput[];
