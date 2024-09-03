@@ -3,6 +3,9 @@
     "clsx",
     "fontawesome",
     "fortawesome",
-    "tseslint"
+    "svgr",
+    "tailwindcss",
+    "tseslint",
+    "typecheck"
   ]
 }
