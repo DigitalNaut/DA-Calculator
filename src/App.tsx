@@ -4,7 +4,7 @@ import "src/index.css";
 
 export default function App(): JSX.Element {
   return (
-    <div className="font-sans text-white bg-gray-800">
+    <div className="bg-gray-800 font-sans text-white">
       <Home />
     </div>
   );

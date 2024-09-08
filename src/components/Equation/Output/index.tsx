@@ -9,10 +9,10 @@ export default function Output({ children, dimmed }: Props) {
   return (
     <p
       className={cn(
-        "p-4 m-1.5 text-center text-white bg-gray-800 rounded-2xl",
+        "m-1.5 rounded-2xl bg-gray-800 p-4 text-center text-white",
         {
-          "text-gray-400 italic": dimmed,
-        }
+          "italic text-gray-400": dimmed,
+        },
       )}
     >
       {children}

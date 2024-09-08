@@ -9,7 +9,7 @@ export default function Separator({ onClick }: Props) {
   return (
     <button
       type="button"
-      className="relative flex flex-col items-center justify-between w-1 m-[2px] h-full rounded-md text-transparent outline-none focus:bg-blue-800 hover:bg-blue-800 focus:text-blue-500 hover:text-blue-500 cursor-text"
+      className="relative m-[2px] flex h-full w-1 cursor-text flex-col items-center justify-between rounded-md text-transparent outline-none hover:bg-blue-800 hover:text-blue-500 focus:bg-blue-800 focus:text-blue-500"
       onClick={onClick}
     >
       <FontAwesomeIcon
