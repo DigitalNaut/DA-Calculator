@@ -6,8 +6,8 @@ import {
   simplifyExpression,
   insertRatio,
   removeOverlap,
-  removeUnit,
-  updateTerm,
+  removeRatio,
+  updateRatio,
 } from "src/logic/equation-wrangler";
 import { BaseRatio, Expression, QuantityPosition } from "src/types/expressions";
 import Output from "src/components/Equation/Output";
@@ -100,7 +100,7 @@ export default function Equation({ input }: { input: Expression }) {
     userInput,
   ) => {
     setExpression((prevExpression) =>
-      updateTerm(prevExpression, index, termPosition, userInput),
+      updateRatio(prevExpression, index, termPosition, userInput),
     );
 
     setWasInputChanged(true);
@@ -113,7 +113,7 @@ export default function Equation({ input }: { input: Expression }) {
   const deleteUnit = (index: number) => {
     if (expression.length === 0) return;
 
-    const modifiedExpression = removeUnit(expression, index);
+    const modifiedExpression = removeRatio(expression, index);
     setExpression(modifiedExpression);
 
     setWasInputChanged(expression.length > modifiedExpression.length);

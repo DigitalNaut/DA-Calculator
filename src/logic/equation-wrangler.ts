@@ -77,18 +77,18 @@ export function insertRatio(
  * @param expression The equation to modify
  * @param index The index of the term to update
  * @param termPosition The position of the term to update
- * @param userInput The new value of the term
+ * @param value The new value of the term
  * @returns A new equation array  with the updated term
  */
-export function updateTerm(
+export function updateRatio(
   expression: Expression,
   index: number,
   termPosition: QuantityPosition,
-  userInput: string,
+  value: string,
 ) {
   const newExpression = [...expression];
   const prevTerm = newExpression[index];
-  const newValue = parseInput(userInput);
+  const newValue = parseInput(value);
 
   newExpression[index] = {
     ...prevTerm,
@@ -106,10 +106,12 @@ export function updateTerm(
  * @param index The index of the term to remove
  * @returns A new equation array with the removed term
  */
-export const removeUnit = (
+export const removeRatio = (
   expression: Expression,
   index: number,
 ): Expression => {
+  if (index < 0 || index >= expression.length) return expression;
+
   const splicedExpression = expression
     .slice(0, index)
     .concat(expression.slice(index + 1));
