@@ -1,19 +1,17 @@
 {
-  "cSpell.ignorePaths": [
-    "**/package-lock.json",
-    "**/node_modules/**",
-    "**/vscode-extension/**",
-    "**/.git/objects/**",
-    ".vscode",
-    ".vscode-insiders",
-    "package.json"
-  ],
   "cSpell.words": [
-    "Geomania"
-  ],
-  "cSpell.ignoreWords": [
-    "latlng",
+    "clsx",
+    "fontawesome",
+    "fortawesome",
+    "svgr",
     "tailwindcss",
-    "testid"
-  ]
+    "tseslint",
+    "typecheck"
+  ],
+  "explorer.fileNesting.enabled": true,
+  "explorer.fileNesting.patterns": {
+    "": "",
+    "*.ts": "${capture}.js, ${capture}.test.ts",
+    "*.js": "${capture}.js.map, ${capture}.min.js, ${capture}.d.ts, ${capture}.test.js"
+  }
 }
