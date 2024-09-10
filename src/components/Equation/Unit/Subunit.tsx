@@ -6,7 +6,7 @@ import {
 } from "react";
 import { twMerge } from "tailwind-merge";
 
-import { stringifyTerm } from "src/validation/input-parser";
+import { stringifyQuantity } from "src/validation/input-parser";
 
 import { SubunitProps } from "../types";
 
@@ -16,7 +16,7 @@ export default function Subunit({
   inputQuantity: input,
   onChangeInput,
 }: SubunitProps) {
-  const [inputString, setInputString] = useState(() => stringifyTerm(input));
+  const [inputString, setInputString] = useState(() => stringifyQuantity(input));
 
   const changeHandler: ChangeEventHandler<HTMLInputElement> = ({
     currentTarget,

@@ -6,6 +6,7 @@ import { useMemo } from "react";
 import { Subunit } from ".";
 import Parenthesis from "../Parenthesis";
 import { UnitProps } from "../types";
+import { quantityIsTrivial } from "src/logic/equation-wrangler";
 
 function Separator() {
   return <div className="h-[1px] w-full bg-white" />;
@@ -17,16 +18,14 @@ export default function Unit({
   onChangeInput,
   onDeleteUnit,
 }: UnitProps) {
-  const isDivisionBy1 = useMemo(
-    () =>
-      inputRatio.denominator?.factor === 1 &&
-      inputRatio.denominator.labels?.length === 0,
-    [inputRatio.denominator?.factor, inputRatio.denominator?.labels],
+  const isTrivialDenominator = useMemo(
+    () => quantityIsTrivial(inputRatio.denominator),
+    [inputRatio.denominator],
   );
 
   return (
     <div className="group relative flex items-center">
-      {isDivisionBy1 ? null : <Parenthesis />}
+      {isTrivialDenominator ? null : <Parenthesis />}
 
       <div className="flex h-full flex-col rounded-2xl bg-gray-700 hover:bg-gray-600">
         <div className="flex h-full grow">
@@ -40,7 +39,8 @@ export default function Unit({
 
         <div
           className={clsx({
-            "hidden group-focus-within:block group-hover:block": isDivisionBy1,
+            "hidden group-focus-within:block group-hover:block":
+              isTrivialDenominator,
           })}
         >
           <Separator />
@@ -53,7 +53,7 @@ export default function Unit({
         </div>
       </div>
 
-      {isDivisionBy1 ? null : <Parenthesis right />}
+      {isTrivialDenominator ? null : <Parenthesis right />}
 
       <button
         type="button"

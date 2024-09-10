@@ -6,24 +6,14 @@ import {
   labelNeedle,
 } from "./factor-labels";
 
-function parseFactor(
-  input: string,
-  callback?: (lastIndex: number) => void,
-): number {
-  // Guard no input
-  if (input?.length === 0) {
-    callback?.(0);
-    return 1;
-  }
-
+function parseFactor(input: string): number {
   const match = input.match(factorNeedle);
 
-  if (match) {
-    callback?.(factorNeedle.lastIndex);
-    return Number.parseFloat(match[0]) ?? 1;
-  }
+  if (!match) return 1;
 
-  callback?.(0);
+  const result = Number.parseFloat(match[0]);
+  if (Number.isNaN(result)) return result;
+
   return 1;
 }
 
@@ -39,13 +29,12 @@ function parseLabels(input: string): string[] | undefined {
     const substring = buffer[0];
 
     // Support for exponents (e.g. m^3)
-    const power = labelExponentNeedle.exec(substring);
-
-    if (power === null) {
+    const exponent = labelExponentNeedle.exec(substring);
+    if (exponent === null) {
       results.push(substring);
     } else {
-      const label = power[1];
-      const count = Number.parseInt(power[2], 10);
+      const label = exponent[1];
+      const count = Number.parseInt(exponent[2], 10);
 
       for (let i = 0; i < count; i++) {
         results.push(label);
@@ -58,16 +47,28 @@ function parseLabels(input: string): string[] | undefined {
   return results;
 }
 
-export function parseInput(input: string): Quantity {
-  if (input?.length === 0) return { factor: 1 };
+/**
+ * Parse a string into a quantity
+ * @param input
+ * @returns A quantity object
+ */
+export function parseInput(input: string): Quantity | undefined {
+  if (input?.length === 0) return undefined;
 
   const factor = parseFactor(input);
   const labels = parseLabels(input);
 
+  if (labels?.length === 0) return { factor };
+
   return { factor, labels };
 }
 
-export function stringifyTerm(quantity?: Quantity) {
+/**
+ * Convert a quantity to a string
+ * @param quantity
+ * @returns A string representation of the quantity
+ */
+export function stringifyQuantity(quantity?: Quantity) {
   if (!quantity) return "";
 
   return `${quantity.factor} ${quantity.labels?.join(" ") || ""}`.trim();

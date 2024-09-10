@@ -10,7 +10,8 @@
     "format": "prettier --write .",
     "typecheck": "tsc --project ./tsconfig.app.json",
     "preview": "vite preview",
-    "test": "vitest"
+    "test": "vitest",
+    "coverage": "vitest run --coverage"
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^6.6.0",
@@ -29,6 +30,7 @@
     "@types/react": "^18.3.5",
     "@types/react-dom": "^18.3.0",
     "@vitejs/plugin-react-swc": "^3.7.0",
+    "@vitest/coverage-v8": "^2.0.5",
     "autoprefixer": "^10.4.20",
     "eslint": "^9.9.0",
     "eslint-plugin-react-hooks": "^5.1.0-rc.0",

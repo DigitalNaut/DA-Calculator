@@ -5,7 +5,7 @@ import { useMemo, useState } from "react";
 import {
   simplifyExpression,
   insertRatio,
-  removeOverlap,
+  cancelOutUnits,
   removeRatio,
   updateRatio,
 } from "src/logic/equation-wrangler";
@@ -84,14 +84,14 @@ export default function Equation({ input }: { input: Expression }) {
       .toFixed(2)
       .replace(/\.0+$/, "")}`;
 
-    const resultLabels = removeOverlap(
+    const [numeratorLabels, denominatorLabels] = cancelOutUnits(
       results.numerator.labels || [],
       results.denominator?.labels || [],
     );
 
-    return `${resultFactor} ${resultLabels[0].join(" • ")} ${
-      resultLabels[1].length > 0 ? "/" : ""
-    } ${resultLabels[1].join(" • ")}`;
+    return `${resultFactor} ${numeratorLabels.join(" • ")} ${
+      denominatorLabels.length > 0 ? "/" : ""
+    } ${denominatorLabels.join(" • ")}`;
   }, [results]);
 
   const updateExpression: InputChangeHandler = (
