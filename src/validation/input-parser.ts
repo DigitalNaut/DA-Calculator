@@ -12,9 +12,8 @@ function parseFactor(input: string): number {
   if (!match) return 1;
 
   const result = Number.parseFloat(match[0]);
-  if (Number.isNaN(result)) return result;
 
-  return 1;
+  return Number.isNaN(result) ? 1 : result;
 }
 
 function parseLabels(input: string): string[] | undefined {
