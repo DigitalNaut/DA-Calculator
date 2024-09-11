@@ -11,7 +11,7 @@
     "typecheck": "tsc --project ./tsconfig.app.json",
     "preview": "vite preview",
     "test": "vitest run",
-    "testing": "vitest",
+    "test:watch": "vitest watch",
     "coverage": "vitest run --coverage"
   },
   "dependencies": {
