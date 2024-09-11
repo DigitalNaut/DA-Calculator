@@ -10,7 +10,8 @@
     "format": "prettier --write .",
     "typecheck": "tsc --project ./tsconfig.app.json",
     "preview": "vite preview",
-    "test": "vitest",
+    "test": "vitest run",
+    "testing": "vitest",
     "coverage": "vitest run --coverage"
   },
   "dependencies": {
