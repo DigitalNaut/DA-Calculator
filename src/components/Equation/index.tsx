@@ -1,6 +1,6 @@
 import { faEquals } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useMemo, useState } from "react";
+import { Fragment, useMemo, useState } from "react";
 
 import {
   simplifyExpression,
@@ -14,7 +14,7 @@ import Output from "src/components/Equation/Output";
 import { Unit } from "src/components/Equation/Unit";
 
 import type { InputChangeHandler } from "./types";
-import Inserter from "./Separator";
+import Inserter from "./Inserter";
 
 export default function Equation({ input }: { input: Expression }) {
   const [expression, setExpression] = useState(input);
@@ -110,6 +110,14 @@ export default function Equation({ input }: { input: Expression }) {
     setExpression((prevExpression) => insertRatio(prevExpression, index));
   };
 
+  const insertionHandler = (
+    currentTarget: EventTarget & HTMLButtonElement,
+    index: number,
+  ) => {
+    insertExpression(index);
+    currentTarget.blur();
+  };
+
   const deleteUnit = (index: number) => {
     if (expression.length === 0) return;
 
@@ -120,19 +128,13 @@ export default function Equation({ input }: { input: Expression }) {
   };
 
   return (
-    <div className="m-1 flex h-full w-max items-center justify-center rounded-md bg-gray-800 shadow-md">
+    <div className="flex h-full w-max items-center justify-center rounded-lg bg-slate-800 px-2 py-2 shadow-md">
       <Inserter
-        onClick={(e) => {
-          insertExpression(0);
-          e.currentTarget.blur();
-        }}
+        onClick={({ currentTarget }) => insertionHandler(currentTarget, 0)}
       />
       {expression.map((ratio, index) => {
         return (
-          <div
-            className="flex h-full items-center justify-center"
-            key={ratio.id}
-          >
+          <Fragment key={ratio.id}>
             <Unit
               inputRatio={ratio}
               onChangeInput={updateExpression}
@@ -140,12 +142,11 @@ export default function Equation({ input }: { input: Expression }) {
               onDeleteUnit={() => deleteUnit(index)}
             />
             <Inserter
-              onClick={({ currentTarget }) => {
-                insertExpression(index + 1);
-                currentTarget.blur();
-              }}
+              onClick={({ currentTarget }) =>
+                insertionHandler(currentTarget, index + 1)
+              }
             />
-          </div>
+          </Fragment>
         );
       })}
 

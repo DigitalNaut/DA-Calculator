@@ -8,7 +8,7 @@ import Parenthesis from "../Parenthesis";
 import { UnitProps } from "../types";
 import { quantityIsTrivial } from "src/logic/equation-wrangler";
 
-function Separator() {
+function Divider() {
   return <div className="h-[1px] w-full bg-white" />;
 }
 
@@ -24,10 +24,10 @@ export default function Unit({
   );
 
   return (
-    <div className="group relative flex items-center">
+    <div className="group relative flex items-center gap-1">
       {isTrivialDenominator ? null : <Parenthesis />}
 
-      <div className="flex h-full flex-col rounded-2xl bg-gray-700 hover:bg-gray-600">
+      <div className="flex h-full flex-col rounded-lg bg-gray-700 hover:bg-gray-600">
         <div className="flex h-full grow">
           <Subunit
             inputQuantity={inputRatio.numerator}
@@ -43,7 +43,7 @@ export default function Unit({
               isTrivialDenominator,
           })}
         >
-          <Separator />
+          <Divider />
           <Subunit
             inputQuantity={inputRatio.denominator || { factor: 1 }}
             onChangeInput={onChangeInput}

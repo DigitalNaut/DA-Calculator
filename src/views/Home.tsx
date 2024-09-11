@@ -47,7 +47,7 @@ const expression1 = newExpression([
 export default function Home(): JSX.Element {
   return (
     <div className="h-screen w-screen bg-gray-900 p-6 flex items-center">
-      <div className="flex h-24 w-full flex-col items-center">
+      <div className="flex h-28 w-full flex-col items-center">
         <Equation input={expression1} />
         {/* <Equation input={expression2} />
         <Equation input={expression3} /> */}

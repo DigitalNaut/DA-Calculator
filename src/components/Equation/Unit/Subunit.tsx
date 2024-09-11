@@ -16,7 +16,9 @@ export default function Subunit({
   inputQuantity: input,
   onChangeInput,
 }: SubunitProps) {
-  const [inputString, setInputString] = useState(() => stringifyQuantity(input));
+  const [inputString, setInputString] = useState(() =>
+    stringifyQuantity(input),
+  );
 
   const changeHandler: ChangeEventHandler<HTMLInputElement> = ({
     currentTarget,
