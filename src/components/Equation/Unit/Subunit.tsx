@@ -2,6 +2,8 @@ import {
   ChangeEventHandler,
   FocusEventHandler,
   KeyboardEventHandler,
+  useEffect,
+  useRef,
   useState,
 } from "react";
 import { twMerge } from "tailwind-merge";
@@ -15,10 +17,13 @@ export default function Subunit({
   quantityPosition: subunit,
   inputQuantity: input,
   onChangeInput,
+  isFocused,
+  onFocused,
 }: SubunitProps) {
   const [inputString, setInputString] = useState(() =>
     stringifyQuantity(input),
   );
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const changeHandler: ChangeEventHandler<HTMLInputElement> = ({
     currentTarget,
@@ -40,10 +45,20 @@ export default function Subunit({
     if (key === "Enter") currentTarget.blur();
   };
 
+  useEffect(() => {
+    if (!inputRef.current) return;
+
+    if (isFocused) {
+      inputRef.current.focus();
+      inputRef.current.select();
+    }
+  }, [isFocused]);
+
   const isAllInputValid = true;
 
   return (
     <input
+      ref={inputRef}
       placeholder="No value"
       className={twMerge(
         "z-10 w-full grow rounded-md border-2 border-transparent bg-transparent p-2 text-center focus:bg-white",
@@ -56,6 +71,7 @@ export default function Subunit({
       onBlur={blurHandler}
       onKeyDown={keyDownHandler}
       size={inputString.length || 5}
+      onFocus={onFocused}
     />
   );
 }

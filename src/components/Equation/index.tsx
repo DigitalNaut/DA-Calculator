@@ -20,6 +20,7 @@ export default function Equation({ input }: { input: Expression }) {
   const [expression, setExpression] = useState(input);
   const [results, setResults] = useState<BaseRatio | null>(null);
   const [wasInputChanged, setWasInputChanged] = useState(false);
+  const [focusIndex, setFocusIndex] = useState<number | null>(null);
 
   const multiplyFactors = (
     expression: Expression,
@@ -108,7 +109,10 @@ export default function Equation({ input }: { input: Expression }) {
 
   const insertExpression = (index: number) => {
     setExpression((prevExpression) => insertRatio(prevExpression, index));
+    setFocusIndex(index);
   };
+
+  const clearFocusIndex = () => setFocusIndex(null);
 
   const insertionHandler = (
     currentTarget: EventTarget & HTMLButtonElement,
@@ -140,6 +144,8 @@ export default function Equation({ input }: { input: Expression }) {
               onChangeInput={updateExpression}
               index={index}
               onDeleteUnit={() => deleteUnit(index)}
+              isFocused={focusIndex === index}
+              onFocused={clearFocusIndex}
             />
             <Inserter
               onClick={({ currentTarget }) =>
