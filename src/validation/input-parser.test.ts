@@ -1,6 +1,6 @@
 import { parseInput, stringifyQuantity } from "./input-parser";
 
-suite("expects to parse input into a quantity", () => {
+suite("expects to parse text into a quantity", () => {
   it("expects to parse an empty string", () => {
     expect(parseInput("")).toBe(undefined);
   });
@@ -25,6 +25,16 @@ suite("expects to parse input into a quantity", () => {
     });
   });
 
+  it("expects to parse a percentage", () => {
+    expect(parseInput("50%")).toEqual({
+      factor: 0.5,
+    });
+
+    expect(parseInput("-50%")).toEqual({
+      factor: -0.5,
+    });
+  });
+
   it("expects to parse a factor and label", () => {
     expect(parseInput("12 roads")).toEqual({
       factor: 12,
@@ -34,6 +44,11 @@ suite("expects to parse input into a quantity", () => {
     expect(parseInput("99.5 km")).toEqual({
       factor: 99.5,
       labels: ["km"],
+    });
+
+    expect(parseInput("10% cake")).toEqual({
+      factor: 0.1,
+      labels: ["cake"],
     });
   });
 

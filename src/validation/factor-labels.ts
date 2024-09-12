@@ -1,3 +1,11 @@
-export const factorNeedle = /^-?\b\d+(?:\.\d+)?(?=$| )/; // e.g. 60 or 60.0
-export const labelNeedle = /\b(?!\d+)[\p{L}\d\-_*#]+(?:\^\d+)?\b/gu; // e.g. m, grapes, m^2, m*n, foot-squared
-export const labelExponentNeedle = /(.+?)\^(\d+)$/; // e.g. m^3
+// Separate factor labels from the rest of the input
+export const factorLabelNeedle =
+  /^(?:(-?\p{N}+(?:\.\p{N}+)?%?)(?:\p{Z}+|\s+|$))?(.*)?$/u;
+export const labelSeparatorNeedle = /(?<=^|\s|\p{Z})(.+?)(?=$|\s|\p{Z})/gu;
+
+// Only numbers
+export const factorNeedle = /^(-?\p{N}+(?:\.\p{N}+)?)(%?)$/u; // e.g. 60, -60, 60.0, -60.0, 60%, -60%, 60.0%, -60.0%
+
+// Only labels
+export const labelNeedle =
+  /^((?:\p{L}|°)[\p{L}\p{N}\-_#@~°!]*)(?:(?:\*{2}|\^)(\p{N}+))?$/u; // e.g. apple, m^3, area**2
