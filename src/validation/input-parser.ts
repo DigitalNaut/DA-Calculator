@@ -20,12 +20,13 @@ function parseFactor(input: string): number {
 
   if (!match) return 1;
 
-  const [, number, percent] = match;
-  const result = Number.parseFloat(number);
+  const [, numberString, percent] = match;
+  const result = Number.parseFloat(numberString);
 
   if (Number.isNaN(result)) return 1;
+  if (Object.is(result, -0)) return 0;
 
-  return percent.length ? result / 100 : result;
+  return percent === "%" ? result / 100 : result;
 }
 
 function parseLabels(input: string): string[] | undefined {

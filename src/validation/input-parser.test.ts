@@ -6,6 +6,18 @@ suite("expects to parse text into a quantity", () => {
   });
 
   it("expects to parse a factor integer", () => {
+    expect(parseInput("1")).toEqual({
+      factor: 1,
+    });
+    expect(parseInput("0")).toEqual({
+      factor: 0,
+    });
+    expect(parseInput("-0")).toEqual({
+      factor: 0,
+    });
+    expect(parseInput("-0")).toEqual({
+      factor: 0,
+    });
     expect(parseInput("60")).toEqual({
       factor: 60,
     });
