@@ -104,7 +104,7 @@ export function updateRatio(
   if (
     termPosition === "denominator" &&
     newQuantity.factor === 1 &&
-    !newQuantity.labels
+    newQuantity.labels?.length === 0
   )
     return newExpression;
 
