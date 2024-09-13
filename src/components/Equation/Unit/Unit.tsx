@@ -26,10 +26,10 @@ export default function Unit({
   );
 
   return (
-    <div className="group relative flex items-center gap-1">
+    <div className="group/unit relative flex items-center gap-1">
       {isTrivialDenominator ? null : <Parenthesis />}
 
-      <div className="flex h-full flex-col rounded-lg bg-gray-700 hover:bg-gray-600">
+      <div className="flex h-full flex-col rounded-lg hover:bg-gray-600">
         <div className="flex h-full grow">
           <Subunit
             inputQuantity={inputRatio.numerator}
@@ -43,7 +43,7 @@ export default function Unit({
 
         <div
           className={clsx({
-            "hidden group-focus-within:block group-hover:block":
+            "hidden group-focus-within/unit:block group-hover/unit:block":
               isTrivialDenominator,
           })}
         >
@@ -61,7 +61,7 @@ export default function Unit({
 
       <button
         type="button"
-        className="absolute right-0 top-0 z-50 hidden group-hover:block"
+        className="absolute right-0 top-0 z-50 hidden group-hover/unit:block group-hover/unit:group-focus-within/unit:hidden"
         onClick={onDeleteUnit}
       >
         <FontAwesomeIcon icon={faTimesCircle} />

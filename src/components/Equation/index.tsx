@@ -132,7 +132,7 @@ export default function Equation({ input }: { input: Expression }) {
   };
 
   return (
-    <div className="flex h-full w-max items-center justify-center rounded-lg bg-slate-800 px-2 py-2 shadow-md">
+    <div className="group/equation flex h-full w-max items-center justify-center rounded-lg px-2 py-2 focus-within:bg-slate-800 focus-within:shadow-lg focus-within:outline focus-within:outline-1 focus-within:outline-slate-700 hover:bg-slate-800 hover:shadow-lg">
       <Inserter
         onClick={({ currentTarget }) => insertionHandler(currentTarget, 0)}
       />
@@ -158,7 +158,7 @@ export default function Equation({ input }: { input: Expression }) {
 
       <button
         type="button"
-        className="flex items-center p-2"
+        className="flex items-center p-1 gap-2"
         onClick={onClickResults}
       >
         <FontAwesomeIcon icon={faEquals} size="2x" />
