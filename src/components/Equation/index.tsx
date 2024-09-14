@@ -156,12 +156,10 @@ export default function Equation({ input }: { input: Expression }) {
         );
       })}
 
-      <button
-        type="button"
-        className="flex items-center p-1 gap-2"
-        onClick={onClickResults}
-      >
+      <button type="button" onClick={onClickResults}>
         <FontAwesomeIcon icon={faEquals} size="2x" />
+      </button>
+      <button className="pl-2" type="button" onClick={onClickResults}>
         <Output dimmed={resultText === "Result" || wasInputChanged}>
           {resultText}
         </Output>

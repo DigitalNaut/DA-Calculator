@@ -61,7 +61,7 @@ export default function Subunit({
       ref={inputRef}
       placeholder="No value"
       className={twMerge(
-        "z-10 w-full grow rounded-md border-2 border-transparent bg-transparent p-2 text-center focus:bg-white",
+        "z-10 w-full grow rounded-md border-2 border-transparent bg-transparent p-1 text-center focus:bg-white",
         isAllInputValid
           ? "focus:border-blue-900 focus:text-blue-900"
           : "focus:border-red-500 focus:text-red-700",
@@ -70,7 +70,8 @@ export default function Subunit({
       onChange={changeHandler}
       onBlur={blurHandler}
       onKeyDown={keyDownHandler}
-      size={inputString.length || 5}
+      size={inputString.length || 1}
+      maxLength={50}
       onFocus={onFocused}
     />
   );

@@ -26,7 +26,7 @@ export default function Unit({
   );
 
   return (
-    <div className="group/unit relative flex items-center gap-1">
+    <div className="group/unit relative flex items-center gap-0.5">
       {isTrivialDenominator ? null : <Parenthesis />}
 
       <div className="flex h-full flex-col rounded-lg hover:bg-gray-600">
