@@ -54,6 +54,7 @@ export default function Subunit({
     }
   }, [isFocused]);
 
+  // TODO: Implement syntax highlight for input
   const isAllInputValid = true;
 
   return (
