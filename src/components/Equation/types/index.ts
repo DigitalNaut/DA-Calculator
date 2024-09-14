@@ -26,5 +26,4 @@ export type SubunitProps = InputHandlerProps &
   Partial<Focusable> & {
     inputQuantity: Quantity;
     quantityPosition: QuantityPosition;
-    display?: true;
   };

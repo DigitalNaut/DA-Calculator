@@ -7,7 +7,12 @@ import {
   labelNeedle,
 } from "./factor-labels";
 
-function separateFactorLabels(input: string): [string, string] | null {
+/**
+ * Separates the factor from the labels in a string
+ * @param input A string
+ * @returns A tuple of [factor, labels] or null if the input is invalid
+ */
+export function separateFactorLabels(input: string): [string, string] | null {
   const match = input.match(factorLabelNeedle);
 
   if (!match) return null;
