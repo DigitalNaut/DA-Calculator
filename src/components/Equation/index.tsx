@@ -132,7 +132,7 @@ export default function Equation({ input }: { input: Expression }) {
   };
 
   return (
-    <div className="group/equation flex h-full w-max items-center justify-center rounded-lg px-2 py-2 focus-within:bg-slate-800 focus-within:shadow-lg focus-within:outline focus-within:outline-1 focus-within:outline-slate-700 hover:bg-slate-800 hover:shadow-lg">
+    <div className="group/equation flex h-full w-max items-center justify-center rounded-lg p-2 focus-within:bg-slate-800 focus-within:shadow-lg focus-within:outline focus-within:outline-1 focus-within:outline-slate-700 hover:bg-slate-800 hover:shadow-lg">
       <Inserter
         onClick={({ currentTarget }) => insertionHandler(currentTarget, 0)}
       />

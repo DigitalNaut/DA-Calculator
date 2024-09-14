@@ -9,7 +9,7 @@ import { UnitProps } from "../types";
 import { quantityIsTrivial } from "src/logic/equation-wrangler";
 
 function Divider() {
-  return <div className="h-[1px] w-full bg-white" />;
+  return <div className="h-px w-full bg-white" />;
 }
 
 export default function Unit({
@@ -29,8 +29,8 @@ export default function Unit({
     <div className="group/unit relative flex items-center gap-0.5">
       {isTrivialDenominator ? null : <Parenthesis />}
 
-      <div className="flex h-full flex-col rounded-lg hover:bg-gray-600">
-        <div className="flex h-full grow">
+      <div className="flex flex-col rounded-lg hover:bg-gray-600">
+        <div className="flex grow">
           <Subunit
             inputQuantity={inputRatio.numerator}
             onChangeInput={onChangeInput}

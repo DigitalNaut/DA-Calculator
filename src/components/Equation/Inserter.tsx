@@ -15,12 +15,12 @@ export default function Inserter({
     >
       <FontAwesomeIcon
         icon={faAngleDown}
-        className="absolute -top-[1em]"
+        className="absolute top-[-1em]"
         size="xs"
       />
       <FontAwesomeIcon
         icon={faAngleUp}
-        className="absolute -bottom-[1em]"
+        className="absolute bottom-[-1em]"
         size="xs"
       />
     </button>

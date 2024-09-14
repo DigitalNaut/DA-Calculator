@@ -3,9 +3,11 @@ import globals from "globals";
 import reactHooks from "eslint-plugin-react-hooks";
 import reactRefresh from "eslint-plugin-react-refresh";
 import tseslint from "typescript-eslint";
+import tailwind from "eslint-plugin-tailwindcss";
 
 export default tseslint.config(
-  { ignores: ["dist"] },
+  ...tailwind.configs["flat/recommended"],
+  { ignores: ["dist", "coverage"] },
   {
     extends: [js.configs.recommended, ...tseslint.configs.recommended],
     files: ["**/*.{ts,tsx}"],
