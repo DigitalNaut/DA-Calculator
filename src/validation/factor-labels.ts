@@ -8,4 +8,4 @@ export const factorNeedle = /^(-?\p{N}+(?:\.\p{N}+)?)(%?)$/u; // e.g. 60, -60, 6
 
 // Only labels
 export const labelNeedle =
-  /^((?:\p{L}|°)[\p{L}\p{N}\-_#@~°!]*)(?:(?:\*{2}|\^)(\p{N}+))?$/u; // e.g. apple, m^3, area**2
+  /^((?:\p{Emoji_Presentation}|\p{L}|°)[\p{Emoji_Presentation}\p{L}\p{N}\-_#@~°!]*)(?:(?:\*{2}|\^)(\p{N}+))?$/u; // e.g. apple, m^3, area**2
