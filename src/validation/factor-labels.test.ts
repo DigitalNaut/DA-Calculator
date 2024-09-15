@@ -15,9 +15,9 @@ suite("separates factor and labels in the input", () => {
     expect(test("3 apples")).toEqual(["3", "apples"]);
   });
   it("handles a factor with multiple labels", () => {
-    expect(test("8 area**2 m^3 quick リンゴ")).toEqual([
+    expect(test("8 area*@ m^3 quick リンゴ 🏠")).toEqual([
       "8",
-      "area**2 m^3 quick リンゴ",
+      "area*@ m^3 quick リンゴ 🏠",
     ]);
   });
 });
@@ -76,7 +76,6 @@ suite("expects a valid label", () => {
   });
   it("handles labels with exponents", () => {
     expect(test("m^2")).toEqual(["m", "2"]);
-    expect(test("m**2")).toEqual(["m", "2"]);
   });
   it("handles labels with non-boundary special characters", () => {
     expect(test("foo#2")).toEqual(["foo#2", undefined]);
@@ -93,6 +92,15 @@ suite("expects a valid label", () => {
     expect(test("Mozart3")).toEqual(["Mozart3", undefined]);
     expect(test("m3n")).toEqual(["m3n", undefined]);
   });
+  it("handles simple emojis", () => {
+    expect(test("🍎")).toEqual(["🍎", undefined]);
+    expect(test("😎^2")).toEqual(["😎", "2"]);
+  });
+  it("handles compound emojis & emoji sequences", () => {
+    expect(test("👩🏿")).toEqual(["👩🏿", undefined]);
+    expect(test("👨‍👨‍👦‍👦")).toEqual(["👨‍👨‍👦‍👦", undefined]);
+    expect(test("👨‍👨‍👦‍👦^3")).toEqual(["👨‍👨‍👦‍👦", "3"]);
+  });
 
   const noMatch = [undefined, undefined];
 
@@ -101,6 +109,10 @@ suite("expects a valid label", () => {
     expect(test("3Z")).toEqual(noMatch);
     expect(test("3caravan")).toEqual(noMatch);
     expect(test("3Mozart")).toEqual(noMatch);
+    expect(test("#")).toEqual(noMatch);
+    expect(test("#Mozart")).toEqual(noMatch);
+    expect(test("*")).toEqual(noMatch);
+    expect(test("*^2")).toEqual(noMatch);
   });
 });
 
