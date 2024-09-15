@@ -1,22 +1,23 @@
 import {
   ChangeEventHandler,
   FocusEventHandler,
+  Fragment,
   KeyboardEventHandler,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from "react";
 
 import {
-  separateFactorLabels,
-  stringifyQuantity,
-} from "src/validation/input-parser";
-import {
   factorNeedle,
   labelNeedle,
   labelSeparatorNeedle,
 } from "src/validation/factor-labels";
-import { cn } from "src/utils";
+import {
+  separateFactorLabels,
+  stringifyQuantity,
+} from "src/validation/input-parser";
 
 import { SubunitProps } from "../types";
 
@@ -71,7 +72,7 @@ function useInput({
 }
 
 function useInputHighlight(inputString: string) {
-  const match = separateFactorLabels(inputString);
+  const match = useMemo(() => separateFactorLabels(inputString), [inputString]);
   if (!match) return <>{inputString}</>;
 
   const [rawFactor, rawLabels] = match;
@@ -93,16 +94,20 @@ function useInputHighlight(inputString: string) {
         const [, label, exponent] = match || [];
 
         return (
-          <span
-            key={rawLabel}
-            className={cn({
-              "text-red-500": isInvalidLabel,
-            })}
-          >
-            {label || rawLabel}
-            {exponent ? <sup>{exponent}</sup> : null}
+          <Fragment key={rawLabel}>
+            <span
+              key={rawLabel}
+              className={
+                isInvalidLabel
+                  ? "text-red-500 group-hover/unit:rounded-md group-hover/unit:bg-red-400 group-hover/unit:text-red-800"
+                  : "m-0 rounded-md px-0.5 group-hover/equation:bg-slate-700 group-hover/unit:bg-slate-600"
+              }
+            >
+              {label || rawLabel}
+              {exponent ? <sup>{exponent}</sup> : null}
+            </span>
             {index < labels.length - 1 ? <>&nbsp;</> : null}
-          </span>
+          </Fragment>
         );
       })}
     </>

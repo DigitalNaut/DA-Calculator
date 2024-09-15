@@ -29,7 +29,7 @@ export default function Unit({
     <div className="group/unit relative flex items-center gap-0.5">
       {isTrivialDenominator ? null : <Parenthesis />}
 
-      <div className="flex flex-col rounded-lg hover:bg-gray-600">
+      <div className="flex flex-col rounded-lg group-hover/unit:bg-slate-700">
         <div className="flex grow">
           <Subunit
             inputQuantity={inputRatio.numerator}
