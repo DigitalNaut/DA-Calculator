@@ -1,4 +1,4 @@
-import { Quantity } from "src/types/expressions";
+import type { LabelCount, Quantity } from "src/types/expressions";
 
 import {
   factorLabelNeedle,
@@ -34,10 +34,10 @@ function parseFactor(input: string): number {
   return percent === "%" ? result / 100 : result;
 }
 
-function parseLabels(input: string): string[] | undefined {
+function parseLabels(input: string): LabelCount | undefined {
   if (input?.length === 0) return;
 
-  const results: string[] = [];
+  const results: LabelCount = new Map();
 
   // Run the search and store the labels
   // See: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp/exec
@@ -51,18 +51,26 @@ function parseLabels(input: string): string[] | undefined {
 
     const [, label, exponent] = validatedLabel;
 
-    if (!exponent) {
-      results.push(labelSubstring);
-    } else {
-      const count = Number.parseInt(exponent, 10);
+    if (!label) continue;
 
-      for (let i = 0; i < count; i++) {
-        results.push(label);
-      }
-    }
+    const prevCount = results.get(label) || 0;
+    const count = Number.parseInt(exponent, 10) || 1;
+
+    results.set(label, prevCount + count);
+
+    // if (!exponent) {
+    //   results.set(labelSubstring, 1);
+    //   results.values();
+    // } else {
+    //   const count = Number.parseInt(exponent, 10);
+
+    //   if (Number.isNaN(count)) results.set(labelSubstring, 1);
+    //   else if (count <= 0) continue;
+    //   else results.set(label, count);
+    // }
   }
 
-  if (results.length === 0) return;
+  if (results.size === 0) return;
 
   return results;
 }
@@ -83,7 +91,7 @@ export function parseInput(input: string): Quantity | undefined {
   const factor = parseFactor(rawFactor);
   const labels = parseLabels(rawLabels);
 
-  if (labels?.length === 0) return { factor };
+  if (labels?.size === 0) return { factor };
 
   return { factor, labels };
 }
@@ -96,5 +104,9 @@ export function parseInput(input: string): Quantity | undefined {
 export function stringifyQuantity(quantity?: Quantity) {
   if (!quantity) return "";
 
-  return `${quantity.factor} ${quantity.labels?.join(" ") || ""}`.trim();
+  const formattedLabels = [...quantity.labels || []]
+    .map(([label, exponent]) => `${label}${exponent > 1 ? "^" + exponent : ""}`)
+    .join(" ");
+
+  return `${quantity.factor} ${formattedLabels}`.trim();
 }

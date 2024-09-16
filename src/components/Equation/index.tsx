@@ -5,11 +5,17 @@ import { Fragment, useMemo, useState } from "react";
 import {
   simplifyExpression,
   insertRatio,
-  cancelOutUnits,
+  cancelOutLabels,
   removeRatio,
   updateRatio,
+  stringifyLabels,
 } from "src/logic/equation-wrangler";
-import { BaseRatio, Expression, QuantityPosition } from "src/types/expressions";
+import type {
+  BaseRatio,
+  Expression,
+  LabelCount,
+  QuantityPosition,
+} from "src/types/expressions";
 import Output from "src/components/Equation/Output";
 import { Unit } from "src/components/Equation/Unit";
 
@@ -38,19 +44,24 @@ export default function Equation({ input }: { input: Expression }) {
     return reducedExpression;
   };
 
-  const reduceLabels = (
+  const compoundLabels = (
     expression: Expression,
     quantityPosition: QuantityPosition,
   ) => {
-    const reducedExpression = expression.reduce<string[]>(
+    const reducedExpression = expression.reduce<LabelCount>(
       (prevTerms, currentTerm) => {
         const labels = currentTerm[quantityPosition]?.labels;
 
         if (!labels) return prevTerms;
 
-        return prevTerms.concat(labels);
+        for (const [label, count] of labels) {
+          const prevCount = prevTerms.get(label) || 0;
+          prevTerms.set(label, prevCount + count);
+        }
+
+        return prevTerms;
       },
-      [],
+      new Map<string, number>(),
     );
 
     return reducedExpression;
@@ -61,11 +72,11 @@ export default function Equation({ input }: { input: Expression }) {
     setResults({
       numerator: {
         factor: multiplyFactors(expression, "numerator"),
-        labels: reduceLabels(expression, "numerator"),
+        labels: compoundLabels(expression, "numerator"),
       },
       denominator: {
         factor: multiplyFactors(expression, "denominator"),
-        labels: reduceLabels(expression, "denominator"),
+        labels: compoundLabels(expression, "denominator"),
       },
     });
 
@@ -85,14 +96,14 @@ export default function Equation({ input }: { input: Expression }) {
       .toFixed(2)
       .replace(/\.0+$/, "")}`;
 
-    const [numeratorLabels, denominatorLabels] = cancelOutUnits(
-      results.numerator.labels || [],
-      results.denominator?.labels || [],
+    const resultsLabels = cancelOutLabels(
+      results.numerator.labels || new Map(),
+      results.denominator?.labels || new Map(),
     );
 
-    return `${resultFactor} ${numeratorLabels.join(" • ")} ${
-      denominatorLabels.length > 0 ? "/" : ""
-    } ${denominatorLabels.join(" • ")}`;
+    const stringifiedLabels = stringifyLabels(resultsLabels);
+
+    return `${resultFactor} ${stringifiedLabels}`;
   }, [results]);
 
   const updateExpression: InputChangeHandler = (

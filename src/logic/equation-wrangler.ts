@@ -1,15 +1,16 @@
-import {
+import type {
   Quantity,
   Ratio,
   Expression,
   QuantityPosition,
   BaseRatio,
   BaseExpression,
+  LabelCount,
 } from "src/types/expressions";
 import { parseInput } from "src/validation/input-parser";
 
 const quantityHasNoLabels = (quantity?: Quantity) =>
-  (quantity?.labels?.length || 0) === 0;
+  (quantity?.labels?.size || 0) === 0;
 
 /**
  * Check if a quantity is non-trivial (contains labels or factors different from 1)
@@ -104,7 +105,7 @@ export function updateRatio(
   if (
     termPosition === "denominator" &&
     newQuantity.factor === 1 &&
-    newQuantity.labels?.length === 0
+    newQuantity.labels?.size === 0
   )
     return newExpression;
 
@@ -139,47 +140,27 @@ export const removeRatio = (
   return splicedExpression;
 };
 
-type HashTable = { [key: string]: number };
+export function cancelOutLabels(
+  numeratorLabels: LabelCount,
+  denominatorLabels: LabelCount,
+) {
+  const keys = new Set([
+    ...numeratorLabels.keys(),
+    ...denominatorLabels.keys(),
+  ]);
 
-const labelsToHash = (
-  hash: HashTable,
-  items: string[],
-  isAdditive: boolean,
-) => {
-  const result: HashTable = { ...hash };
+  const reducedLabels = [...keys].reduce((reducedLabels, label) => {
+    const numeratorCount = numeratorLabels.get(label) || 0;
+    const denominatorCount = denominatorLabels.get(label) || 0;
 
-  items.forEach((item) => {
-    result[item] = (result[item] ?? 0) + (isAdditive ? +1 : -1);
-  });
+    const newCount = numeratorCount - denominatorCount;
 
-  return result;
-};
+    if (newCount !== 0) reducedLabels.set(label, newCount);
 
-type LabelCount = [string, number];
-type LabelCounts = [LabelCount[], LabelCount[]];
+    return reducedLabels;
+  }, new Map<string, number>());
 
-/**
- * Remove duplicates from two arrays of labels
- * @param arr1
- * @param arr2
- * @returns An array of unique labels, counted by how many times they appear
- */
-function countDuplicateLabels(arr1: string[], arr2: string[]): LabelCounts {
-  let hash: HashTable = {};
-  hash = labelsToHash(hash, arr1, true);
-  hash = labelsToHash(hash, arr2, false);
-
-  return Object.entries(hash).reduce<LabelCounts>(
-    (acc, [label, count]) => {
-      if (count > 0) {
-        acc[0].push([label, count]);
-      } else if (count < 0) {
-        acc[1].push([label, -count]); // Make count positive
-      }
-      return acc;
-    },
-    [[], []],
-  );
+  return reducedLabels;
 }
 
 const sortLabels = (
@@ -192,24 +173,33 @@ const sortLabels = (
   return label.localeCompare(labelB);
 };
 
-const labelToExponent = (label: string, count: number) => {
-  if (count > 1) return label + `^${count}`;
-  return label;
-};
+/**
+ * 
+ * @param labels 
+ * @returns 
+ */
+export function stringifyLabels(labels: LabelCount) {
+  const numeratorLabels: [string, number][] = [];
+  const denominatorLabels: [string, number][] = [];
 
-export function cancelOutUnits(arr1: string[], arr2: string[]) {
-  const [numeratorLabels, denominatorLabels] = countDuplicateLabels(arr1, arr2); // ["foo", 3]
+  labels.forEach((count, key) => {
+    if (count > 0) numeratorLabels.push([key, count]);
+    if (count < 0) denominatorLabels.push([key, -count]);
+  });
 
-  const sortedNumeratorLabels = numeratorLabels.sort(sortLabels);
-  const sortedDenominatorLabels = denominatorLabels.sort(sortLabels);
+  numeratorLabels.sort(sortLabels);
+  denominatorLabels.sort(sortLabels);
 
-  const exponentNumeratorLabels = sortedNumeratorLabels.map(([label, count]) =>
-    labelToExponent(label, count),
-  );
-  const exponentDenominatorLabels = sortedDenominatorLabels.map(
-    ([label, count]) => labelToExponent(label, count),
-  );
-  return [exponentNumeratorLabels, exponentDenominatorLabels];
+  const numeratorLabelsString = numeratorLabels
+    .map(([label, count]) => (count === 1 ? label : `${label}^${count}`))
+    .join(" • ");
+  const denominatorLabelsString = denominatorLabels
+    .map(([label, count]) => (count === 1 ? label : `${label}^${count}`))
+    .join(" • ");
+
+  return denominatorLabels.length === 0
+    ? numeratorLabelsString
+    : `${numeratorLabelsString} / ${denominatorLabelsString}`;
 }
 
 /**

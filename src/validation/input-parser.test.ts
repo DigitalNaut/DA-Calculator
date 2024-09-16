@@ -1,93 +1,102 @@
+import type { Quantity } from "src/types/expressions";
 import { parseInput, stringifyQuantity } from "./input-parser";
 
 suite("expects to parse text into a quantity", () => {
-  it("expects to parse an empty string", () => {
+  it("can parse an empty string", () => {
     expect(parseInput("")).toBe(undefined);
   });
 
-  it("expects to parse a factor integer", () => {
-    expect(parseInput("1")).toEqual({
+  it("can parse a factor integer", () => {
+    expect(parseInput("1")).toEqual<Quantity>({
       factor: 1,
     });
-    expect(parseInput("0")).toEqual({
+    expect(parseInput("0")).toEqual<Quantity>({
       factor: 0,
     });
-    expect(parseInput("-0")).toEqual({
+    expect(parseInput("-0")).toEqual<Quantity>({
       factor: 0,
     });
-    expect(parseInput("-0")).toEqual({
+    expect(parseInput("-0")).toEqual<Quantity>({
       factor: 0,
     });
-    expect(parseInput("60")).toEqual({
+    expect(parseInput("60")).toEqual<Quantity>({
       factor: 60,
     });
-    expect(parseInput("-32")).toEqual({
+    expect(parseInput("-32")).toEqual<Quantity>({
       factor: -32,
     });
   });
 
-  it("expects to parse a factor float", () => {
+  it("can parse a factor float", () => {
     expect(parseInput("18.125")?.factor).toBe(18.125);
   });
 
-  it("expects to parse a label", () => {
-    expect(parseInput("m")).toEqual({
+  it("can parse a label", () => {
+    expect(parseInput("m")).toEqual<Quantity>({
       factor: 1,
-      labels: ["m"],
+      labels: new Map([["m", 1]]),
     });
   });
 
-  it("expects to parse a percentage", () => {
-    expect(parseInput("50%")).toEqual({
+  it("can parse a percentage", () => {
+    expect(parseInput("50%")).toEqual<Quantity>({
       factor: 0.5,
     });
 
-    expect(parseInput("-50%")).toEqual({
+    expect(parseInput("-50%")).toEqual<Quantity>({
       factor: -0.5,
     });
   });
 
-  it("expects to parse a factor and label", () => {
-    expect(parseInput("12 roads")).toEqual({
+  it("can parse a factor and label", () => {
+    expect(parseInput("12 roads")).toEqual<Quantity>({
       factor: 12,
-      labels: ["roads"],
+      labels: new Map([["roads", 1]]),
     });
 
-    expect(parseInput("99.5 km")).toEqual({
+    expect(parseInput("99.5 km")).toEqual<Quantity>({
       factor: 99.5,
-      labels: ["km"],
+      labels: new Map([["km", 1]]),
     });
 
-    expect(parseInput("10% cake")).toEqual({
+    expect(parseInput("10% cake")).toEqual<Quantity>({
       factor: 0.1,
-      labels: ["cake"],
+      labels: new Map([["cake", 1]]),
     });
   });
 
-  it("expects to parse an exponential label", () => {
-    expect(parseInput("m^3")).toEqual({
+  it("can parse an exponential label", () => {
+    expect(parseInput("m^3")).toEqual<Quantity>({
       factor: 1,
-      labels: ["m", "m", "m"],
+      labels: new Map([["m", 3]]),
     });
   });
 
-  it("expects an identity for invalid input", () => {
-    expect(parseInput("99invalid")).toEqual({
+  it("returns identity for invalid input", () => {
+    expect(parseInput("99invalid")).toEqual<Quantity>({
       factor: 1,
     });
   });
 });
 
 suite("expects to parse a quantity", () => {
-  it("expects to stringify undefined", () => {
+  it("can stringify undefined", () => {
     expect(stringifyQuantity()).toBe("");
     expect(stringifyQuantity(undefined)).toBe("");
   });
 
-  it("expects to stringify a quantity", () => {
-    expect(stringifyQuantity({ factor: 1, labels: ["m"] })).toBe("1 m");
-    expect(stringifyQuantity({ factor: 1.0, labels: ["km", "h"] })).toBe(
-      "1 km h",
+  it("can stringify a quantity", () => {
+    expect(stringifyQuantity({ factor: 1, labels: new Map([["m", 1]]) })).toBe(
+      "1 m",
     );
+    expect(
+      stringifyQuantity({
+        factor: 1.0,
+        labels: new Map([
+          ["km", 1],
+          ["h", 3],
+        ]),
+      }),
+    ).toBe("1 km h^3");
   });
 });
