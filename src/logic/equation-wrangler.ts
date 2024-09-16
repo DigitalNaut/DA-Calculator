@@ -174,9 +174,9 @@ const sortLabels = (
 };
 
 /**
- * 
- * @param labels 
- * @returns 
+ *
+ * @param labels
+ * @returns
  */
 export function stringifyLabels(labels: LabelCount) {
   const numeratorLabels: [string, number][] = [];

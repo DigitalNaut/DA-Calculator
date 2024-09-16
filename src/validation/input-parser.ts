@@ -104,7 +104,7 @@ export function parseInput(input: string): Quantity | undefined {
 export function stringifyQuantity(quantity?: Quantity) {
   if (!quantity) return "";
 
-  const formattedLabels = [...quantity.labels || []]
+  const formattedLabels = [...(quantity.labels || [])]
     .map(([label, exponent]) => `${label}${exponent > 1 ? "^" + exponent : ""}`)
     .join(" ");
 
