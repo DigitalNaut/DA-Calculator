@@ -5,7 +5,7 @@ import { useMemo } from "react";
 
 import { Subunit } from ".";
 import Parenthesis from "../Parenthesis";
-import { UnitProps } from "../types";
+import type { UnitProps } from "../types";
 import { quantityIsTrivial } from "src/logic/equation-wrangler";
 
 function Divider() {

@@ -1,13 +1,9 @@
-import {
+import type {
   ChangeEventHandler,
   FocusEventHandler,
-  Fragment,
   KeyboardEventHandler,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
 } from "react";
+import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 
 import {
   factorNeedle,
@@ -19,7 +15,7 @@ import {
   stringifyQuantity,
 } from "src/validation/input-parser";
 
-import { SubunitProps } from "../types";
+import type { SubunitProps } from "../types";
 
 function useInput({
   index,
