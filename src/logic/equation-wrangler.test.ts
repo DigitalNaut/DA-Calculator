@@ -2,8 +2,8 @@ import type { LabelCount, Quantity } from "src/types/expressions";
 import {
   insertRatio,
   isRatioTrivial,
-  newExpression,
-  newRatio,
+  createExpression,
+  createRatio,
   quantityIsTrivial,
   cancelOutLabels,
   removeRatio,
@@ -13,7 +13,7 @@ import {
 } from "./equation-wrangler";
 
 it("expects to get a new default expression", () => {
-  const testExpression = newExpression();
+  const testExpression = createExpression();
   expect(testExpression).toHaveLength(1);
 
   expect(testExpression[0].id).toBeTypeOf("string");
@@ -26,7 +26,7 @@ it("expects to get a new default expression", () => {
 });
 
 it("expects to get a new expression from an input object", () => {
-  const testExpression = newExpression([
+  const testExpression = createExpression([
     {
       numerator: { factor: 5, labels: new Map([["foo", 1]]) },
       denominator: { factor: 1, labels: new Map([["bar", 1]]) },
@@ -109,7 +109,7 @@ suite("detect trivial quantities", () => {
 
 suite("detects trivial ratios", () => {
   it("1/1 is trivial", () => {
-    const testRatio = newRatio({
+    const testRatio = createRatio({
       numerator: { factor: 1 },
       denominator: { factor: 1 },
     });
@@ -117,7 +117,7 @@ suite("detects trivial ratios", () => {
   });
 
   it("-1/-1 is trivial", () => {
-    const testRatio = newRatio({
+    const testRatio = createRatio({
       numerator: { factor: -1 },
       denominator: { factor: -1 },
     });
@@ -125,12 +125,12 @@ suite("detects trivial ratios", () => {
   });
 
   it("1.0 is trivial", () => {
-    const testRatio = newRatio({ numerator: { factor: 1.0 } });
+    const testRatio = createRatio({ numerator: { factor: 1.0 } });
     expect(isRatioTrivial(testRatio)).toBe(true);
   });
 
   it("1.0/1.0 is trivial", () => {
-    const testRatio = newRatio({
+    const testRatio = createRatio({
       numerator: { factor: 1.0 },
       denominator: { factor: 1.0 },
     });
@@ -138,7 +138,7 @@ suite("detects trivial ratios", () => {
   });
 
   it("1 / 1.0 is trivial", () => {
-    const testRatio = newRatio({
+    const testRatio = createRatio({
       numerator: { factor: 1 },
       denominator: { factor: 1.0 },
     });
@@ -146,7 +146,7 @@ suite("detects trivial ratios", () => {
   });
 
   it("1.0 / 1 is trivial", () => {
-    const testRatio = newRatio({
+    const testRatio = createRatio({
       numerator: { factor: 1.0 },
       denominator: { factor: 1 },
     });
@@ -154,12 +154,12 @@ suite("detects trivial ratios", () => {
   });
 
   it("2 is not trivial", () => {
-    const testRatio = newRatio({ numerator: { factor: 2 } });
+    const testRatio = createRatio({ numerator: { factor: 2 } });
     expect(isRatioTrivial(testRatio)).toBe(false);
   });
 
   it("2/1 is not trivial", () => {
-    const testRatio = newRatio({
+    const testRatio = createRatio({
       numerator: { factor: 2 },
       denominator: { factor: 1 },
     });
@@ -167,7 +167,7 @@ suite("detects trivial ratios", () => {
   });
 
   it("1/2 is not trivial", () => {
-    const testRatio = newRatio({
+    const testRatio = createRatio({
       numerator: { factor: 1 },
       denominator: { factor: 2 },
     });
@@ -177,7 +177,7 @@ suite("detects trivial ratios", () => {
   it("1 foo is not trivial", () => {
     expect(
       isRatioTrivial(
-        newRatio({
+        createRatio({
           numerator: { factor: 1, labels: new Map([["foo", 1]]) },
         }),
       ),
@@ -187,7 +187,7 @@ suite("detects trivial ratios", () => {
   it("1/1 foo is not trivial", () => {
     expect(
       isRatioTrivial(
-        newRatio({
+        createRatio({
           numerator: { factor: 1 },
           denominator: { factor: 1, labels: new Map([["foo", 1]]) },
         }),
@@ -196,7 +196,7 @@ suite("detects trivial ratios", () => {
   });
 
   it("1 foo/1 is not trivial", () => {
-    const testRatio = newRatio({
+    const testRatio = createRatio({
       numerator: { factor: 1, labels: new Map([["foo", 1]]) },
       denominator: { factor: 1 },
     });
@@ -204,7 +204,7 @@ suite("detects trivial ratios", () => {
   });
 
   it("0/1 is not trivial", () => {
-    const testRatio = newRatio({
+    const testRatio = createRatio({
       numerator: { factor: 0 },
       denominator: { factor: 1 },
     });
@@ -212,7 +212,7 @@ suite("detects trivial ratios", () => {
   });
 
   it("1/0 is not trivial", () => {
-    const testRatio = newRatio({
+    const testRatio = createRatio({
       numerator: { factor: 1 },
       denominator: { factor: 0 },
     });
@@ -220,7 +220,7 @@ suite("detects trivial ratios", () => {
   });
 
   it("-1/1 is not trivial", () => {
-    const testRatio = newRatio({
+    const testRatio = createRatio({
       numerator: { factor: -1 },
       denominator: { factor: 1 },
     });
@@ -229,7 +229,7 @@ suite("detects trivial ratios", () => {
 });
 
 it("expects to remove trivial ratios", () => {
-  const testExpression = newExpression([
+  const testExpression = createExpression([
     {
       numerator: { factor: 1 }, // Trivial
     },
@@ -259,7 +259,7 @@ it("expects to remove trivial ratios", () => {
 });
 
 it("expects to insert a ratio in an expression", () => {
-  const testExpression = newExpression([
+  const testExpression = createExpression([
     {
       numerator: { factor: 2 },
     },
@@ -271,7 +271,7 @@ it("expects to insert a ratio in an expression", () => {
   const modifiedExpression = insertRatio(
     testExpression,
     1,
-    newRatio({
+    createRatio({
       numerator: { factor: 1, labels: new Map([["bar", 1]]) },
     }),
   );
@@ -285,7 +285,7 @@ it("expects to insert a ratio in an expression", () => {
 });
 
 suite("expects to update a ratio in an expression", () => {
-  const testExpression = newExpression([
+  const testExpression = createExpression([
     {
       numerator: { factor: 2 },
     },
@@ -369,7 +369,7 @@ suite("expects to update a ratio in an expression", () => {
 });
 
 it("can remove a ratio from an expression", () => {
-  const testExpression = newExpression([
+  const testExpression = createExpression([
     {
       numerator: { factor: 2 },
     },

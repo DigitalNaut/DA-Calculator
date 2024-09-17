@@ -7,6 +7,7 @@ import type {
   BaseExpression,
   LabelCount,
 } from "src/types/expressions";
+import { randomId } from "src/utils/id";
 import { parseInput } from "src/validation/input-parser";
 
 const quantityHasNoLabels = (quantity?: Quantity) =>
@@ -47,9 +48,9 @@ export const isRatioTrivial = (ratio: Ratio) => {
 };
 
 /**
- * Remove all 1/1 terms from an equation
+ * Remove all 1/1 terms from an expression
  * @param expression
- * @returns The equation without 1/1 terms or a default equation if empty
+ * @returns The expression without 1/1 terms or a default expression if empty
  */
 export const simplifyExpression = (expression: Expression): Expression => {
   const filteredExpression = expression.filter(
@@ -57,15 +58,15 @@ export const simplifyExpression = (expression: Expression): Expression => {
   );
 
   // If no non-trivial terms, return the default [{ numerator: { factor: 1 } }]
-  return filteredExpression.length > 0 ? filteredExpression : [newRatio()];
+  return filteredExpression.length > 0 ? filteredExpression : [createRatio()];
 };
 
 /**
- * Add a new term to an equation
- * @param expression The equation to modify
+ * Add a new term to an expression
+ * @param expression The expression to modify
  * @param index The index to insert the new term
  * @param ratio The term to insert
- * @returns A new equation object with the new term
+ * @returns A new expression object with the new term
  */
 export function insertRatio(
   expression: Expression,
@@ -74,18 +75,18 @@ export function insertRatio(
 ): Expression {
   return [
     ...expression.slice(0, index),
-    ratio || newRatio(),
+    ratio || createRatio(),
     ...expression.slice(index),
   ];
 }
 
 /**
- * Update a term in an equation
- * @param expression The equation to modify
+ * Update a term in an expression
+ * @param expression The expression to modify
  * @param index The index of the term to update
  * @param termPosition The position of the term to update
  * @param value The new value of the term
- * @returns A new equation array  with the updated term
+ * @returns A new expression array  with the updated term
  */
 export function updateRatio(
   expression: Expression,
@@ -120,10 +121,10 @@ export function updateRatio(
 }
 
 /**
- * Remove a term from an equation
- * @param expression The equation to modify
+ * Remove a term from an expression
+ * @param expression The expression to modify
  * @param index The index of the term to remove
- * @returns A new equation array with the removed term
+ * @returns A new expression array with the removed term
  */
 export const removeRatio = (
   expression: Expression,
@@ -135,7 +136,7 @@ export const removeRatio = (
     .slice(0, index)
     .concat(expression.slice(index + 1));
 
-  if (splicedExpression.length === 0) return [newRatio()];
+  if (splicedExpression.length === 0) return [createRatio()];
 
   return splicedExpression;
 };
@@ -203,21 +204,11 @@ export function stringifyLabels(labels: LabelCount) {
 }
 
 /**
- * Generate a random id
- *
- * See: https://stackoverflow.com/a/53116778
- * @returns
- */
-function randomId() {
-  return Date.now().toString(36) + Math.random().toString(36).substring(2, 12);
-}
-
-/**
  * Create a new ratio
  * @param term
  * @returns
  */
-export function newRatio(term?: BaseRatio): Ratio {
+export function createRatio(term?: BaseRatio): Ratio {
   return {
     id: randomId(),
     numerator: { factor: 1 },
@@ -230,8 +221,8 @@ export function newRatio(term?: BaseRatio): Ratio {
  * @param baseExpression An array of ratios
  * @returns A new expression object
  */
-export function newExpression(baseExpression?: BaseExpression): Expression {
-  if (!baseExpression) return [newRatio()];
+export function createExpression(baseExpression?: BaseExpression): Expression {
+  if (!baseExpression) return [createRatio()];
 
-  return baseExpression.map((term) => newRatio(term));
+  return baseExpression.map((term) => createRatio(term));
 }

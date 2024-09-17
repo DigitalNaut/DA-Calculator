@@ -1,4 +1,4 @@
-import { cn } from "src/utils";
+import { cn } from "src/utils/styles";
 
 type Props = {
   children: string;
