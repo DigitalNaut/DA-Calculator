@@ -10,7 +10,7 @@ import {
   simplifyExpression,
   updateRatio,
   stringifyLabels,
-} from "./equation-wrangler";
+} from "./expression-wrangler";
 
 it("expects to get a new default expression", () => {
   const testExpression = createExpression();
