@@ -1,32 +1,35 @@
-import { faEquals } from "@fortawesome/free-solid-svg-icons";
+import {
+  faBroom,
+  faClone,
+  faEquals,
+  faTrash,
+} from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Fragment, useMemo, useState } from "react";
 
+import Output from "src/components/Equation/Output";
+import { Unit } from "src/components/Equation/Unit";
 import {
-  simplifyExpression,
-  insertRatio,
   cancelOutLabels,
+  insertRatio,
   removeRatio,
-  updateRatio,
+  simplifyExpression,
   stringifyLabels,
-} from "src/logic/equation-wrangler";
+  updateRatio,
+} from "src/logic/expression-wrangler";
 import type {
   BaseRatio,
   Expression,
   LabelCount,
   QuantityPosition,
 } from "src/types/expressions";
-import Output from "src/components/Equation/Output";
-import { Unit } from "src/components/Equation/Unit";
 
-import type { InputChangeHandler } from "./types";
 import Inserter from "./Inserter";
+import type { InputChangeHandler } from "./types";
 
-export default function Equation({ input }: { input: Expression }) {
+function useEquation(input: Expression) {
   const [expression, setExpression] = useState(input);
   const [results, setResults] = useState<BaseRatio | null>(null);
-  const [wasInputChanged, setWasInputChanged] = useState(false);
-  const [focusIndex, setFocusIndex] = useState<number | null>(null);
 
   const multiplyFactors = (
     expression: Expression,
@@ -67,8 +70,11 @@ export default function Equation({ input }: { input: Expression }) {
     return reducedExpression;
   };
 
-  const onClickResults = () => {
-    // Update data
+  const cleanupExpression = () => {
+    setExpression(simplifyExpression(expression));
+  };
+
+  const calculateResults = () =>
     setResults({
       numerator: {
         factor: multiplyFactors(expression, "numerator"),
@@ -80,11 +86,27 @@ export default function Equation({ input }: { input: Expression }) {
       },
     });
 
-    // Clean up
-    setExpression(simplifyExpression(expression));
+  const deleteUnit = (index: number) => {
+    if (expression.length === 0) return;
 
-    // Set flags
-    setWasInputChanged(false);
+    const modifiedExpression = removeRatio(expression, index);
+    setExpression(modifiedExpression);
+
+    return expression.length > modifiedExpression.length;
+  };
+
+  const updateExpression: InputChangeHandler = (
+    index,
+    termPosition,
+    userInput,
+  ) => {
+    setExpression((prevExpression) =>
+      updateRatio(prevExpression, index, termPosition, userInput),
+    );
+  };
+
+  const insertExpression = (index: number) => {
+    setExpression((prevExpression) => insertRatio(prevExpression, index));
   };
 
   const resultText = useMemo(() => {
@@ -106,21 +128,49 @@ export default function Equation({ input }: { input: Expression }) {
     return `${resultFactor} ${stringifiedLabels}`;
   }, [results]);
 
-  const updateExpression: InputChangeHandler = (
-    index,
-    termPosition,
-    userInput,
-  ) => {
-    setExpression((prevExpression) =>
-      updateRatio(prevExpression, index, termPosition, userInput),
-    );
-
-    setWasInputChanged(true);
+  return {
+    state: { expression, resultText },
+    actions: {
+      cleanupExpression,
+      calculateResults,
+      deleteUnit,
+      updateExpression,
+      insertExpression,
+    },
   };
+}
 
-  const insertExpression = (index: number) => {
-    setExpression((prevExpression) => insertRatio(prevExpression, index));
-    setFocusIndex(index);
+export default function Equation({
+  input,
+  onDelete,
+  onClone,
+}: {
+  input: Expression;
+  onDelete?: () => void;
+  onClone?: () => void;
+}) {
+  const {
+    state: { expression, resultText },
+    actions: {
+      cleanupExpression,
+      calculateResults,
+      deleteUnit,
+      insertExpression,
+      updateExpression,
+    },
+  } = useEquation(input);
+  const [wasInputChanged, setWasInputChanged] = useState(false);
+  const [focusIndex, setFocusIndex] = useState<number | null>(null);
+
+  const onClickResults = () => {
+    // Clean up
+    cleanupExpression();
+
+    // Update data
+    calculateResults();
+
+    // Reset flags
+    setWasInputChanged(false);
   };
 
   const clearFocusIndex = () => setFocusIndex(null);
@@ -130,20 +180,21 @@ export default function Equation({ input }: { input: Expression }) {
     index: number,
   ) => {
     insertExpression(index);
+    setFocusIndex(index);
     currentTarget.blur();
   };
 
-  const deleteUnit = (index: number) => {
-    if (expression.length === 0) return;
+  const deleteUnitHandler = (index: number) => {
+    if (deleteUnit(index)) setWasInputChanged(true);
+  };
 
-    const modifiedExpression = removeRatio(expression, index);
-    setExpression(modifiedExpression);
-
-    setWasInputChanged(expression.length > modifiedExpression.length);
+  const changeInputHandler: InputChangeHandler = (...args) => {
+    updateExpression(...args);
+    setWasInputChanged(true);
   };
 
   return (
-    <div className="group/equation flex h-full w-max items-center justify-center rounded-lg p-2 focus-within:bg-slate-800 focus-within:shadow-lg focus-within:outline focus-within:outline-1 focus-within:outline-slate-700 hover:bg-slate-800 hover:shadow-lg">
+    <div className="group/equation flex h-fit w-max items-center justify-center rounded-lg p-2 focus-within:bg-slate-800 focus-within:shadow-lg focus-within:outline focus-within:outline-1 focus-within:outline-slate-700 hover:bg-slate-800 hover:shadow-lg">
       <Inserter
         onClick={({ currentTarget }) => insertionHandler(currentTarget, 0)}
       />
@@ -152,9 +203,9 @@ export default function Equation({ input }: { input: Expression }) {
           <Fragment key={ratio.id}>
             <Unit
               inputRatio={ratio}
-              onChangeInput={updateExpression}
+              onChangeInput={changeInputHandler}
               index={index}
-              onDeleteUnit={() => deleteUnit(index)}
+              onDeleteUnit={() => deleteUnitHandler(index)}
               isFocused={focusIndex === index}
               onFocused={clearFocusIndex}
             />
@@ -175,6 +226,29 @@ export default function Equation({ input }: { input: Expression }) {
           {resultText}
         </Output>
       </button>
+      <div className="invisible flex h-full flex-col pl-1 text-slate-600 group-hover/equation:visible">
+        <button
+          className="hover:text-blue-400 active:text-blue-500"
+          type="button"
+          onClick={onClone}
+        >
+          <FontAwesomeIcon icon={faClone} />
+        </button>
+        <button
+          className="hover:text-blue-400 active:text-blue-500"
+          type="button"
+          onClick={cleanupExpression}
+        >
+          <FontAwesomeIcon icon={faBroom} />
+        </button>
+        <button
+          className="hover:text-red-400 active:text-red-500"
+          type="button"
+          onClick={onDelete}
+        >
+          <FontAwesomeIcon icon={faTrash} />
+        </button>
+      </div>
     </div>
   );
 }

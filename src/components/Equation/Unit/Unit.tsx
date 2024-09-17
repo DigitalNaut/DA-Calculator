@@ -1,4 +1,4 @@
-import { faTimesCircle } from "@fortawesome/free-solid-svg-icons";
+import { faTimes } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import clsx from "clsx";
 import { useMemo } from "react";
@@ -61,10 +61,10 @@ export default function Unit({
 
       <button
         type="button"
-        className="absolute right-0 top-0 z-50 hidden group-hover/unit:block group-hover/unit:group-focus-within/unit:hidden"
+        className="absolute right-0 top-0 z-50 hidden aspect-square -translate-y-1/3 translate-x-1/4 items-center justify-center rounded-full bg-white p-1 group-hover/unit:flex group-hover/unit:group-focus-within/unit:hidden"
         onClick={onDeleteUnit}
       >
-        <FontAwesomeIcon icon={faTimesCircle} />
+        <FontAwesomeIcon className="text-slate-900" icon={faTimes} size="xs" />
       </button>
     </div>
   );
