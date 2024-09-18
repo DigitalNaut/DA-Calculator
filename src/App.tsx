@@ -1,7 +1,7 @@
 import Home from "src/views/Home";
 
+import ExpressionsProvider from "src/hooks/expressions-context/ExpressionsProvider";
 import "src/index.css";
-import ExpressionsProvider from "./hooks/expressions-context/ExpressionsProvider";
 
 export default function App(): JSX.Element {
   return (

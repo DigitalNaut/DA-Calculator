@@ -14,7 +14,6 @@ import {
   separateFactorLabels,
   stringifyQuantity,
 } from "src/validation/input-parser";
-
 import type { SubunitProps } from "../types";
 
 function useInput({

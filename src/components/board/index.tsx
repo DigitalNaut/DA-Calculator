@@ -8,7 +8,6 @@ import type { MouseEventHandler } from "react";
 
 import Equation from "src/components/Equation";
 import useExpressions from "src/hooks/expressions-context/useExpressions";
-
 import Draggable from "./Draggable";
 
 const NEW_EQUATION_HALF_WIDTH = 107.5; // Manually measured

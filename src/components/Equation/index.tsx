@@ -24,7 +24,6 @@ import type {
   LabelCount,
   QuantityPosition,
 } from "src/types/expressions";
-
 import Inserter from "./Inserter";
 import type { InputChangeHandler } from "./types";
 
