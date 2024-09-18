@@ -44,7 +44,7 @@ export default function Board() {
 
   return (
     <div
-      className="relative size-full gap-3 overflow-auto rounded-lg bg-slate-900 p-2"
+      className="relative size-full gap-3 overflow-auto rounded-lg bg-gray-900 p-2"
       onDoubleClick={doubleClickHandler}
     >
       <DndContext
