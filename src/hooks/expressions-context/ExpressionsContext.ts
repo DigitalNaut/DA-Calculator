@@ -1,16 +1,26 @@
+import type { Coordinates } from "@dnd-kit/utilities";
 import { createContext } from "react";
 
 import type { Expression } from "src/types/expressions";
 
+export type ExpressionRecord = {
+  expression: Expression;
+  coordinates: Coordinates;
+};
+export type ExpressionRecords = Map<string, ExpressionRecord>;
+
 type ExpressionsProvider = {
   state: {
-    expressions: Map<string, Expression>;
+    expressions: ExpressionRecords;
   };
   actions: {
-    addExpression: (expression?: Expression) => void;
-    removeExpression: (key: string) => void;
+    addExpression: (expressionRecord?: Partial<ExpressionRecord>) => void;
     clearExpressions: () => void;
-    updateExpression: (key: string, expression: Expression) => void;
+    removeExpression: (key: string) => void;
+    updateExpression: (
+      key: string,
+      callback: (prevRecord: ExpressionRecord) => Partial<ExpressionRecord>,
+    ) => void;
   };
 };
 

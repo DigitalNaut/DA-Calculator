@@ -5,21 +5,37 @@ import { createExpression } from "src/logic/expression-wrangler";
 import type { Expression } from "src/types/expressions";
 import { randomId } from "src/utils/id";
 
+import type { ExpressionRecords, ExpressionRecord } from "./ExpressionsContext";
 import { ExpressionsContext } from "./ExpressionsContext";
 
 function ExpressionsCRUD(initialExpressions?: Expression[]) {
-  const [expressions, setExpressions] = useState<Map<string, Expression>>(
+  const [expressions, setExpressions] = useState<ExpressionRecords>(
     () =>
       new Map(
-        initialExpressions?.map((expression) => [randomId(), expression]),
+        initialExpressions?.map((expression) => [
+          randomId(),
+          { expression, coordinates: { x: 0, y: 0 } },
+        ]),
       ),
   );
 
-  const addExpression = (expression?: Expression) => {
+  const addExpression = ({
+    expression,
+    coordinates,
+  }: Partial<ExpressionRecord> = {}) => {
     const newExpression = createExpression(expression);
+    const newCoordinates = coordinates ?? { x: 0, y: 0 };
     const key = randomId();
 
-    setExpressions((prevMap) => new Map(prevMap.set(key, newExpression)));
+    setExpressions(
+      (prevMap) =>
+        new Map(
+          prevMap.set(key, {
+            expression: newExpression,
+            coordinates: newCoordinates,
+          }),
+        ),
+    );
   };
 
   const removeExpression = (key: string) =>
@@ -34,14 +50,24 @@ function ExpressionsCRUD(initialExpressions?: Expression[]) {
     setExpressions(new Map());
   };
 
-  const updateExpression = (key: string, expression: Expression) =>
-    void expressions.set(key, expression);
+  const updateExpression = (
+    key: string,
+    callback: (prev: ExpressionRecord) => Partial<ExpressionRecord>,
+  ) => {
+    if (!expressions.has(key)) return;
+
+    const record = expressions.get(key);
+    if (!record) return;
+
+    const newRecord = callback(record);
+
+    setExpressions(new Map(expressions.set(key, { ...record, ...newRecord })));
+  };
 
   return {
     state: {
       expressions,
     },
-
     actions: {
       addExpression,
       removeExpression,

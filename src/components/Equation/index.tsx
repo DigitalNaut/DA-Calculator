@@ -2,6 +2,7 @@ import {
   faBroom,
   faClone,
   faEquals,
+  faGripVertical,
   faTrash,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -194,38 +195,45 @@ export default function Equation({
   };
 
   return (
-    <div className="group/equation flex h-fit w-max items-center justify-center rounded-lg p-2 focus-within:bg-slate-800 focus-within:shadow-lg focus-within:outline focus-within:outline-1 focus-within:outline-slate-700 hover:bg-slate-800 hover:shadow-lg">
-      <Inserter
-        onClick={({ currentTarget }) => insertionHandler(currentTarget, 0)}
-      />
-      {expression.map((ratio, index) => {
-        return (
-          <Fragment key={ratio.id}>
-            <Unit
-              inputRatio={ratio}
-              onChangeInput={changeInputHandler}
-              index={index}
-              onDeleteUnit={() => deleteUnitHandler(index)}
-              isFocused={focusIndex === index}
-              onFocused={clearFocusIndex}
-            />
-            <Inserter
-              onClick={({ currentTarget }) =>
-                insertionHandler(currentTarget, index + 1)
-              }
-            />
-          </Fragment>
-        );
-      })}
+    <div className="group/equation flex size-max items-stretch justify-center gap-2 rounded-lg p-2 focus-within:bg-slate-800 focus-within:shadow-lg focus-within:outline focus-within:outline-1 focus-within:outline-slate-700 hover:bg-slate-800 hover:shadow-lg">
+      <div className="invisible flex items-center text-slate-600 group-hover/equation:visible">
+        <FontAwesomeIcon icon={faGripVertical} />
+      </div>
 
-      <button type="button" onClick={onClickResults}>
-        <FontAwesomeIcon icon={faEquals} size="2x" />
-      </button>
-      <button className="pl-2" type="button" onClick={onClickResults}>
-        <Output dimmed={resultText === "Result" || wasInputChanged}>
-          {resultText}
-        </Output>
-      </button>
+      <div className="flex">
+        <Inserter
+          onClick={({ currentTarget }) => insertionHandler(currentTarget, 0)}
+        />
+        {expression.map((ratio, index) => {
+          return (
+            <Fragment key={ratio.id}>
+              <Unit
+                inputRatio={ratio}
+                onChangeInput={changeInputHandler}
+                index={index}
+                onDeleteUnit={() => deleteUnitHandler(index)}
+                isFocused={focusIndex === index}
+                onFocused={clearFocusIndex}
+              />
+              <Inserter
+                onClick={({ currentTarget }) =>
+                  insertionHandler(currentTarget, index + 1)
+                }
+              />
+            </Fragment>
+          );
+        })}
+
+        <button type="button" onClick={onClickResults}>
+          <FontAwesomeIcon icon={faEquals} size="2x" />
+        </button>
+        <button className="pl-2" type="button" onClick={onClickResults}>
+          <Output dimmed={resultText === "Result" || wasInputChanged}>
+            {resultText}
+          </Output>
+        </button>
+      </div>
+
       <div className="invisible flex h-full flex-col pl-1 text-slate-600 group-hover/equation:visible">
         <button
           className="hover:text-blue-400 active:text-blue-500"
