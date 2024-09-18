@@ -6,9 +6,9 @@ import {
 } from "@dnd-kit/core";
 import type { MouseEventHandler } from "react";
 
+import Draggable from "src/components/Draggable";
 import Equation from "src/components/Equation";
 import useExpressions from "src/hooks/expressions-context/useExpressions";
-import Draggable from "./Draggable";
 
 const NEW_EQUATION_HALF_WIDTH = 107.5; // Manually measured
 const NEW_EQUATION_HALF_HEIGHT = 44;
@@ -58,7 +58,12 @@ export default function Board() {
         }
       >
         {[...expressions].map(([key, { expression, coordinates }]) => (
-          <Draggable key={key} id={key} coordinates={coordinates}>
+          <Draggable
+            className="absolute flex size-max"
+            key={key}
+            id={key}
+            style={{ top: coordinates.y, left: coordinates.x }}
+          >
             <Equation
               input={expression}
               onDelete={() => removeExpression(key)}

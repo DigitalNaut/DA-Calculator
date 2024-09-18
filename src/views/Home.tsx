@@ -1,4 +1,4 @@
-import Board from "src/components/board";
+import Board from "src/components/Board";
 
 export default function Home() {
   return (

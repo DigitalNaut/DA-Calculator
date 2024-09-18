@@ -1,13 +1,17 @@
 import { useDraggable } from "@dnd-kit/core";
-import type { Coordinates } from "@dnd-kit/utilities";
 import { CSS } from "@dnd-kit/utilities";
-import type { PropsWithChildren } from "react";
+import type { CSSProperties, PropsWithChildren } from "react";
 
 export default function Draggable({
   children,
   id,
-  coordinates,
-}: PropsWithChildren<{ id: string; coordinates: Coordinates }>) {
+  style,
+  className,
+}: PropsWithChildren<{
+  id: string;
+  className?: string;
+  style?: CSSProperties;
+}>) {
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
     id,
   });
@@ -15,10 +19,9 @@ export default function Draggable({
   return (
     <div
       ref={setNodeRef}
-      className="absolute flex size-max"
+      className={className}
       style={{
-        top: coordinates.y,
-        left: coordinates.x,
+        ...style,
         transform: CSS.Translate.toString(transform),
       }}
       {...listeners}
