@@ -123,7 +123,7 @@ export default function Subunit({ onFocused, ...inputParams }: SubunitProps) {
       <input
         ref={inputRef}
         placeholder="No value"
-        className="w-full grow rounded-md border-2 border-transparent bg-transparent p-1 text-center text-transparent focus:bg-white focus:text-slate-900"
+        className="w-full grow rounded-md bg-transparent py-2 text-center text-transparent focus:bg-white focus:text-slate-900"
         value={inputString}
         onChange={changeHandler}
         onBlur={blurHandler}

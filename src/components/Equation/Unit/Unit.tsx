@@ -7,6 +7,7 @@ import { Subunit } from ".";
 import Parenthesis from "../Parenthesis";
 import type { UnitProps } from "../types";
 import { quantityIsTrivial } from "src/logic/expression-wrangler";
+import { cn } from "src/utils/styles";
 
 function Divider() {
   return <div className="h-px w-full bg-white" />;
@@ -26,7 +27,11 @@ export default function Unit({
   );
 
   return (
-    <div className="group/unit relative flex items-center gap-0.5">
+    <div
+      className={cn("group/unit relative flex items-center", {
+        "gap-0.5": !isTrivialDenominator,
+      })}
+    >
       {isTrivialDenominator ? null : <Parenthesis />}
 
       <div className="flex flex-col rounded-lg group-hover/unit:bg-slate-700">
