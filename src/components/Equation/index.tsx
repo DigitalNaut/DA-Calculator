@@ -1,12 +1,14 @@
-import {
-  faBroom,
-  faClone,
-  faEquals,
-  faGripVertical,
-  faTrash,
-} from "@fortawesome/free-solid-svg-icons";
+import type { IconDefinition } from "@fortawesome/free-solid-svg-icons";
+import { faEquals, faGripVertical } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Fragment, useMemo, useState } from "react";
+import type { ComponentPropsWithoutRef } from "react";
+import {
+  forwardRef,
+  Fragment,
+  useImperativeHandle,
+  useMemo,
+  useState,
+} from "react";
 
 import Output from "src/components/Equation/Output";
 import { Unit } from "src/components/Equation/Unit";
@@ -26,6 +28,7 @@ import type {
 } from "src/types/expressions";
 import Inserter from "./Inserter";
 import type { InputChangeHandler } from "./types";
+import { cn } from "src/utils/styles";
 
 function useEquation(input: Expression) {
   const [expression, setExpression] = useState(input);

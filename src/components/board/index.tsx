@@ -7,7 +7,9 @@ import {
   useSensors,
 } from "@dnd-kit/core";
 import type { Coordinates } from "@dnd-kit/utilities";
-import { useCallback, type MouseEventHandler } from "react";
+import { faBroom, faClone, faTrash } from "@fortawesome/free-solid-svg-icons";
+import type { MouseEventHandler } from "react";
+import { useCallback, useRef } from "react";
 
 import Draggable from "src/components/Draggable";
 import Equation from "src/components/Equation";
@@ -60,7 +62,7 @@ export default function Board() {
     [updateExpression],
   );
 
-  const cloneEquationHandler = useCallback(
+  const duplicateEquationHandler = useCallback(
     (expression: Expression, coordinates: Coordinates) =>
       addExpression({
         expression,
