@@ -143,15 +143,13 @@ function useEquation(input: Expression) {
   };
 }
 
-export default function Equation({
-  input,
-  onDelete,
-  onClone,
-}: {
-  input: Expression;
-  onDelete?: () => void;
-  onClone?: () => void;
-}) {
+const Equation = forwardRef<
+  { cleanupExpression: () => void },
+  {
+    input: Expression;
+    actionButtons: ReturnType<typeof ActionButton>;
+  }
+>(function Equation({ input, actionButtons }, ref) {
   const {
     state: { expression, resultText },
     actions: {
@@ -164,6 +162,14 @@ export default function Equation({
   } = useEquation(input);
   const [wasInputChanged, setWasInputChanged] = useState(false);
   const [focusIndex, setFocusIndex] = useState<number | null>(null);
+
+  useImperativeHandle(
+    ref,
+    () => ({
+      cleanupExpression,
+    }),
+    [cleanupExpression],
+  );
 
   const onClickResults = () => {
     // Clean up
@@ -237,28 +243,42 @@ export default function Equation({
       </div>
 
       <div className="invisible flex h-full flex-col pl-1 text-slate-600 group-hover/equation:visible">
-        <button
-          className="hover:text-blue-400 active:text-blue-500"
-          type="button"
-          onClick={onClone}
-        >
-          <FontAwesomeIcon icon={faClone} />
-        </button>
-        <button
-          className="hover:text-blue-400 active:text-blue-500"
-          type="button"
-          onClick={cleanupExpression}
-        >
-          <FontAwesomeIcon icon={faBroom} />
-        </button>
-        <button
-          className="hover:text-red-400 active:text-red-500"
-          type="button"
-          onClick={onDelete}
-        >
-          <FontAwesomeIcon icon={faTrash} />
-        </button>
+        {actionButtons}
       </div>
     </div>
   );
+});
+
+const actionButtonStyles = {
+  blue: "hover:text-blue-400 active:text-blue-500",
+  red: "hover:text-red-400 active:text-red-500",
+};
+
+export function ActionButton({
+  icon,
+  mode,
+  className,
+  ...props
+}: Omit<ComponentPropsWithoutRef<"button">, "children"> & {
+  mode: keyof typeof actionButtonStyles;
+  icon: IconDefinition;
+}) {
+  return (
+    <button
+      className={cn(`${actionButtonStyles[mode]}`, className)}
+      type="button"
+      {...props}
+    >
+      <FontAwesomeIcon icon={icon} />
+    </button>
+  );
 }
+
+type EquationComponent = typeof Equation & {
+  ActionButton: typeof ActionButton;
+};
+
+(Equation as EquationComponent).ActionButton = ActionButton;
+
+export const EquationWithActionButton = Equation as EquationComponent;
+export default EquationWithActionButton;

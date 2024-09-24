@@ -28,6 +28,9 @@ export default function Board() {
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
     useSensor(TouchSensor),
   );
+  const equationsMapRef = useRef(
+    new Map<string, { cleanupExpression: () => void }>(),
+  );
 
   const doubleClickHandler: MouseEventHandler<HTMLDivElement> = useCallback(
     (event) => {
@@ -88,9 +91,43 @@ export default function Board() {
             style={{ top: coordinates.y, left: coordinates.x }}
           >
             <Equation
+              ref={(ref) => {
+                if (ref) equationsMapRef.current.set(key, ref);
+                else equationsMapRef.current.delete(key);
+                return () => {
+                  equationsMapRef.current.delete(key);
+                };
+              }}
               input={expression}
-              onDelete={() => removeExpression(key)}
-              onClone={() => cloneEquationHandler(expression, coordinates)}
+              actionButtons={
+                <>
+                  <Equation.ActionButton
+                    mode="blue"
+                    icon={faClone}
+                    title="Duplicate equation"
+                    onClick={() =>
+                      duplicateEquationHandler(expression, coordinates)
+                    }
+                  />
+                  <Equation.ActionButton
+                    mode="blue"
+                    icon={faBroom}
+                    title="Remove trivial units"
+                    onClick={() =>
+                      equationsMapRef.current.get(key)?.cleanupExpression()
+                    }
+                  />
+                  <Equation.ActionButton
+                    mode="red"
+                    icon={faTrash}
+                    title="Delete equation"
+                    onClick={() => {
+                      removeExpression(key);
+                      equationsMapRef.current.delete(key);
+                    }}
+                  />
+                </>
+              }
             />
           </Draggable>
         ))}
