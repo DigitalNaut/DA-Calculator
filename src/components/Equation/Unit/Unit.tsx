@@ -3,11 +3,11 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import clsx from "clsx";
 import { useMemo } from "react";
 
-import { Subunit } from ".";
-import Parenthesis from "../Parenthesis";
-import type { UnitProps } from "../types";
 import { quantityIsTrivial } from "src/logic/expression-wrangler";
 import { cn } from "src/utils/styles";
+import Subunit from "./Subunit";
+import Parenthesis from "../Parenthesis";
+import type { UnitProps } from "../types";
 
 function Divider() {
   return <div className="h-px w-full bg-white" />;

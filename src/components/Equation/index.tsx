@@ -1,5 +1,10 @@
 import type { IconDefinition } from "@fortawesome/free-solid-svg-icons";
-import { faEquals, faGripVertical } from "@fortawesome/free-solid-svg-icons";
+import {
+  faCopy,
+  faEquals,
+  faGripVertical,
+  faRepeat,
+} from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import type { ComponentPropsWithoutRef } from "react";
 import {
@@ -10,8 +15,7 @@ import {
   useState,
 } from "react";
 
-import Output from "src/components/Equation/Output";
-import { Unit } from "src/components/Equation/Unit";
+import Unit from "src/components/Equation/Unit/Unit";
 import {
   cancelOutLabels,
   insertRatio,
@@ -27,8 +31,8 @@ import type {
   QuantityPosition,
 } from "src/types/expressions";
 import Inserter from "./Inserter";
-import type { InputChangeHandler } from "./types";
 import { cn } from "src/utils/styles";
+import type { InputChangeHandler } from "./types";
 
 function useEquation(input: Expression) {
   const [expression, setExpression] = useState(input);
@@ -235,11 +239,37 @@ const Equation = forwardRef<
         <button type="button" onClick={onClickResults}>
           <FontAwesomeIcon icon={faEquals} size="2x" />
         </button>
-        <button className="pl-2" type="button" onClick={onClickResults}>
-          <Output dimmed={resultText === "Result" || wasInputChanged}>
-            {resultText}
-          </Output>
-        </button>
+        <div
+          className="group/overlay relative flex items-center justify-center overflow-hidden rounded-lg"
+          onClick={onClickResults}
+        >
+          <div className="absolute inset-0 flex content-stretch opacity-0 group-hover/overlay:opacity-80 [&>button:hover:active]:bg-white/50 [&>button:hover]:bg-white/40 [&>button>*]:pointer-events-none">
+            <button
+              className="flex grow items-center justify-center"
+              type="button"
+              onClick={onClickResults}
+            >
+              <FontAwesomeIcon className="grow" icon={faRepeat} size="2x" />
+            </button>
+            <button className="p-2" type="button">
+              <FontAwesomeIcon icon={faCopy} />
+            </button>
+          </div>
+
+          <div className="pointer-events-none group-hover/overlay:opacity-20">
+            <div
+              className={cn(
+                "min-w-24 rounded-lg p-2 text-center text-white hover:bg-slate-700",
+                {
+                  "italic text-gray-500":
+                    resultText === "Result" || wasInputChanged,
+                },
+              )}
+            >
+              {resultText}
+            </div>
+          </div>
+        </div>
       </div>
 
       <div className="invisible flex h-full flex-col pl-1 text-slate-600 group-hover/equation:visible">
