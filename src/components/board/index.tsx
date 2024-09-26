@@ -6,6 +6,7 @@ import {
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
+import { restrictToParentElement } from "@dnd-kit/modifiers";
 import type { Coordinates } from "@dnd-kit/utilities";
 import { faBroom, faClone, faTrash } from "@fortawesome/free-solid-svg-icons";
 import type { MouseEventHandler } from "react";
@@ -82,7 +83,11 @@ export default function Board() {
       className="relative size-full gap-3 overflow-auto rounded-lg bg-gray-900 p-2"
       onDoubleClick={doubleClickHandler}
     >
-      <DndContext sensors={sensors} onDragEnd={dragEndHandler}>
+      <DndContext
+        sensors={sensors}
+        onDragEnd={dragEndHandler}
+        modifiers={[restrictToParentElement]}
+      >
         {[...expressions].map(([key, { expression, coordinates }]) => (
           <Draggable
             className="absolute flex size-max"

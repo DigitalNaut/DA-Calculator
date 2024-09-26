@@ -1,3 +1,21 @@
+import type { DragEndEvent } from "@dnd-kit/core";
+import {
+  closestCenter,
+  DndContext,
+  PointerSensor,
+  TouchSensor,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import {
+  restrictToHorizontalAxis,
+  restrictToParentElement,
+} from "@dnd-kit/modifiers";
+import {
+  arrayMove,
+  horizontalListSortingStrategy,
+  SortableContext,
+} from "@dnd-kit/sortable";
 import type { IconDefinition } from "@fortawesome/free-solid-svg-icons";
 import {
   faCopy,
@@ -7,13 +25,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import type { ComponentPropsWithoutRef } from "react";
-import {
-  forwardRef,
-  Fragment,
-  useImperativeHandle,
-  useMemo,
-  useState,
-} from "react";
+import { forwardRef, useImperativeHandle, useMemo, useState } from "react";
 
 import Unit from "src/components/Equation/Unit/Unit";
 import {
@@ -33,6 +45,7 @@ import type {
 import { cn } from "src/utils/styles";
 import Inserter from "./Inserter";
 import type { InputChangeHandler } from "./types";
+import { SortableItem } from "../Sortable";
 
 function useEquation(input: Expression) {
   const [expression, setExpression] = useState(input);
@@ -143,6 +156,7 @@ function useEquation(input: Expression) {
       deleteUnit,
       updateExpression,
       insertExpression,
+      setExpression,
     },
   };
 }
@@ -162,6 +176,7 @@ const Equation = forwardRef<
       deleteUnit,
       insertExpression,
       updateExpression,
+      setExpression,
     },
   } = useEquation(input);
   const [wasInputChanged, setWasInputChanged] = useState(false);
@@ -206,6 +221,26 @@ const Equation = forwardRef<
     setWasInputChanged(true);
   };
 
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(TouchSensor),
+  );
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (!over) return;
+
+    if (active.id !== over.id) {
+      setExpression((items) => {
+        const oldIndex = items.map(({ id }) => id).indexOf(String(active.id));
+        const newIndex = items.map(({ id }) => id).indexOf(String(over.id));
+
+        return arrayMove(items, oldIndex, newIndex);
+      });
+    }
+  };
+
   return (
     <div className="group/equation flex size-max items-stretch justify-center gap-2 rounded-lg p-2 focus-within:bg-slate-800 focus-within:shadow-lg focus-within:outline focus-within:outline-1 focus-within:outline-slate-700 hover:bg-slate-800 hover:shadow-lg">
       <div className="invisible flex items-center text-slate-600 group-hover/equation:visible">
@@ -216,26 +251,43 @@ const Equation = forwardRef<
         <Inserter
           onClick={({ currentTarget }) => insertionHandler(currentTarget, 0)}
         />
-        {expression.map((ratio, index) => {
-          return (
-            <Fragment key={ratio.id}>
-              <Unit
-                inputRatio={ratio}
-                onChangeInput={changeInputHandler}
-                index={index}
-                onDeleteUnit={() => deleteUnitHandler(index)}
-                isFocused={focusIndex === index}
-                onFocused={clearFocusIndex}
-              />
-              <Inserter
-                onClick={({ currentTarget }) =>
-                  insertionHandler(currentTarget, index + 1)
-                }
-              />
-            </Fragment>
-          );
-        })}
-
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          modifiers={[restrictToHorizontalAxis, restrictToParentElement]}
+          onDragEnd={handleDragEnd}
+        >
+          <SortableContext
+            items={expression}
+            strategy={horizontalListSortingStrategy}
+          >
+            <div className="flex w-full items-stretch justify-center gap-2">
+              {expression.map((ratio, index) => {
+                return (
+                  <SortableItem
+                    className="flex size-max"
+                    key={ratio.id}
+                    id={ratio.id}
+                  >
+                    <Unit
+                      inputRatio={ratio}
+                      onChangeInput={changeInputHandler}
+                      index={index}
+                      onDeleteUnit={() => deleteUnitHandler(index)}
+                      isFocused={focusIndex === index}
+                      onFocused={clearFocusIndex}
+                    />
+                    <Inserter
+                      onClick={({ currentTarget }) =>
+                        insertionHandler(currentTarget, index + 1)
+                      }
+                    />
+                  </SortableItem>
+                );
+              })}
+            </div>
+          </SortableContext>
+        </DndContext>
         <button type="button" onClick={onClickResults}>
           <FontAwesomeIcon icon={faEquals} size="2x" />
         </button>
