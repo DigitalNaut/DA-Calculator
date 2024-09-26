@@ -1,4 +1,4 @@
-import type { QuantityPosition, Ratio, Quantity } from "src/types/expressions";
+import type { Quantity, QuantityPosition, Ratio } from "src/types/expressions";
 
 export type InputChangeHandler = (
   index: number,

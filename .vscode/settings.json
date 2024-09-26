@@ -26,11 +26,15 @@
   "commandOnAllFiles.commands": {
     "Organize All Imports": {
       "command": "editor.action.organizeImports",
-      "saveFiles": false
+      "description": "Run Organize Imports on all TS/TSX files",
+      "saveFiles": false,
+      "includeFolders": [
+        "src"
+      ],
+      "includeFileExtensions": [
+        ".ts",
+        ".tsx"
+      ]
     }
   },
-  "commandOnAllFiles.includeFileExtensions": [
-    "ts",
-    "tsx"
-  ]
 }

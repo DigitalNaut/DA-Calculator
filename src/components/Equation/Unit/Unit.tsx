@@ -5,9 +5,9 @@ import { useMemo } from "react";
 
 import { quantityIsTrivial } from "src/logic/expression-wrangler";
 import { cn } from "src/utils/styles";
-import Subunit from "./Subunit";
 import Parenthesis from "../Parenthesis";
 import type { UnitProps } from "../types";
+import Subunit from "./Subunit";
 
 function Divider() {
   return <div className="h-px w-full bg-white" />;

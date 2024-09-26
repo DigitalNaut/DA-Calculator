@@ -1,6 +1,3 @@
 {
-  "recommendations": [
-    "vitest.explorer",
-    "rioj7.commandonallfiles"
-  ]
+  "recommendations": ["vitest.explorer", "rioj7.commandonallfiles"]
 }

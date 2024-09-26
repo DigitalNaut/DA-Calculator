@@ -30,8 +30,8 @@ import type {
   LabelCount,
   QuantityPosition,
 } from "src/types/expressions";
-import Inserter from "./Inserter";
 import { cn } from "src/utils/styles";
+import Inserter from "./Inserter";
 import type { InputChangeHandler } from "./types";
 
 function useEquation(input: Expression) {
