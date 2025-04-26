@@ -17,12 +17,7 @@ import {
   SortableContext,
 } from "@dnd-kit/sortable";
 import type { IconDefinition } from "@fortawesome/free-solid-svg-icons";
-import {
-  faCopy,
-  faEquals,
-  faGripVertical,
-  faRepeat,
-} from "@fortawesome/free-solid-svg-icons";
+import { faEquals, faGripVertical } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import type { ComponentPropsWithoutRef } from "react";
 import {
@@ -49,9 +44,10 @@ import type {
   QuantityPosition,
 } from "src/types/expressions";
 import { cn } from "src/utils/styles";
+import { SortableItem } from "../Sortable";
+import CopyButton from "./CopyButton";
 import Inserter from "./Inserter";
 import type { InputChangeHandler } from "./types";
-import { SortableItem } from "../Sortable";
 
 function useEquation(input: Expression) {
   const [expression, setExpression] = useState(input);
@@ -196,7 +192,7 @@ const Equation = forwardRef<
     [cleanupExpression],
   );
 
-  const onClickResults = () => {
+  const handleClickResults = () => {
     // Clean up
     cleanupExpression();
 
@@ -302,38 +298,32 @@ const Equation = forwardRef<
             </div>
           </SortableContext>
         </DndContext>
-        <button type="button" onClick={onClickResults}>
-          <FontAwesomeIcon icon={faEquals} size="2x" />
+        <button
+          className="-m-2 p-2 hover:bg-slate-700"
+          type="button"
+          onClick={handleClickResults}
+        >
+          <FontAwesomeIcon icon={faEquals} />
         </button>
         <div
-          className="group/overlay relative flex items-center justify-center overflow-hidden rounded-lg"
-          onClick={onClickResults}
+          className="group relative flex max-w-xs min-w-max items-center justify-center overflow-hidden rounded-lg"
+          onClick={handleClickResults}
         >
-          <div className="absolute inset-0 flex content-stretch opacity-0 group-hover/overlay:opacity-80 [&>button:hover:active]:bg-white/50 [&>button:hover]:bg-white/40 [&>button>*]:pointer-events-none">
-            <button
-              className="flex grow items-center justify-center"
-              type="button"
-              onClick={onClickResults}
-            >
-              <FontAwesomeIcon className="grow" icon={faRepeat} size="2x" />
-            </button>
-            <button className="p-2" type="button">
-              <FontAwesomeIcon icon={faCopy} />
-            </button>
-          </div>
+          <CopyButton
+            className="absolute top-0 right-0 p-2 opacity-0 group-hover:opacity-100"
+            content={resultText}
+          />
 
-          <div className="pointer-events-none group-hover/overlay:opacity-20">
-            <div
-              className={cn(
-                "min-w-24 rounded-lg p-2 text-center text-white hover:bg-slate-700",
-                {
-                  "text-gray-500 italic":
-                    resultText === "Result" || wasInputChanged,
-                },
-              )}
-            >
-              {resultText}
-            </div>
+          <div
+            className={cn(
+              "min-w-24 rounded-lg p-2 text-center text-white hover:bg-slate-700",
+              {
+                "text-gray-500 italic":
+                  resultText === "Result" || wasInputChanged,
+              },
+            )}
+          >
+            {resultText}
           </div>
         </div>
       </div>
