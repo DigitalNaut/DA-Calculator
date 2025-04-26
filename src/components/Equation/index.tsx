@@ -256,7 +256,7 @@ const Equation = forwardRef<
   );
 
   return (
-    <div className="group/equation flex size-max items-stretch justify-center gap-2 rounded-lg p-2 focus-within:bg-slate-800 focus-within:shadow-lg focus-within:outline focus-within:outline-1 focus-within:outline-slate-700 hover:bg-slate-800 hover:shadow-lg">
+    <div className="group/equation flex size-max items-stretch justify-center gap-2 rounded-lg p-2 focus-within:bg-slate-800 focus-within:shadow-lg focus-within:outline focus-within:outline-slate-700 hover:bg-slate-800 hover:shadow-lg">
       <div className="invisible flex items-center text-slate-600 group-hover/equation:visible">
         <FontAwesomeIcon icon={faGripVertical} />
       </div>
@@ -327,7 +327,7 @@ const Equation = forwardRef<
               className={cn(
                 "min-w-24 rounded-lg p-2 text-center text-white hover:bg-slate-700",
                 {
-                  "italic text-gray-500":
+                  "text-gray-500 italic":
                     resultText === "Result" || wasInputChanged,
                 },
               )}

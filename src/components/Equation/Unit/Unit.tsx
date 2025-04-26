@@ -66,7 +66,7 @@ export default function Unit({
 
       <button
         type="button"
-        className="absolute right-0 top-0 z-50 hidden aspect-square -translate-y-1/3 translate-x-1/4 items-center justify-center rounded-full bg-white p-1 group-hover/unit:flex group-hover/unit:group-focus-within/unit:hidden"
+        className="absolute right-0 top-0 z-50 hidden aspect-square -translate-y-1/3 translate-x-1/4 items-center justify-center rounded-full bg-white p-1 group-hover/unit:flex group-focus-within/unit:group-hover/unit:hidden"
         onClick={onDeleteUnit}
       >
         <FontAwesomeIcon className="text-slate-900" icon={faTimes} size="xs" />
