@@ -261,7 +261,7 @@ const Equation = forwardRef<
         <FontAwesomeIcon icon={faGripVertical} />
       </div>
 
-      <div className="flex">
+      <div className="flex gap-0.5">
         <Inserter
           onClick={({ currentTarget }) => insertionHandler(currentTarget, 0)}
         />
@@ -275,11 +275,11 @@ const Equation = forwardRef<
             items={expression}
             strategy={horizontalListSortingStrategy}
           >
-            <div className="flex w-full items-stretch justify-center gap-2">
+            <div className="flex w-full items-center justify-center gap-0.5">
               {expression.map((ratio, index) => {
                 return (
                   <SortableItem
-                    className="flex size-max"
+                    className="flex h-full w-max gap-0.5"
                     key={ratio.id}
                     id={ratio.id}
                   >

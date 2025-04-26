@@ -10,7 +10,7 @@ export default function Inserter({
   return (
     <button
       type="button"
-      className="outline-hidden relative flex h-full w-1 cursor-text flex-col items-center justify-between rounded-md text-transparent hover:bg-blue-800 hover:text-blue-500 focus:bg-blue-800 focus:text-blue-500"
+      className="relative flex h-full w-1 cursor-text flex-col items-center justify-between rounded-md text-transparent outline-hidden hover:bg-blue-800 hover:text-blue-500 focus:bg-blue-800 focus:text-blue-500"
       onClick={onClick}
     >
       <FontAwesomeIcon
