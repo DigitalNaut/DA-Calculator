@@ -25,7 +25,13 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import type { ComponentPropsWithoutRef } from "react";
-import { forwardRef, useImperativeHandle, useMemo, useState } from "react";
+import {
+  forwardRef,
+  useCallback,
+  useImperativeHandle,
+  useMemo,
+  useState,
+} from "react";
 
 import Unit from "src/components/Equation/Unit/Unit";
 import {
@@ -226,20 +232,28 @@ const Equation = forwardRef<
     useSensor(TouchSensor),
   );
 
-  const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event;
+  const expressionIndices = useMemo(() => {
+    const indices = expression.map(({ id }) => id);
+    return indices;
+  }, [expression]);
 
-    if (!over) return;
+  const handleDragEnd = useCallback(
+    (event: DragEndEvent) => {
+      const { active, over } = event;
 
-    if (active.id !== over.id) {
-      setExpression((items) => {
-        const oldIndex = items.map(({ id }) => id).indexOf(String(active.id));
-        const newIndex = items.map(({ id }) => id).indexOf(String(over.id));
+      if (!over) return;
 
-        return arrayMove(items, oldIndex, newIndex);
-      });
-    }
-  };
+      if (active.id !== over.id) {
+        setExpression((items) => {
+          const oldIndex = expressionIndices.indexOf(String(active.id));
+          const newIndex = expressionIndices.indexOf(String(over.id));
+
+          return arrayMove(items, oldIndex, newIndex);
+        });
+      }
+    },
+    [expressionIndices, setExpression],
+  );
 
   return (
     <div className="group/equation flex size-max items-stretch justify-center gap-2 rounded-lg p-2 focus-within:bg-slate-800 focus-within:shadow-lg focus-within:outline focus-within:outline-1 focus-within:outline-slate-700 hover:bg-slate-800 hover:shadow-lg">
