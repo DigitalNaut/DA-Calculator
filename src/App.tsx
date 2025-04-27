@@ -1,3 +1,4 @@
+import type { JSX } from "react";
 import ExpressionsProvider from "src/hooks/expressions-context/ExpressionsProvider";
 import Home from "src/views/Home";
 

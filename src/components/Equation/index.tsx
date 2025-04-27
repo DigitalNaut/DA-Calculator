@@ -19,14 +19,8 @@ import {
 import type { IconDefinition } from "@fortawesome/free-solid-svg-icons";
 import { faEquals, faGripVertical } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import type { ComponentPropsWithoutRef } from "react";
-import {
-  forwardRef,
-  useCallback,
-  useImperativeHandle,
-  useMemo,
-  useState,
-} from "react";
+import type { ComponentPropsWithoutRef, Ref } from "react";
+import { useCallback, useImperativeHandle, useMemo, useState } from "react";
 
 import Unit from "src/components/Equation/Unit/Unit";
 import {
@@ -163,13 +157,15 @@ function useEquation(input: Expression) {
   };
 }
 
-const Equation = forwardRef<
-  { cleanupExpression: () => void },
-  {
-    input: Expression;
-    actionButtons: ReturnType<typeof ActionButton>;
-  }
->(function Equation({ input, actionButtons }, ref) {
+function Equation({
+  input,
+  actionButtons,
+  ref,
+}: {
+  ref?: Ref<{ cleanupExpression: () => void }>;
+  input: Expression;
+  actionButtons: ReturnType<typeof ActionButton>;
+}) {
   const {
     state: { expression, resultText },
     actions: {
@@ -334,7 +330,7 @@ const Equation = forwardRef<
       </div>
     </div>
   );
-});
+}
 
 const actionButtonStyles = {
   blue: "hover:text-blue-400 active:text-blue-500",
@@ -367,5 +363,5 @@ type EquationComponent = typeof Equation & {
 
 (Equation as EquationComponent).ActionButton = ActionButton;
 
-export const EquationWithActionButton = Equation as EquationComponent;
+const EquationWithActionButton = Equation as EquationComponent;
 export default EquationWithActionButton;
