@@ -7,6 +7,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { MouseEventHandler, useCallback, useState } from "react";
+import { twMerge } from "tailwind-merge";
 
 type CopyButtonState = "idle" | "copying" | "copied" | "error";
 
@@ -20,8 +21,10 @@ const stateIcon: Record<CopyButtonState, IconDefinition> = {
 export default function CopyButton({
   content,
   className,
+  disabled = false,
 }: {
   content: string;
+  disabled: boolean;
   className?: string;
 }) {
   const [state, setState] = useState<CopyButtonState>("idle");
@@ -29,7 +32,7 @@ export default function CopyButton({
   const resetAfterTimeout = () => {
     setTimeout(() => {
       setState("idle");
-    }, 2000);
+    }, 1000);
   };
 
   const onClickHandler: MouseEventHandler = useCallback(async (event) => {
@@ -49,9 +52,11 @@ export default function CopyButton({
 
   return (
     <button
-      className={className}
+      className={twMerge("disabled:opacity-50", className)}
+      aria-label="Copy to clipboard"
       type="button"
-      disabled={state !== "idle"}
+      disabled={state !== "idle" || disabled}
+      title={state === "idle" ? "Copy to clipboard" : undefined}
       onClick={onClickHandler}
     >
       <FontAwesomeIcon icon={stateIcon[state]} />

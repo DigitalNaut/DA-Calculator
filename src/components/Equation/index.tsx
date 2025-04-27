@@ -299,21 +299,16 @@ const Equation = forwardRef<
           </SortableContext>
         </DndContext>
         <button
-          className="-m-2 p-2 hover:bg-slate-700"
+          className="-m-2 cursor-pointer p-2 hover:bg-slate-700"
           type="button"
           onClick={handleClickResults}
         >
           <FontAwesomeIcon icon={faEquals} />
         </button>
         <div
-          className="group relative flex max-w-xs min-w-max items-center justify-center overflow-hidden rounded-lg"
+          className="group flex max-w-xs min-w-max items-center justify-center rounded-lg overflow-ellipsis"
           onClick={handleClickResults}
         >
-          <CopyButton
-            className="absolute top-0 right-0 p-2 opacity-0 group-hover:opacity-100"
-            content={resultText}
-          />
-
           <div
             className={cn(
               "min-w-24 rounded-lg p-2 text-center text-white hover:bg-slate-700",
@@ -325,6 +320,12 @@ const Equation = forwardRef<
           >
             {resultText}
           </div>
+
+          <CopyButton
+            className="p-2 opacity-0 group-hover:opacity-100"
+            content={resultText}
+            disabled={resultText === "Result" || wasInputChanged}
+          />
         </div>
       </div>
 
