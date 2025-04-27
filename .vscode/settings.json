@@ -1,6 +1,7 @@
 {
   "cSpell.words": [
     "clsx",
+    "Componentwithout",
     "fontawesome",
     "fortawesome",
     "svgr",
@@ -13,5 +14,27 @@
     "": "",
     "*.ts": "${capture}.js, ${capture}.test.ts",
     "*.js": "${capture}.js.map, ${capture}.min.js, ${capture}.d.ts, ${capture}.test.js"
-  }
+  },
+  "commandOnAllFiles.excludeFolders": [
+    "node_modules",
+    "out",
+    ".vscode-test",
+    "media",
+    ".git",
+    "coverage"
+  ],
+  "commandOnAllFiles.commands": {
+    "Organize All Imports": {
+      "command": "editor.action.organizeImports",
+      "description": "Run Organize Imports on all TS/TSX files",
+      "saveFiles": false,
+      "includeFolders": [
+        "src"
+      ],
+      "includeFileExtensions": [
+        ".ts",
+        ".tsx"
+      ]
+    }
+  },
 }

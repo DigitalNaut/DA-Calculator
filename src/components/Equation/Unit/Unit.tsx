@@ -1,14 +1,16 @@
-import { faTimesCircle } from "@fortawesome/free-solid-svg-icons";
+import { faTimes } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import clsx from "clsx";
 import { useMemo } from "react";
 
-import { Subunit } from ".";
+import { quantityIsTrivial } from "src/logic/expression-wrangler";
+import { cn } from "src/utils/styles";
 import Parenthesis from "../Parenthesis";
-import { UnitProps } from "../types";
+import type { UnitProps } from "../types";
+import Subunit from "./Subunit";
 
-function Separator() {
-  return <div className="h-[1px] w-full bg-white" />;
+function Divider() {
+  return <div className="h-px w-full bg-white" />;
 }
 
 export default function Unit({
@@ -16,34 +18,41 @@ export default function Unit({
   inputRatio,
   onChangeInput,
   onDeleteUnit,
+  isFocused,
+  onFocused,
 }: UnitProps) {
-  const isDivisionBy1 = useMemo(
-    () =>
-      inputRatio.denominator?.factor === 1 &&
-      inputRatio.denominator.labels?.length === 0,
-    [inputRatio.denominator?.factor, inputRatio.denominator?.labels],
+  const isTrivialDenominator = useMemo(
+    () => quantityIsTrivial(inputRatio.denominator),
+    [inputRatio.denominator],
   );
 
   return (
-    <div className="group relative flex items-center">
-      {isDivisionBy1 ? null : <Parenthesis />}
+    <div
+      className={cn("group/unit relative flex items-center", {
+        "gap-0.5": !isTrivialDenominator,
+      })}
+    >
+      {isTrivialDenominator ? null : <Parenthesis />}
 
-      <div className="flex h-full flex-col rounded-2xl bg-gray-700 hover:bg-gray-600">
-        <div className="flex h-full grow">
+      <div className="flex flex-col rounded-lg group-hover/unit:bg-slate-700">
+        <div className="flex grow">
           <Subunit
             inputQuantity={inputRatio.numerator}
             onChangeInput={onChangeInput}
             index={index}
             quantityPosition={"numerator"}
+            isFocused={isFocused}
+            onFocused={onFocused}
           />
         </div>
 
         <div
           className={clsx({
-            "hidden group-focus-within:block group-hover:block": isDivisionBy1,
+            "hidden group-focus-within/unit:block group-hover/unit:block":
+              isTrivialDenominator,
           })}
         >
-          <Separator />
+          <Divider />
           <Subunit
             inputQuantity={inputRatio.denominator || { factor: 1 }}
             onChangeInput={onChangeInput}
@@ -53,14 +62,14 @@ export default function Unit({
         </div>
       </div>
 
-      {isDivisionBy1 ? null : <Parenthesis right />}
+      {isTrivialDenominator ? null : <Parenthesis right />}
 
       <button
         type="button"
-        className="absolute right-0 top-0 z-50 hidden group-hover:block"
+        className="absolute right-0 top-0 z-50 hidden aspect-square -translate-y-1/3 translate-x-1/4 items-center justify-center rounded-full bg-white p-1 group-hover/unit:flex group-focus-within/unit:group-hover/unit:hidden"
         onClick={onDeleteUnit}
       >
-        <FontAwesomeIcon icon={faTimesCircle} />
+        <FontAwesomeIcon className="text-slate-900" icon={faTimes} size="xs" />
       </button>
     </div>
   );

@@ -1,4 +1,4 @@
-import type { QuantityPosition, Ratio, Quantity } from "src/types/expressions";
+import type { Quantity, QuantityPosition, Ratio } from "src/types/expressions";
 
 export type InputChangeHandler = (
   index: number,
@@ -11,13 +11,19 @@ type InputHandlerProps = {
   onChangeInput: InputChangeHandler;
 };
 
-export type UnitProps = InputHandlerProps & {
-  inputRatio: Ratio;
-  onDeleteUnit(): void;
+type Focusable = {
+  isFocused: boolean;
+  onFocused(): void;
 };
 
-export type SubunitProps = InputHandlerProps & {
-  inputQuantity: Quantity;
-  quantityPosition: QuantityPosition;
-  display?: true;
-};
+export type UnitProps = InputHandlerProps &
+  Focusable & {
+    inputRatio: Ratio;
+    onDeleteUnit(): void;
+  };
+
+export type SubunitProps = InputHandlerProps &
+  Partial<Focusable> & {
+    inputQuantity: Quantity;
+    quantityPosition: QuantityPosition;
+  };

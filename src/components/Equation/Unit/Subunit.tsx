@@ -1,22 +1,32 @@
-import {
+import type {
   ChangeEventHandler,
   FocusEventHandler,
   KeyboardEventHandler,
-  useState,
 } from "react";
-import { twMerge } from "tailwind-merge";
+import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 
-import { stringifyTerm } from "src/validation/input-parser";
+import {
+  factorNeedle,
+  labelNeedle,
+  labelSeparatorNeedle,
+} from "src/validation/factor-labels";
+import {
+  separateFactorLabels,
+  stringifyQuantity,
+} from "src/validation/input-parser";
+import type { SubunitProps } from "../types";
 
-import { SubunitProps } from "../types";
-
-export default function Subunit({
-  index = -1,
-  quantityPosition: subunit,
-  inputQuantity: input,
+function useInput({
+  index,
+  inputQuantity,
+  quantityPosition,
+  isFocused,
   onChangeInput,
-}: SubunitProps) {
-  const [inputString, setInputString] = useState(() => stringifyTerm(input));
+}: Omit<SubunitProps, "display" | "onFocused">) {
+  const [inputString, setInputString] = useState(() =>
+    stringifyQuantity(inputQuantity),
+  );
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const changeHandler: ChangeEventHandler<HTMLInputElement> = ({
     currentTarget,
@@ -28,7 +38,7 @@ export default function Subunit({
     if (adjustedInput === "" || adjustedInput === "0") adjustedInput = "1";
 
     setInputString(adjustedInput);
-    onChangeInput(index, subunit, adjustedInput);
+    onChangeInput(index, quantityPosition, adjustedInput);
   };
 
   const keyDownHandler: KeyboardEventHandler<HTMLInputElement> = ({
@@ -38,22 +48,90 @@ export default function Subunit({
     if (key === "Enter") currentTarget.blur();
   };
 
-  const isAllInputValid = true;
+  useEffect(() => {
+    if (!inputRef.current) return;
+
+    if (isFocused) {
+      inputRef.current.focus();
+      inputRef.current.select();
+    }
+  }, [isFocused]);
+
+  return {
+    inputString,
+    inputRef,
+    changeHandler,
+    blurHandler,
+    keyDownHandler,
+  };
+}
+
+function useInputHighlight(inputString: string) {
+  const match = useMemo(() => separateFactorLabels(inputString), [inputString]);
+  if (!match) return <>{inputString}</>;
+
+  const [rawFactor, rawLabels] = match;
+
+  const labels = rawLabels.match(labelSeparatorNeedle);
 
   return (
-    <input
-      placeholder="No value"
-      className={twMerge(
-        "z-10 w-full grow rounded-md border-2 border-transparent bg-transparent p-2 text-center focus:bg-white",
-        isAllInputValid
-          ? "focus:border-blue-900 focus:text-blue-900"
-          : "focus:border-red-500 focus:text-red-700",
-      )}
-      value={inputString}
-      onChange={changeHandler}
-      onBlur={blurHandler}
-      onKeyDown={keyDownHandler}
-      size={inputString.length || 5}
-    />
+    <>
+      {factorNeedle.test(rawFactor) ? (
+        <div className="text-green-300">{rawFactor}</div>
+      ) : null}
+
+      {labels?.length ? <>&nbsp;</> : null}
+
+      {labels?.map((rawLabel, index) => {
+        const match = rawLabel.match(labelNeedle);
+        const isInvalidLabel = match === null;
+
+        const [, label, exponent] = match || [];
+
+        return (
+          <Fragment key={rawLabel}>
+            <span
+              key={rawLabel}
+              className={
+                isInvalidLabel
+                  ? "text-red-500 group-hover/unit:rounded-md group-hover/unit:bg-red-400 group-hover/unit:text-red-800"
+                  : "m-0 rounded-md px-0.5 group-hover/equation:bg-slate-700 group-hover/unit:bg-slate-600"
+              }
+            >
+              {label || rawLabel}
+              {exponent ? <sup>{exponent}</sup> : null}
+            </span>
+            {index < labels.length - 1 ? <>&nbsp;</> : null}
+          </Fragment>
+        );
+      })}
+    </>
+  );
+}
+
+export default function Subunit({ onFocused, ...inputParams }: SubunitProps) {
+  const { inputString, inputRef, changeHandler, blurHandler, keyDownHandler } =
+    useInput(inputParams);
+
+  const highlightedInput = useInputHighlight(inputString);
+
+  return (
+    <div className="group/subunit relative grow">
+      <div className="pointer-events-none absolute flex size-full items-center justify-center group-focus-within/subunit:hidden">
+        {highlightedInput}
+      </div>
+      <input
+        ref={inputRef}
+        placeholder="No value"
+        className="w-full grow rounded-md bg-transparent py-2 text-center text-transparent focus:bg-white focus:text-slate-900"
+        value={inputString}
+        onChange={changeHandler}
+        onBlur={blurHandler}
+        onKeyDown={keyDownHandler}
+        size={inputString.length || 1}
+        maxLength={50}
+        onFocus={onFocused}
+      />
+    </div>
   );
 }
