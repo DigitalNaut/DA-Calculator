@@ -1,12 +1,13 @@
+import type { IconDefinition } from "@fortawesome/free-solid-svg-icons";
 import {
   faCheck,
   faCopy,
   faSpinner,
   faTriangleExclamation,
-  IconDefinition,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { MouseEventHandler, useCallback, useState } from "react";
+import type { MouseEventHandler } from "react";
+import { useState } from "react";
 import { twMerge } from "tailwind-merge";
 
 type CopyButtonState = "idle" | "copying" | "copied" | "error";
@@ -35,27 +36,31 @@ export default function CopyButton({
     }, 1000);
   };
 
-  const onClickHandler: MouseEventHandler = useCallback(async (event) => {
+  const onClickHandler: MouseEventHandler = async (event) => {
     event.stopPropagation();
-    event.preventDefault();
+
     try {
       setState("copying");
       await navigator.clipboard.writeText(content);
       setState("copied");
       resetAfterTimeout();
     } catch (error) {
-      console.error("Failed to copy: ", error);
+      console.error(
+        "Failed to copy:",
+        error instanceof Error ? error.message : error,
+      );
+
       setState("error");
       resetAfterTimeout();
     }
-  }, []);
+  };
 
   return (
     <button
-      className={twMerge("disabled:opacity-50", className)}
+      className={twMerge(state !== "idle" && "disabled:opacity-50", className)}
       aria-label="Copy to clipboard"
       type="button"
-      disabled={state !== "idle" || disabled}
+      disabled={disabled || state !== "idle"}
       title={state === "idle" ? "Copy to clipboard" : undefined}
       onClick={onClickHandler}
     >

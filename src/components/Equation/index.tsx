@@ -125,7 +125,7 @@ function useEquation(input: Expression) {
     setExpression((prevExpression) => insertRatio(prevExpression, index));
   };
 
-  const resultText = useMemo(() => {
+  const result = useMemo(() => {
     if (!results) return "Result";
 
     const resultFactor = `${(
@@ -145,7 +145,7 @@ function useEquation(input: Expression) {
   }, [results]);
 
   return {
-    state: { expression, resultText },
+    state: { expression, result },
     actions: {
       cleanupExpression,
       calculateResults,
@@ -167,7 +167,7 @@ function Equation({
   actionButtons: ReturnType<typeof ActionButton>;
 }) {
   const {
-    state: { expression, resultText },
+    state: { expression, result },
     actions: {
       cleanupExpression,
       calculateResults,
@@ -309,18 +309,17 @@ function Equation({
             className={cn(
               "min-w-24 rounded-lg p-2 text-center text-white hover:bg-slate-700",
               {
-                "text-gray-500 italic":
-                  resultText === "Result" || wasInputChanged,
+                "text-gray-500 italic": result === "Result" || wasInputChanged,
               },
             )}
           >
-            {resultText}
+            {result}
           </div>
 
           <CopyButton
             className="p-2 opacity-0 group-hover:opacity-100"
-            content={resultText}
-            disabled={resultText === "Result" || wasInputChanged}
+            content={result}
+            disabled={result === "Result" || wasInputChanged}
           />
         </div>
       </div>
