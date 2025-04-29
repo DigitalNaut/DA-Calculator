@@ -144,15 +144,71 @@ function useEquation(input: Expression) {
     return `${resultFactor} ${stringifiedLabels}`;
   }, [results]);
 
+  const [wasInputChanged, setWasInputChanged] = useState(false);
+  const [focusIndex, setFocusIndex] = useState<number | null>(null);
+
+  const handleClickResults = () => {
+    // Clean up
+    cleanupExpression();
+
+    // Update data
+    calculateResults();
+
+    // Reset flags
+    setWasInputChanged(false);
+  };
+
+  const handleClearFocusIndex = () => setFocusIndex(null);
+
+  const handleInsertion = (
+    currentTarget: EventTarget & HTMLButtonElement,
+    index: number,
+  ) => {
+    insertExpression(index);
+    setFocusIndex(index);
+    currentTarget.blur();
+  };
+
+  const handleDeleteUnit = (index: number) => {
+    if (deleteUnit(index)) setWasInputChanged(true);
+  };
+
+  const handleChangeInput: InputChangeHandler = (...args) => {
+    updateExpression(...args);
+    setWasInputChanged(true);
+  };
+
+  const handleDragEnd = useCallback(
+    (event: DragEndEvent) => {
+      const { active, over } = event;
+
+      if (!over) return;
+
+      if (active.id !== over.id) {
+        setExpression((items) => {
+          const expressionIndices = items.map((item) => item.id);
+          const oldIndex = expressionIndices.indexOf(String(active.id));
+          const newIndex = expressionIndices.indexOf(String(over.id));
+
+          if (oldIndex === -1 || newIndex === -1) return items;
+
+          return arrayMove(items, oldIndex, newIndex);
+        });
+      }
+    },
+    [setExpression],
+  );
+
   return {
-    state: { expression, result },
-    actions: {
-      cleanupExpression,
-      calculateResults,
-      deleteUnit,
-      updateExpression,
-      insertExpression,
-      setExpression,
+    state: { expression, result, wasInputChanged },
+    actions: { cleanupExpression, focusIndex },
+    handlers: {
+      handleClickResults,
+      handleClearFocusIndex,
+      handleInsertion,
+      handleDeleteUnit,
+      handleChangeInput,
+      handleDragEnd,
     },
   };
 }
@@ -167,18 +223,17 @@ function Equation({
   actionButtons: ReturnType<typeof ActionButton>;
 }) {
   const {
-    state: { expression, result },
-    actions: {
-      cleanupExpression,
-      calculateResults,
-      deleteUnit,
-      insertExpression,
-      updateExpression,
-      setExpression,
+    state: { expression, result, wasInputChanged },
+    actions: { cleanupExpression, focusIndex },
+    handlers: {
+      handleClickResults,
+      handleClearFocusIndex,
+      handleInsertion,
+      handleDeleteUnit,
+      handleChangeInput,
+      handleDragEnd,
     },
   } = useEquation(input);
-  const [wasInputChanged, setWasInputChanged] = useState(false);
-  const [focusIndex, setFocusIndex] = useState<number | null>(null);
 
   useImperativeHandle(
     ref,
@@ -188,63 +243,9 @@ function Equation({
     [cleanupExpression],
   );
 
-  const handleClickResults = () => {
-    // Clean up
-    cleanupExpression();
-
-    // Update data
-    calculateResults();
-
-    // Reset flags
-    setWasInputChanged(false);
-  };
-
-  const clearFocusIndex = () => setFocusIndex(null);
-
-  const insertionHandler = (
-    currentTarget: EventTarget & HTMLButtonElement,
-    index: number,
-  ) => {
-    insertExpression(index);
-    setFocusIndex(index);
-    currentTarget.blur();
-  };
-
-  const deleteUnitHandler = (index: number) => {
-    if (deleteUnit(index)) setWasInputChanged(true);
-  };
-
-  const changeInputHandler: InputChangeHandler = (...args) => {
-    updateExpression(...args);
-    setWasInputChanged(true);
-  };
-
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
     useSensor(TouchSensor),
-  );
-
-  const expressionIndices = useMemo(() => {
-    const indices = expression.map(({ id }) => id);
-    return indices;
-  }, [expression]);
-
-  const handleDragEnd = useCallback(
-    (event: DragEndEvent) => {
-      const { active, over } = event;
-
-      if (!over) return;
-
-      if (active.id !== over.id) {
-        setExpression((items) => {
-          const oldIndex = expressionIndices.indexOf(String(active.id));
-          const newIndex = expressionIndices.indexOf(String(over.id));
-
-          return arrayMove(items, oldIndex, newIndex);
-        });
-      }
-    },
-    [expressionIndices, setExpression],
   );
 
   return (
@@ -255,7 +256,7 @@ function Equation({
 
       <div className="flex gap-0.5">
         <Inserter
-          onClick={({ currentTarget }) => insertionHandler(currentTarget, 0)}
+          onClick={({ currentTarget }) => handleInsertion(currentTarget, 0)}
         />
         <DndContext
           sensors={sensors}
@@ -277,15 +278,15 @@ function Equation({
                   >
                     <Unit
                       inputRatio={ratio}
-                      onChangeInput={changeInputHandler}
+                      onChangeInput={handleChangeInput}
                       index={index}
-                      onDeleteUnit={() => deleteUnitHandler(index)}
+                      onDeleteUnit={() => handleDeleteUnit(index)}
                       isFocused={focusIndex === index}
-                      onFocused={clearFocusIndex}
+                      onFocused={handleClearFocusIndex}
                     />
                     <Inserter
                       onClick={({ currentTarget }) =>
-                        insertionHandler(currentTarget, index + 1)
+                        handleInsertion(currentTarget, index + 1)
                       }
                     />
                   </SortableItem>
