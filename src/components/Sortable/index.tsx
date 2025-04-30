@@ -5,13 +5,9 @@ export function SortableItem({
   id,
   children,
   className,
+
   ...rest
-}: PropsWithChildren<
-  {
-    id: string;
-    className?: string;
-  } & HTMLAttributes<HTMLDivElement>
->) {
+}: PropsWithChildren<HTMLAttributes<HTMLDivElement>>) {
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({ id });
 
