@@ -275,6 +275,7 @@ function Equation({
                     className="flex h-full w-max gap-0.5"
                     key={ratio.id}
                     id={ratio.id}
+                    tabIndex={-1}
                   >
                     <Unit
                       inputRatio={ratio}
