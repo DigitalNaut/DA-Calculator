@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import clsx from "clsx";
 import { useMemo } from "react";
 
-import { quantityIsTrivial } from "src/logic/expression-wrangler";
+import { quantityIsTrivial } from "src/logic/expressions";
 import { cn } from "src/utils/styles";
 import Parenthesis from "../Parenthesis";
 import type { UnitProps } from "../types";

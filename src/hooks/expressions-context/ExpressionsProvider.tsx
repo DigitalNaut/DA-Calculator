@@ -1,7 +1,7 @@
 import type { PropsWithChildren } from "react";
 import { useState } from "react";
 
-import { createExpression } from "src/logic/expression-wrangler";
+import { createExpression } from "src/logic/expressions";
 import type { Expression } from "src/types/expressions";
 import { randomId } from "src/utils/id";
 import type { ExpressionRecord, ExpressionRecords } from "./ExpressionsContext";

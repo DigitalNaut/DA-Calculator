@@ -30,7 +30,7 @@ import {
   simplifyExpression,
   stringifyLabels,
   updateRatio,
-} from "src/logic/expression-wrangler";
+} from "src/logic/expressions";
 import type {
   BaseRatio,
   Expression,
