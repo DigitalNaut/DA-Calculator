@@ -33,27 +33,28 @@ export default function Board() {
     new Map<string, { cleanupExpression: () => void }>(),
   );
 
-  const doubleClickHandler: MouseEventHandler<HTMLDivElement> = useCallback(
-    (event) => {
-      const { target, currentTarget } = event;
-      if (target !== currentTarget) return;
+  const doubleClickBoardHandler: MouseEventHandler<HTMLDivElement> =
+    useCallback(
+      (event) => {
+        const { target, currentTarget } = event;
+        if (target !== currentTarget) return;
 
-      const x =
-        currentTarget.scrollLeft +
-        event.clientX -
-        currentTarget.offsetLeft -
-        NEW_EQUATION_HALF_WIDTH;
+        const x =
+          currentTarget.scrollLeft +
+          event.clientX -
+          currentTarget.offsetLeft -
+          NEW_EQUATION_HALF_WIDTH;
 
-      const y =
-        currentTarget.scrollTop +
-        event.clientY -
-        currentTarget.offsetTop -
-        NEW_EQUATION_HALF_HEIGHT;
+        const y =
+          currentTarget.scrollTop +
+          event.clientY -
+          currentTarget.offsetTop -
+          NEW_EQUATION_HALF_HEIGHT;
 
-      addExpression({ coordinates: { x, y } });
-    },
-    [addExpression],
-  );
+        addExpression({ coordinates: { x, y } });
+      },
+      [addExpression],
+    );
 
   const dragEndHandler = useCallback(
     ({ active, delta }: DragEndEvent) =>
@@ -79,9 +80,9 @@ export default function Board() {
   );
 
   return (
-    <div
+    <article
       className="relative size-full gap-3 overflow-auto rounded-lg bg-gray-900 p-2"
-      onDoubleClick={doubleClickHandler}
+      onDoubleClick={doubleClickBoardHandler}
     >
       <DndContext
         sensors={sensors}
@@ -137,6 +138,6 @@ export default function Board() {
           </Draggable>
         ))}
       </DndContext>
-    </div>
+    </article>
   );
 }

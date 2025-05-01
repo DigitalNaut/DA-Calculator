@@ -19,14 +19,8 @@ import {
 import type { IconDefinition } from "@fortawesome/free-solid-svg-icons";
 import { faEquals, faGripVertical } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import type { ComponentPropsWithoutRef } from "react";
-import {
-  forwardRef,
-  useCallback,
-  useImperativeHandle,
-  useMemo,
-  useState,
-} from "react";
+import type { ComponentPropsWithoutRef, Ref } from "react";
+import { useCallback, useImperativeHandle, useMemo, useState } from "react";
 
 import Unit from "src/components/Equation/Unit/Unit";
 import {
@@ -131,7 +125,7 @@ function useEquation(input: Expression) {
     setExpression((prevExpression) => insertRatio(prevExpression, index));
   };
 
-  const resultText = useMemo(() => {
+  const result = useMemo(() => {
     if (!results) return "Result";
 
     const resultFactor = `${(
@@ -150,47 +144,8 @@ function useEquation(input: Expression) {
     return `${resultFactor} ${stringifiedLabels}`;
   }, [results]);
 
-  return {
-    state: { expression, resultText },
-    actions: {
-      cleanupExpression,
-      calculateResults,
-      deleteUnit,
-      updateExpression,
-      insertExpression,
-      setExpression,
-    },
-  };
-}
-
-const Equation = forwardRef<
-  { cleanupExpression: () => void },
-  {
-    input: Expression;
-    actionButtons: ReturnType<typeof ActionButton>;
-  }
->(function Equation({ input, actionButtons }, ref) {
-  const {
-    state: { expression, resultText },
-    actions: {
-      cleanupExpression,
-      calculateResults,
-      deleteUnit,
-      insertExpression,
-      updateExpression,
-      setExpression,
-    },
-  } = useEquation(input);
   const [wasInputChanged, setWasInputChanged] = useState(false);
   const [focusIndex, setFocusIndex] = useState<number | null>(null);
-
-  useImperativeHandle(
-    ref,
-    () => ({
-      cleanupExpression,
-    }),
-    [cleanupExpression],
-  );
 
   const handleClickResults = () => {
     // Clean up
@@ -203,9 +158,9 @@ const Equation = forwardRef<
     setWasInputChanged(false);
   };
 
-  const clearFocusIndex = () => setFocusIndex(null);
+  const handleClearFocusIndex = () => setFocusIndex(null);
 
-  const insertionHandler = (
+  const handleInsertion = (
     currentTarget: EventTarget & HTMLButtonElement,
     index: number,
   ) => {
@@ -214,24 +169,14 @@ const Equation = forwardRef<
     currentTarget.blur();
   };
 
-  const deleteUnitHandler = (index: number) => {
+  const handleDeleteUnit = (index: number) => {
     if (deleteUnit(index)) setWasInputChanged(true);
   };
 
-  const changeInputHandler: InputChangeHandler = (...args) => {
+  const handleChangeInput: InputChangeHandler = (...args) => {
     updateExpression(...args);
     setWasInputChanged(true);
   };
-
-  const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
-    useSensor(TouchSensor),
-  );
-
-  const expressionIndices = useMemo(() => {
-    const indices = expression.map(({ id }) => id);
-    return indices;
-  }, [expression]);
 
   const handleDragEnd = useCallback(
     (event: DragEndEvent) => {
@@ -241,14 +186,66 @@ const Equation = forwardRef<
 
       if (active.id !== over.id) {
         setExpression((items) => {
+          const expressionIndices = items.map((item) => item.id);
           const oldIndex = expressionIndices.indexOf(String(active.id));
           const newIndex = expressionIndices.indexOf(String(over.id));
+
+          if (oldIndex === -1 || newIndex === -1) return items;
 
           return arrayMove(items, oldIndex, newIndex);
         });
       }
     },
-    [expressionIndices, setExpression],
+    [setExpression],
+  );
+
+  return {
+    state: { expression, result, wasInputChanged },
+    actions: { cleanupExpression, focusIndex },
+    handlers: {
+      handleClickResults,
+      handleClearFocusIndex,
+      handleInsertion,
+      handleDeleteUnit,
+      handleChangeInput,
+      handleDragEnd,
+    },
+  };
+}
+
+function Equation({
+  input,
+  actionButtons,
+  ref,
+}: {
+  ref?: Ref<{ cleanupExpression: () => void }>;
+  input: Expression;
+  actionButtons: ReturnType<typeof ActionButton>;
+}) {
+  const {
+    state: { expression, result, wasInputChanged },
+    actions: { cleanupExpression, focusIndex },
+    handlers: {
+      handleClickResults,
+      handleClearFocusIndex,
+      handleInsertion,
+      handleDeleteUnit,
+      handleChangeInput,
+      handleDragEnd,
+    },
+  } = useEquation(input);
+
+  useImperativeHandle(
+    ref,
+    () => ({
+      cleanupExpression,
+    }),
+    [cleanupExpression],
+  );
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(TouchSensor),
   );
 
   return (
@@ -259,7 +256,7 @@ const Equation = forwardRef<
 
       <div className="flex gap-0.5">
         <Inserter
-          onClick={({ currentTarget }) => insertionHandler(currentTarget, 0)}
+          onClick={({ currentTarget }) => handleInsertion(currentTarget, 0)}
         />
         <DndContext
           sensors={sensors}
@@ -278,18 +275,19 @@ const Equation = forwardRef<
                     className="flex h-full w-max gap-0.5"
                     key={ratio.id}
                     id={ratio.id}
+                    tabIndex={-1}
                   >
                     <Unit
                       inputRatio={ratio}
-                      onChangeInput={changeInputHandler}
+                      onChangeInput={handleChangeInput}
                       index={index}
-                      onDeleteUnit={() => deleteUnitHandler(index)}
+                      onDeleteUnit={() => handleDeleteUnit(index)}
                       isFocused={focusIndex === index}
-                      onFocused={clearFocusIndex}
+                      onFocused={handleClearFocusIndex}
                     />
                     <Inserter
                       onClick={({ currentTarget }) =>
-                        insertionHandler(currentTarget, index + 1)
+                        handleInsertion(currentTarget, index + 1)
                       }
                     />
                   </SortableItem>
@@ -313,18 +311,17 @@ const Equation = forwardRef<
             className={cn(
               "min-w-24 rounded-lg p-2 text-center text-white hover:bg-slate-700",
               {
-                "text-gray-500 italic":
-                  resultText === "Result" || wasInputChanged,
+                "text-gray-500 italic": result === "Result" || wasInputChanged,
               },
             )}
           >
-            {resultText}
+            {result}
           </div>
 
           <CopyButton
             className="p-2 opacity-0 group-hover:opacity-100"
-            content={resultText}
-            disabled={resultText === "Result" || wasInputChanged}
+            content={result}
+            disabled={result === "Result" || wasInputChanged}
           />
         </div>
       </div>
@@ -334,7 +331,7 @@ const Equation = forwardRef<
       </div>
     </div>
   );
-});
+}
 
 const actionButtonStyles = {
   blue: "hover:text-blue-400 active:text-blue-500",
@@ -367,5 +364,5 @@ type EquationComponent = typeof Equation & {
 
 (Equation as EquationComponent).ActionButton = ActionButton;
 
-export const EquationWithActionButton = Equation as EquationComponent;
+const EquationWithActionButton = Equation as EquationComponent;
 export default EquationWithActionButton;

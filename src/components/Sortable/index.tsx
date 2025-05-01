@@ -1,11 +1,16 @@
 import { useSortable } from "@dnd-kit/sortable";
-import type { CSSProperties, PropsWithChildren } from "react";
+import type { CSSProperties, HTMLAttributes } from "react";
+
+type SortableItemProps = HTMLAttributes<HTMLDivElement> & {
+  id: string; // Required for useSortable
+};
 
 export function SortableItem({
   id,
   children,
   className,
-}: PropsWithChildren<{ id: string; className?: string }>) {
+  ...rest
+}: SortableItemProps) {
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({ id });
 
@@ -21,6 +26,7 @@ export function SortableItem({
       style={style}
       {...attributes}
       {...listeners}
+      {...rest}
     >
       {children}
     </div>
