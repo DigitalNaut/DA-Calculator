@@ -19,7 +19,7 @@ import {
 import type { IconDefinition } from "@fortawesome/free-solid-svg-icons";
 import { faEquals, faGripVertical } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import type { ComponentPropsWithoutRef, Ref } from "react";
+import type { ComponentPropsWithoutRef, FocusEventHandler, Ref } from "react";
 import { useCallback, useImperativeHandle, useMemo, useState } from "react";
 
 import Unit from "src/components/Equation/Unit/Unit";
@@ -42,8 +42,8 @@ import { cn } from "src/utils/styles";
 import { SortableItem } from "../Sortable";
 import CopyButton from "./CopyButton";
 import Inserter from "./Inserter";
-import type { InputChangeHandler } from "./types";
 import Period from "./Period";
+import type { InputChangeHandler } from "./types";
 
 function useEquation(input: Expression) {
   const [expression, setExpression] = useState(input);
@@ -243,10 +243,14 @@ function Equation({
   input,
   actionButtons,
   ref,
+  onElementFocus,
+  onElementBlur,
 }: {
   ref?: Ref<{ cleanupExpression: () => void }>;
   input: Expression;
   actionButtons: ReturnType<typeof ActionButton>;
+  onElementFocus?: FocusEventHandler<HTMLDivElement>;
+  onElementBlur?: FocusEventHandler<HTMLDivElement>;
 }) {
   const {
     state: { expression, metadata, result, wasInputChanged },
@@ -274,6 +278,25 @@ function Equation({
     useSensor(TouchSensor),
   );
 
+  const [hasFocus, setHasFocus] = useState(false);
+
+  const handleUnitFocus: FocusEventHandler<HTMLDivElement> = useCallback(
+    (event) => {
+      handleClearFocusIndex();
+      onElementFocus?.(event);
+      setHasFocus(true);
+    },
+    [handleClearFocusIndex, onElementFocus],
+  );
+
+  const handleUnitBlur: FocusEventHandler<HTMLDivElement> = useCallback(
+    (event) => {
+      onElementBlur?.(event);
+      setHasFocus(false);
+    },
+    [onElementBlur],
+  );
+
   return (
     <div className="group/equation flex size-max items-stretch justify-center gap-2 rounded-lg p-2 focus-within:bg-slate-800 focus-within:shadow-lg focus-within:outline focus-within:outline-slate-700 hover:bg-slate-800 hover:shadow-lg">
       <div className="invisible flex items-center text-slate-600 group-hover/equation:visible">
@@ -293,6 +316,7 @@ function Equation({
           <SortableContext
             items={expression}
             strategy={horizontalListSortingStrategy}
+            disabled={hasFocus}
           >
             <div className="flex w-full items-center justify-center gap-0.5">
               {expression.map((ratio, index) => {
@@ -309,7 +333,8 @@ function Equation({
                       index={index}
                       onDeleteUnit={() => handleDeleteUnit(index)}
                       isFocused={focusIndex === index}
-                      onFocused={handleClearFocusIndex}
+                      onFocused={handleUnitFocus}
+                      onBlurred={handleUnitBlur}
                     />
                     <Period
                       style={{
@@ -341,6 +366,7 @@ function Equation({
           onClick={handleClickResults}
         >
           <div
+            autoFocus
             className={cn(
               "min-w-24 rounded-lg p-2 text-center text-white hover:bg-slate-700",
               {
@@ -348,7 +374,13 @@ function Equation({
               },
             )}
           >
-            {result}
+            <input
+              readOnly
+              onFocus={onElementFocus}
+              onBlur={onElementBlur}
+              value={result}
+              size={result.length || 1}
+            />
           </div>
 
           <CopyButton

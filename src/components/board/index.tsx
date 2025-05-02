@@ -10,7 +10,7 @@ import { restrictToParentElement } from "@dnd-kit/modifiers";
 import type { Coordinates } from "@dnd-kit/utilities";
 import { faBroom, faClone, faTrash } from "@fortawesome/free-solid-svg-icons";
 import type { MouseEventHandler } from "react";
-import { useCallback, useRef } from "react";
+import { useCallback, useRef, useState } from "react";
 
 import Draggable from "src/components/Draggable";
 import Equation from "src/components/Equation";
@@ -79,6 +79,8 @@ export default function Board() {
     [addExpression],
   );
 
+  const [hasFocus, setHasFocus] = useState(false);
+
   return (
     <article
       className="relative size-full gap-3 overflow-auto rounded-lg bg-gray-900 p-2"
@@ -95,6 +97,7 @@ export default function Board() {
             key={key}
             id={key}
             style={{ top: coordinates.y, left: coordinates.x }}
+            disabled={hasFocus}
           >
             <Equation
               ref={(ref) => {
@@ -104,6 +107,8 @@ export default function Board() {
                   equationsMapRef.current.delete(key);
                 };
               }}
+              onElementFocus={() => setHasFocus(true)}
+              onElementBlur={() => setHasFocus(false)}
               input={expression}
               actionButtons={
                 <>

@@ -22,7 +22,9 @@ function useInput({
   quantityPosition,
   isFocused,
   onChangeInput,
-}: Omit<SubunitProps, "display" | "onFocused">) {
+  onFocused,
+  onBlurred,
+}: Omit<SubunitProps, "display">) {
   const [inputString, setInputString] = useState(() =>
     stringifyQuantity(inputQuantity),
   );
@@ -32,12 +34,17 @@ function useInput({
     currentTarget,
   }) => setInputString(currentTarget.value);
 
-  const blurHandler: FocusEventHandler<HTMLInputElement> = () => {
+  const focusHandler: FocusEventHandler<HTMLInputElement> = (event) => {
+    onFocused?.(event);
+  };
+
+  const blurHandler: FocusEventHandler<HTMLInputElement> = (event) => {
     let adjustedInput = inputString.trim();
     adjustedInput = adjustedInput.replace(/\s+/g, " ");
     if (adjustedInput === "" || adjustedInput === "0") adjustedInput = "1";
 
     setInputString(adjustedInput);
+    onBlurred?.(event);
     onChangeInput(index, quantityPosition, adjustedInput);
   };
 
@@ -62,6 +69,7 @@ function useInput({
     inputRef,
     changeHandler,
     blurHandler,
+    focusHandler,
     keyDownHandler,
   };
 }
@@ -108,9 +116,15 @@ function StyledInput({ input }: { input: string }) {
   );
 }
 
-export default function Subunit({ onFocused, ...inputParams }: SubunitProps) {
-  const { inputString, inputRef, changeHandler, blurHandler, keyDownHandler } =
-    useInput(inputParams);
+export default function Subunit(inputParams: SubunitProps) {
+  const {
+    inputString,
+    inputRef,
+    changeHandler,
+    focusHandler,
+    blurHandler,
+    keyDownHandler,
+  } = useInput(inputParams);
 
   return (
     <div className="group/subunit relative grow">
@@ -123,11 +137,11 @@ export default function Subunit({ onFocused, ...inputParams }: SubunitProps) {
         className="w-full grow rounded-md bg-transparent py-2 text-center text-transparent focus:bg-white focus:text-slate-900"
         value={inputString}
         onChange={changeHandler}
+        onFocus={focusHandler}
         onBlur={blurHandler}
         onKeyDown={keyDownHandler}
         size={inputString.length || 1}
         maxLength={50}
-        onFocus={onFocused}
       />
     </div>
   );

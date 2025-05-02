@@ -20,6 +20,7 @@ export default function Unit({
   onDeleteUnit,
   isFocused,
   onFocused,
+  onBlurred,
 }: UnitProps) {
   const isTrivialDenominator = useMemo(
     () => quantityIsTrivial(inputRatio.denominator),
@@ -43,6 +44,7 @@ export default function Unit({
             quantityPosition={"numerator"}
             isFocused={isFocused}
             onFocused={onFocused}
+            onBlurred={onBlurred}
           />
         </div>
 
@@ -58,6 +60,8 @@ export default function Unit({
             onChangeInput={onChangeInput}
             index={index}
             quantityPosition={"denominator"}
+            onFocused={onFocused}
+            onBlurred={onBlurred}
           />
         </div>
       </div>

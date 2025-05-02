@@ -2,7 +2,8 @@ import { useSortable } from "@dnd-kit/sortable";
 import type { CSSProperties, HTMLAttributes } from "react";
 
 type SortableItemProps = HTMLAttributes<HTMLDivElement> & {
-  id: string; // Required for useSortable
+  id: string; // Make required for useSortable
+  disabled?: boolean;
 };
 
 export function SortableItem({

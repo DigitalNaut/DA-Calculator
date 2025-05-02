@@ -1,3 +1,4 @@
+import type { FocusEventHandler } from "react";
 import type { Quantity, QuantityPosition, Ratio } from "src/types/expressions";
 
 export type InputChangeHandler = (
@@ -13,7 +14,8 @@ type InputHandlerProps = {
 
 type Focusable = {
   isFocused: boolean;
-  onFocused(): void;
+  onFocused?: FocusEventHandler<HTMLDivElement>;
+  onBlurred?: FocusEventHandler<HTMLDivElement>;
 };
 
 export type UnitProps = InputHandlerProps &
