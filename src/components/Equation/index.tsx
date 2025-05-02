@@ -26,6 +26,7 @@ import Unit from "src/components/Equation/Unit/Unit";
 import {
   cancelOutLabels,
   insertRatio,
+  quantityIsTrivial,
   removeRatio,
   simplifyExpression,
   stringifyLabels,
@@ -42,10 +43,35 @@ import { SortableItem } from "../Sortable";
 import CopyButton from "./CopyButton";
 import Inserter from "./Inserter";
 import type { InputChangeHandler } from "./types";
+import Period from "./Period";
 
 function useEquation(input: Expression) {
   const [expression, setExpression] = useState(input);
   const [results, setResults] = useState<BaseRatio | null>(null);
+
+  const metadata = useMemo<{
+    [key: string]: { needsPeriod: boolean };
+  }>(
+    () =>
+      expression.reduce((prev, current, index) => {
+        const isNotLastItem = index < expression.length - 1;
+
+        if (!isNotLastItem) return prev;
+
+        const currentHasTrivialRatio = quantityIsTrivial(current.denominator);
+        const nextHasTrivialRatio = quantityIsTrivial(
+          expression[index + 1]?.denominator,
+        );
+
+        return {
+          ...prev,
+          [current.id]: {
+            needsPeriod: currentHasTrivialRatio && nextHasTrivialRatio,
+          },
+        };
+      }, {}),
+    [expression],
+  );
 
   const multiplyFactors = (
     expression: Expression,
@@ -200,7 +226,7 @@ function useEquation(input: Expression) {
   );
 
   return {
-    state: { expression, result, wasInputChanged },
+    state: { expression, metadata, result, wasInputChanged },
     actions: { cleanupExpression, focusIndex },
     handlers: {
       handleClickResults,
@@ -223,7 +249,7 @@ function Equation({
   actionButtons: ReturnType<typeof ActionButton>;
 }) {
   const {
-    state: { expression, result, wasInputChanged },
+    state: { expression, metadata, result, wasInputChanged },
     actions: { cleanupExpression, focusIndex },
     handlers: {
       handleClickResults,
@@ -284,6 +310,13 @@ function Equation({
                       onDeleteUnit={() => handleDeleteUnit(index)}
                       isFocused={focusIndex === index}
                       onFocused={handleClearFocusIndex}
+                    />
+                    <Period
+                      style={{
+                        visibility: metadata[ratio.id]?.needsPeriod
+                          ? "visible"
+                          : "hidden",
+                      }}
                     />
                     <Inserter
                       onClick={({ currentTarget }) =>
