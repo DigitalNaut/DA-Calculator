@@ -66,12 +66,11 @@ function useInput({
   };
 }
 
-function useInputHighlight(inputString: string) {
-  const match = useMemo(() => separateFactorLabels(inputString), [inputString]);
-  if (!match) return <>{inputString}</>;
+function StyledInput({ input }: { input: string }) {
+  const match = useMemo(() => separateFactorLabels(input), [input]);
+  if (!match) return <>{input}</>;
 
   const [rawFactor, rawLabels] = match;
-
   const labels = rawLabels.match(labelSeparatorNeedle);
 
   return (
@@ -113,12 +112,10 @@ export default function Subunit({ onFocused, ...inputParams }: SubunitProps) {
   const { inputString, inputRef, changeHandler, blurHandler, keyDownHandler } =
     useInput(inputParams);
 
-  const highlightedInput = useInputHighlight(inputString);
-
   return (
     <div className="group/subunit relative grow">
       <div className="pointer-events-none absolute flex size-full items-center justify-center group-focus-within/subunit:hidden">
-        {highlightedInput}
+        <StyledInput input={inputString} />
       </div>
       <input
         ref={inputRef}
