@@ -16,6 +16,13 @@ import {
 } from "src/validation/input-parser";
 import type { SubunitProps } from "../types";
 
+function adjustInput(inputString: string) {
+  let adjustedInput = inputString.trim();
+  adjustedInput = adjustedInput.replace(/\s+/g, " ");
+  if (adjustedInput === "" || adjustedInput === "0") adjustedInput = "1";
+  return adjustedInput;
+}
+
 function useInput({
   index,
   inputQuantity,
@@ -39,9 +46,8 @@ function useInput({
   };
 
   const blurHandler: FocusEventHandler<HTMLInputElement> = (event) => {
-    let adjustedInput = inputString.trim();
-    adjustedInput = adjustedInput.replace(/\s+/g, " ");
-    if (adjustedInput === "" || adjustedInput === "0") adjustedInput = "1";
+    const adjustedInput = adjustInput(inputString);
+    if (adjustedInput === inputString) return;
 
     setInputString(adjustedInput);
     onBlurred?.(event);
