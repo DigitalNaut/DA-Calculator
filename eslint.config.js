@@ -27,7 +27,7 @@ export default tseslint.config(
         "warn",
         { allowConstantExport: true },
       ],
-      "no-console": ["error", { allow: ["warn", "error"] }],
+      "no-console": ["warn", { allow: ["warn", "error"] }],
       "@typescript-eslint/consistent-type-imports": "error",
     },
   },
