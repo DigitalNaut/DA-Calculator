@@ -22,7 +22,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import type { ComponentPropsWithoutRef, FocusEventHandler } from "react";
 import { useCallback, useImperativeHandle, useMemo, useState } from "react";
 
-import Unit from "src/components/Equation/Unit/Unit";
+import Unit from "src/components/Equation/Unit";
 import {
   cancelOutLabels,
   flipUnit,
