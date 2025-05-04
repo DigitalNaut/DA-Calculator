@@ -7,7 +7,7 @@ import { randomId } from "src/utils/id";
 import type { ExpressionRecord, ExpressionRecords } from "./ExpressionsContext";
 import { ExpressionsContext } from "./ExpressionsContext";
 
-function ExpressionsCRUD(initialExpressions?: Expression[]) {
+function useExpressionsCRUD(initialExpressions?: Expression[]) {
   const [expressions, setExpressions] = useState<ExpressionRecords>(
     () =>
       new Map(
@@ -120,7 +120,7 @@ const expression1 = createExpression([
 // ]);
 
 export default function ExpressionsProvider({ children }: PropsWithChildren) {
-  const expressionsCrud = ExpressionsCRUD([expression1]);
+  const expressionsCrud = useExpressionsCRUD([expression1]);
 
   return (
     <ExpressionsContext.Provider value={expressionsCrud}>

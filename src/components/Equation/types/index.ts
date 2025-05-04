@@ -24,6 +24,11 @@ export type UnitProps = InputHandlerProps &
     onDeleteUnit(): void;
   };
 
+export type EquationHandle = {
+  expressionToString: () => string;
+  cleanupExpression: () => void;
+};
+
 export type SubunitProps = InputHandlerProps &
   Partial<Focusable> & {
     inputQuantity: Quantity;

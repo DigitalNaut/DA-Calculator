@@ -16,6 +16,7 @@ import Draggable from "src/components/Draggable";
 import Equation from "src/components/Equation";
 import useExpressions from "src/hooks/expressions-context/useExpressions";
 import type { Expression } from "src/types/expressions";
+import type { EquationHandle } from "../Equation/types";
 
 const NEW_EQUATION_HALF_WIDTH = 107.5; // Manually measured
 const NEW_EQUATION_HALF_HEIGHT = 44;
@@ -29,9 +30,7 @@ export default function Board() {
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
     useSensor(TouchSensor),
   );
-  const equationsMapRef = useRef(
-    new Map<string, { cleanupExpression: () => void }>(),
-  );
+  const equationsMapRef = useRef(new Map<string, EquationHandle>());
 
   const doubleClickBoardHandler: MouseEventHandler<HTMLDivElement> =
     useCallback(

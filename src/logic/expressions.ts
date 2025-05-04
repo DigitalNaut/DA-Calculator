@@ -175,7 +175,7 @@ const sortLabels = (
 };
 
 /**
- *
+ * Convert a map of labels to a string
  * @param labels
  * @returns
  */
