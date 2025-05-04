@@ -1,16 +1,24 @@
-import { faTimes } from "@fortawesome/free-solid-svg-icons";
+import { faArrowsRotate, faTimes } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import clsx from "clsx";
-import { useMemo } from "react";
+import type { MouseEventHandler, PropsWithChildren } from "react";
+import { useMemo, useRef } from "react";
 
 import { quantityIsTrivial } from "src/logic/expressions";
 import { cn } from "src/utils/styles";
 import Parenthesis from "../Parenthesis";
-import type { UnitProps } from "../types";
+import type { SubunitHandle, UnitProps } from "../types";
 import Subunit from "./Subunit";
 
-function Divider() {
-  return <div className="h-px w-full bg-white" />;
+function Divider({
+  children,
+  className,
+}: PropsWithChildren<{ className?: string }>) {
+  return (
+    <div className={cn("my-0.5 h-px w-full bg-white", className)}>
+      {children}
+    </div>
+  );
 }
 
 export default function Unit({
@@ -21,11 +29,28 @@ export default function Unit({
   isFocused,
   onFocused,
   onBlurred,
+  onFlipUnit,
 }: UnitProps) {
+  const inputRefNumerator = useRef<SubunitHandle | null>(null);
+  const inputRefDenominator = useRef<SubunitHandle | null>(null);
+
   const isTrivialDenominator = useMemo(
     () => quantityIsTrivial(inputRatio.denominator),
     [inputRatio.denominator],
   );
+
+  const handleFlipUnit: MouseEventHandler<HTMLButtonElement> = () => {
+    if (!inputRefDenominator.current || !inputRefNumerator.current)
+      throw new Error("Input references are not set.");
+
+    const numeratorValue = inputRefNumerator.current.inputString;
+    const denominatorValue = inputRefDenominator.current.inputString;
+
+    inputRefNumerator.current.setInputString(denominatorValue || "1");
+    inputRefDenominator.current.setInputString(numeratorValue || "1");
+
+    onFlipUnit();
+  };
 
   return (
     <div
@@ -38,6 +63,7 @@ export default function Unit({
       <div className="flex flex-col rounded-lg group-hover/unit:bg-slate-700">
         <div className="flex grow">
           <Subunit
+            ref={inputRefNumerator}
             inputQuantity={inputRatio.numerator}
             onChangeInput={onChangeInput}
             index={index}
@@ -54,8 +80,21 @@ export default function Unit({
               isTrivialDenominator,
           })}
         >
-          <Divider />
+          <Divider className="group relative">
+            <button
+              type="button"
+              className="absolute left-1/2 z-100 -translate-1/2 cursor-pointer opacity-0 group-hover:opacity-100 disabled:cursor-not-allowed disabled:opacity-50"
+              onClick={handleFlipUnit}
+            >
+              <FontAwesomeIcon
+                icon={faArrowsRotate}
+                className="rounded-full bg-white p-0.25 text-slate-800"
+                size="xs"
+              />
+            </button>
+          </Divider>
           <Subunit
+            ref={inputRefDenominator}
             inputQuantity={inputRatio.denominator || { factor: 1 }}
             onChangeInput={onChangeInput}
             index={index}

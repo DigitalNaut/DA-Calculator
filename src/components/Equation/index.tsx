@@ -19,12 +19,13 @@ import {
 import type { IconDefinition } from "@fortawesome/free-solid-svg-icons";
 import { faEquals, faGripVertical } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import type { ComponentPropsWithoutRef, FocusEventHandler, Ref } from "react";
+import type { ComponentPropsWithoutRef, FocusEventHandler } from "react";
 import { useCallback, useImperativeHandle, useMemo, useState } from "react";
 
 import Unit from "src/components/Equation/Unit/Unit";
 import {
   cancelOutLabels,
+  flipUnit,
   insertRatio,
   quantityIsTrivial,
   removeRatio,
@@ -43,7 +44,7 @@ import { SortableItem } from "../Sortable";
 import CopyButton from "./CopyButton";
 import Inserter from "./Inserter";
 import Period from "./Period";
-import type { InputChangeHandler } from "./types";
+import type { EquationProps, InputChangeHandler } from "./types";
 
 function useEquation(input: Expression) {
   const [expression, setExpression] = useState(input);
@@ -205,6 +206,11 @@ function useEquation(input: Expression) {
     setIsInputDirty(true);
   };
 
+  const handleInvertUnit = (index: number) => {
+    setExpression(flipUnit(expression, index));
+    setIsInputDirty(true);
+  };
+
   const handleDragEnd = useCallback(
     (event: DragEndEvent) => {
       const { active, over } = event;
@@ -236,6 +242,7 @@ function useEquation(input: Expression) {
       handleDeleteUnit,
       handleChangeInput,
       handleDragEnd,
+      handleInvertUnit,
     },
   };
 }
@@ -246,13 +253,7 @@ function Equation({
   ref,
   onElementFocus,
   onElementBlur,
-}: {
-  ref?: Ref<{ cleanupExpression: () => void }>;
-  input: Expression;
-  actionButtons: ReturnType<typeof ActionButton>;
-  onElementFocus?: FocusEventHandler<HTMLDivElement>;
-  onElementBlur?: FocusEventHandler<HTMLDivElement>;
-}) {
+}: EquationProps) {
   const {
     state: { expression, metadata, result, isInputDirty },
     actions: { cleanupExpression, focusIndex },
@@ -263,6 +264,7 @@ function Equation({
       handleDeleteUnit,
       handleChangeInput,
       handleDragEnd,
+      handleInvertUnit,
     },
   } = useEquation(input);
 
@@ -301,7 +303,7 @@ function Equation({
   return (
     <div className="group/equation flex size-max items-stretch justify-center gap-2 rounded-lg p-2 focus-within:bg-slate-800 focus-within:shadow-lg focus-within:outline focus-within:outline-slate-700 hover:bg-slate-800 hover:shadow-lg">
       <div className="invisible flex items-center text-slate-600 group-hover/equation:visible">
-        <FontAwesomeIcon icon={faGripVertical} />
+        {!hasFocus && <FontAwesomeIcon icon={faGripVertical} />}
       </div>
 
       <div className="flex gap-0.5">
@@ -336,6 +338,7 @@ function Equation({
                       isFocused={focusIndex === index}
                       onFocused={handleUnitFocus}
                       onBlurred={handleUnitBlur}
+                      onFlipUnit={() => handleInvertUnit(index)}
                     />
                     <Period
                       style={{

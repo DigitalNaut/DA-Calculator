@@ -1,5 +1,17 @@
-import type { FocusEventHandler } from "react";
-import type { Quantity, QuantityPosition, Ratio } from "src/types/expressions";
+import type {
+  Dispatch,
+  FocusEventHandler,
+  ReactNode,
+  Ref,
+  SetStateAction,
+  RefObject,
+} from "react";
+import type {
+  Expression,
+  Quantity,
+  QuantityPosition,
+  Ratio,
+} from "src/types/expressions";
 
 export type InputChangeHandler = (
   index: number,
@@ -22,15 +34,30 @@ export type UnitProps = InputHandlerProps &
   Focusable & {
     inputRatio: Ratio;
     onDeleteUnit(): void;
+    onFlipUnit(): void;
   };
 
 export type EquationHandle = {
-  expressionToString: () => string;
   cleanupExpression: () => void;
+};
+
+export type SubunitHandle = {
+  focus: () => void;
+  setInputString: Dispatch<SetStateAction<string>>;
+  inputString: string;
 };
 
 export type SubunitProps = InputHandlerProps &
   Partial<Focusable> & {
     inputQuantity: Quantity;
     quantityPosition: QuantityPosition;
+    ref: RefObject<SubunitHandle | null>;
   };
+
+export type EquationProps = {
+  ref?: Ref<EquationHandle>;
+  input: Expression;
+  actionButtons: ReactNode;
+  onElementFocus?: FocusEventHandler<HTMLDivElement>;
+  onElementBlur?: FocusEventHandler<HTMLDivElement>;
+};

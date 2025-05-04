@@ -3,7 +3,14 @@ import type {
   FocusEventHandler,
   KeyboardEventHandler,
 } from "react";
-import { Fragment, useEffect, useMemo, useRef, useState } from "react";
+import {
+  Fragment,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 import {
   factorNeedle,
@@ -32,10 +39,11 @@ function useInput({
   onFocused,
   onBlurred,
 }: Omit<SubunitProps, "display">) {
+  const inputRef = useRef<HTMLInputElement>(null);
+
   const [inputString, setInputString] = useState(() =>
     stringifyQuantity(inputQuantity),
   );
-  const inputRef = useRef<HTMLInputElement>(null);
 
   const changeHandler: ChangeEventHandler<HTMLInputElement> = ({
     currentTarget,
@@ -68,11 +76,12 @@ function useInput({
       inputRef.current.focus();
       inputRef.current.select();
     }
-  }, [isFocused]);
+  }, [inputRef, isFocused]);
 
   return {
     inputString,
     inputRef,
+    setInputString,
     changeHandler,
     blurHandler,
     focusHandler,
@@ -124,13 +133,24 @@ function StyledInput({ input }: { input: string }) {
 
 export default function Subunit(inputParams: SubunitProps) {
   const {
-    inputString,
     inputRef,
+    inputString,
+    setInputString,
     changeHandler,
     focusHandler,
     blurHandler,
     keyDownHandler,
   } = useInput(inputParams);
+
+  useImperativeHandle(
+    inputParams.ref,
+    () => ({
+      inputString,
+      setInputString,
+      focus: () => inputRef.current?.focus(),
+    }),
+    [inputRef, inputString, setInputString],
+  );
 
   return (
     <div className="group/subunit relative grow">

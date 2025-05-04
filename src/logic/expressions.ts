@@ -81,6 +81,25 @@ export function insertRatio(
 }
 
 /**
+ * Flip a term in an expression
+ * @param expression The expression to modify
+ * @param index The index of the term to flip
+ */
+export function flipUnit(expression: Expression, index: number) {
+  const reference = expression[index];
+
+  const newExpression = [...expression];
+
+  newExpression[index] = {
+    id: reference.id,
+    numerator: reference.denominator || { factor: 1 },
+    denominator: reference.numerator,
+  };
+
+  return newExpression;
+}
+
+/**
  * Update a term in an expression
  * @param expression The expression to modify
  * @param index The index of the term to update
