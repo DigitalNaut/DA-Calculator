@@ -170,7 +170,8 @@ function useEquation(input: Expression) {
     return `${resultFactor} ${stringifiedLabels}`;
   }, [results]);
 
-  const [wasInputChanged, setWasInputChanged] = useState(false);
+  // Used for indicating that the expression has probably changed and the results need to be recalculated
+  const [isInputDirty, setIsInputDirty] = useState(false);
   const [focusIndex, setFocusIndex] = useState<number | null>(null);
 
   const handleClickResults = () => {
@@ -181,7 +182,7 @@ function useEquation(input: Expression) {
     calculateResults();
 
     // Reset flags
-    setWasInputChanged(false);
+    setIsInputDirty(false);
   };
 
   const handleClearFocusIndex = () => setFocusIndex(null);
@@ -196,12 +197,12 @@ function useEquation(input: Expression) {
   };
 
   const handleDeleteUnit = (index: number) => {
-    if (deleteUnit(index)) setWasInputChanged(true);
+    if (deleteUnit(index)) setIsInputDirty(true);
   };
 
   const handleChangeInput: InputChangeHandler = (...args) => {
     updateExpression(...args);
-    setWasInputChanged(true);
+    setIsInputDirty(true);
   };
 
   const handleDragEnd = useCallback(
@@ -226,7 +227,7 @@ function useEquation(input: Expression) {
   );
 
   return {
-    state: { expression, metadata, result, wasInputChanged },
+    state: { expression, metadata, result, isInputDirty },
     actions: { cleanupExpression, focusIndex },
     handlers: {
       handleClickResults,
@@ -253,7 +254,7 @@ function Equation({
   onElementBlur?: FocusEventHandler<HTMLDivElement>;
 }) {
   const {
-    state: { expression, metadata, result, wasInputChanged },
+    state: { expression, metadata, result, isInputDirty },
     actions: { cleanupExpression, focusIndex },
     handlers: {
       handleClickResults,
@@ -370,7 +371,7 @@ function Equation({
             className={cn(
               "min-w-24 rounded-lg p-2 text-center text-white hover:bg-slate-700",
               {
-                "text-gray-500 italic": result === "Result" || wasInputChanged,
+                "text-gray-500 italic": result === "Result" || isInputDirty,
               },
             )}
           >
@@ -386,7 +387,7 @@ function Equation({
           <CopyButton
             className="p-2 opacity-0 group-hover:opacity-100"
             content={result}
-            disabled={result === "Result" || wasInputChanged}
+            disabled={result === "Result" || isInputDirty}
           />
         </div>
       </div>
