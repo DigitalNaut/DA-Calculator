@@ -55,10 +55,11 @@ function useInput({
 
   const blurHandler: FocusEventHandler<HTMLInputElement> = (event) => {
     const adjustedInput = adjustInput(inputString);
+    onBlurred?.(event);
+
     if (adjustedInput === inputString) return;
 
     setInputString(adjustedInput);
-    onBlurred?.(event);
     onChangeInput(index, quantityPosition, adjustedInput);
   };
 
