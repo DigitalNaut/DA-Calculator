@@ -124,10 +124,6 @@ function useEquation({
     return reducedExpression;
   };
 
-  const cleanupExpression = () => {
-    setExpression(simplifyExpression(expression));
-  };
-
   const calculateResults = useCallback(
     () =>
       setResults({
@@ -142,6 +138,10 @@ function useEquation({
       }),
     [expression],
   );
+
+  const cleanupExpression = () => {
+    setExpression(simplifyExpression(expression));
+  };
 
   const deleteUnit = (index: number) => {
     if (expression.length === 0) return;

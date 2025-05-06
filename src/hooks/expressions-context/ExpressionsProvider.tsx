@@ -7,15 +7,69 @@ import { randomId } from "src/utils/id";
 import type { ExpressionRecord, ExpressionRecords } from "./ExpressionsContext";
 import { ExpressionsContext } from "./ExpressionsContext";
 
+const expression1 = createExpression([
+  {
+    numerator: { factor: 2, labels: new Map([["grapes", 1]]) },
+    denominator: { factor: 1, labels: new Map([["m", 1]]) },
+  },
+  {
+    numerator: { factor: 60, labels: new Map([["m", 1]]) },
+    denominator: { factor: 1, labels: new Map([["h", 1]]) },
+  },
+  {
+    numerator: { factor: 24, labels: new Map([["h", 1]]) },
+    denominator: { factor: 1, labels: new Map([["d", 1]]) },
+  },
+  {
+    numerator: { factor: 5, labels: new Map([["d", 1]]) },
+  },
+]);
+// const expression2 = newExpression([
+//   { numerator: { factor: 15, labels: new Map([["wood", 1]]) } },
+//   {
+//     numerator: { factor: 4, labels: new Map([["planks", 1]]) },
+//     denominator: { factor: 1, labels: new Map([["wood", 1]]) },
+//   },
+//   {
+//     numerator: { factor: 1, labels: new Map([["slabs", 1]]) },
+//     denominator: { factor: 3, labels: new Map([["planks", 1]]) },
+//   },
+// ]);
+// const expression3 = newExpression([
+//   {
+//     numerator: { factor: 2, labels: new Map([["grapes", 1]]) },
+//     denominator: { factor: 1, labels: new Map([["m", 1]]) },
+//   },
+//   {
+//     numerator: { factor: 60, labels: new Map([["m", 1]]) },
+//     denominator: { factor: 1, labels: new Map([["h", 1]]) },
+//   },
+//   {
+//     numerator: { factor: 24, labels: new Map([["h", 1]]) },
+//     denominator: { factor: 1, labels: new Map([["d", 1]]) },
+//   },
+// ]);
+
+/**
+ * Adds a random ID and default coordinates to each expression in the array.
+ * The coordinates are set to { x: 0, y: 0 } by default.
+ * @param initialExpressions
+ * @returns
+ */
+function normalizeExpressions(
+  initialExpressions?: Expression[],
+): ExpressionRecords {
+  return new Map(
+    initialExpressions?.map((expression) => [
+      randomId(),
+      { expression, coordinates: { x: 0, y: 0 } },
+    ]),
+  );
+}
+
 function useExpressionsCRUD(initialExpressions?: Expression[]) {
   const [expressions, setExpressions] = useState<ExpressionRecords>(
-    () =>
-      new Map(
-        initialExpressions?.map((expression) => [
-          randomId(),
-          { expression, coordinates: { x: 0, y: 0 } },
-        ]),
-      ),
+    () => normalizeExpressions(initialExpressions), // Initialize with an empty map if no initial expressions are provided
   );
 
   const addExpression = ({
@@ -75,49 +129,6 @@ function useExpressionsCRUD(initialExpressions?: Expression[]) {
     },
   };
 }
-
-const expression1 = createExpression([
-  {
-    numerator: { factor: 2, labels: new Map([["grapes", 1]]) },
-    denominator: { factor: 1, labels: new Map([["m", 1]]) },
-  },
-  {
-    numerator: { factor: 60, labels: new Map([["m", 1]]) },
-    denominator: { factor: 1, labels: new Map([["h", 1]]) },
-  },
-  {
-    numerator: { factor: 24, labels: new Map([["h", 1]]) },
-    denominator: { factor: 1, labels: new Map([["d", 1]]) },
-  },
-  {
-    numerator: { factor: 5, labels: new Map([["d", 1]]) },
-  },
-]);
-// const expression2 = newExpression([
-//   { numerator: { factor: 15, labels: new Map([["wood", 1]]) } },
-//   {
-//     numerator: { factor: 4, labels: new Map([["planks", 1]]) },
-//     denominator: { factor: 1, labels: new Map([["wood", 1]]) },
-//   },
-//   {
-//     numerator: { factor: 1, labels: new Map([["slabs", 1]]) },
-//     denominator: { factor: 3, labels: new Map([["planks", 1]]) },
-//   },
-// ]);
-// const expression3 = newExpression([
-//   {
-//     numerator: { factor: 2, labels: new Map([["grapes", 1]]) },
-//     denominator: { factor: 1, labels: new Map([["m", 1]]) },
-//   },
-//   {
-//     numerator: { factor: 60, labels: new Map([["m", 1]]) },
-//     denominator: { factor: 1, labels: new Map([["h", 1]]) },
-//   },
-//   {
-//     numerator: { factor: 24, labels: new Map([["h", 1]]) },
-//     denominator: { factor: 1, labels: new Map([["d", 1]]) },
-//   },
-// ]);
 
 export default function ExpressionsProvider({ children }: PropsWithChildren) {
   const expressionsCrud = useExpressionsCRUD([expression1]);
