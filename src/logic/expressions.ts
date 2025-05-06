@@ -87,7 +87,6 @@ export function insertRatio(
  */
 export function flipUnit(expression: Expression, index: number) {
   const reference = expression[index];
-
   const newExpression = [...expression];
 
   newExpression[index] = {
@@ -220,6 +219,47 @@ export function stringifyLabels(labels: LabelCount) {
   return denominatorLabels.length === 0
     ? numeratorLabelsString
     : `${numeratorLabelsString} / ${denominatorLabelsString}`;
+}
+
+/**
+ * Convert a ratio to a string.
+ *
+ * Example:
+ * ```ts
+ * const ratio = {
+ *  numerator: { factor: 2, labels: new Map([["m", 1], ["s", -1]]) },
+ *  denominator: { factor: 3, labels: new Map([["kg", 1]]) },
+ * };
+ *
+ * stringifyRatio(ratio); // "0.67 m / kg • s"
+ * ```
+ * @param ratio
+ * @returns
+ */
+export function stringifyRatio(ratio: BaseRatio) {
+  const resultFactor = `${(
+    ratio.numerator.factor / (ratio.denominator?.factor || 1)
+  )
+    .toFixed(2)
+    .replace(/\.0+$/, "")}`;
+
+  const resultsLabels = cancelOutLabels(
+    ratio.numerator.labels || new Map(),
+    ratio.denominator?.labels || new Map(),
+  );
+
+  const stringifiedLabels = stringifyLabels(resultsLabels);
+
+  return `${resultFactor} ${stringifiedLabels}`;
+}
+
+/**
+ * Stringify an expression to a string
+ * @param expression
+ * @returns
+ */
+export function stringifyExpression(expression: Expression) {
+  return expression.map(stringifyRatio).join(" * ");
 }
 
 /**

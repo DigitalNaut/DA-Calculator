@@ -20,17 +20,22 @@ import type { IconDefinition } from "@fortawesome/free-solid-svg-icons";
 import { faEquals, faGripVertical } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import type { ComponentPropsWithoutRef, FocusEventHandler } from "react";
-import { useCallback, useImperativeHandle, useMemo, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useState,
+} from "react";
 
 import Unit from "src/components/Equation/Unit";
 import {
-  cancelOutLabels,
   flipUnit,
   insertRatio,
   quantityIsTrivial,
   removeRatio,
   simplifyExpression,
-  stringifyLabels,
+  stringifyRatio,
   updateRatio,
 } from "src/logic/expressions";
 import type {
@@ -46,7 +51,13 @@ import Inserter from "./Inserter";
 import Period from "./Period";
 import type { EquationProps, InputChangeHandler } from "./types";
 
-function useEquation(input: Expression) {
+function useEquation({
+  input,
+  onExpressionChange,
+}: {
+  input: Expression;
+  onExpressionChange?: (expression: Expression) => void;
+}) {
   const [expression, setExpression] = useState(input);
   const [results, setResults] = useState<BaseRatio | null>(null);
 
@@ -117,17 +128,20 @@ function useEquation(input: Expression) {
     setExpression(simplifyExpression(expression));
   };
 
-  const calculateResults = () =>
-    setResults({
-      numerator: {
-        factor: multiplyFactors(expression, "numerator"),
-        labels: compoundLabels(expression, "numerator"),
-      },
-      denominator: {
-        factor: multiplyFactors(expression, "denominator"),
-        labels: compoundLabels(expression, "denominator"),
-      },
-    });
+  const calculateResults = useCallback(
+    () =>
+      setResults({
+        numerator: {
+          factor: multiplyFactors(expression, "numerator"),
+          labels: compoundLabels(expression, "numerator"),
+        },
+        denominator: {
+          factor: multiplyFactors(expression, "denominator"),
+          labels: compoundLabels(expression, "denominator"),
+        },
+      }),
+    [expression],
+  );
 
   const deleteUnit = (index: number) => {
     if (expression.length === 0) return;
@@ -138,13 +152,13 @@ function useEquation(input: Expression) {
     return expression.length > modifiedExpression.length;
   };
 
-  const updateExpression: InputChangeHandler = (
+  const setExpressionTerm: InputChangeHandler = (
     index,
-    termPosition,
+    position,
     userInput,
   ) => {
     setExpression((prevExpression) =>
-      updateRatio(prevExpression, index, termPosition, userInput),
+      updateRatio(prevExpression, index, position, userInput),
     );
   };
 
@@ -152,24 +166,10 @@ function useEquation(input: Expression) {
     setExpression((prevExpression) => insertRatio(prevExpression, index));
   };
 
-  const result = useMemo(() => {
-    if (!results) return "Result";
-
-    const resultFactor = `${(
-      results.numerator.factor / (results.denominator?.factor || 1)
-    )
-      .toFixed(2)
-      .replace(/\.0+$/, "")}`;
-
-    const resultsLabels = cancelOutLabels(
-      results.numerator.labels || new Map(),
-      results.denominator?.labels || new Map(),
-    );
-
-    const stringifiedLabels = stringifyLabels(resultsLabels);
-
-    return `${resultFactor} ${stringifiedLabels}`;
-  }, [results]);
+  const result = useMemo(
+    () => (results ? stringifyRatio(results) : "---"),
+    [results],
+  );
 
   // Used for indicating that the expression has probably changed and the results need to be recalculated
   const [isInputDirty, setIsInputDirty] = useState(false);
@@ -198,11 +198,13 @@ function useEquation(input: Expression) {
   };
 
   const handleDeleteUnit = (index: number) => {
-    if (deleteUnit(index)) setIsInputDirty(true);
+    if (deleteUnit(index)) {
+      setIsInputDirty(true);
+    }
   };
 
   const handleChangeInput: InputChangeHandler = (...args) => {
-    updateExpression(...args);
+    setExpressionTerm(...args);
     setIsInputDirty(true);
   };
 
@@ -211,26 +213,28 @@ function useEquation(input: Expression) {
     setIsInputDirty(true);
   };
 
-  const handleDragEnd = useCallback(
-    (event: DragEndEvent) => {
-      const { active, over } = event;
+  const handleDragEnd = useCallback((event: DragEndEvent) => {
+    const { active, over } = event;
 
-      if (!over) return;
+    if (!over) return;
 
-      if (active.id !== over.id) {
-        setExpression((items) => {
-          const expressionIndices = items.map((item) => item.id);
-          const oldIndex = expressionIndices.indexOf(String(active.id));
-          const newIndex = expressionIndices.indexOf(String(over.id));
+    if (active.id !== over.id) {
+      setExpression((items) => {
+        const expressionIndices = items.map((item) => item.id);
+        const oldIndex = expressionIndices.indexOf(String(active.id));
+        const newIndex = expressionIndices.indexOf(String(over.id));
 
-          if (oldIndex === -1 || newIndex === -1) return items;
+        if (oldIndex === -1 || newIndex === -1) return items;
 
-          return arrayMove(items, oldIndex, newIndex);
-        });
-      }
-    },
-    [setExpression],
-  );
+        return arrayMove(items, oldIndex, newIndex);
+      });
+    }
+  }, []);
+
+  useEffect(() => {
+    if (expression.length) calculateResults();
+    onExpressionChange?.(expression);
+  }, [expression, calculateResults, onExpressionChange]);
 
   return {
     state: { expression, metadata, result, isInputDirty },
@@ -253,6 +257,7 @@ function Equation({
   ref,
   onElementFocus,
   onElementBlur,
+  onExpressionChange,
 }: EquationProps) {
   const {
     state: { expression, metadata, result, isInputDirty },
@@ -266,7 +271,7 @@ function Equation({
       handleDragEnd,
       handleInvertUnit,
     },
-  } = useEquation(input);
+  } = useEquation({ input, onExpressionChange });
 
   useImperativeHandle(
     ref,

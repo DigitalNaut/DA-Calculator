@@ -40,15 +40,6 @@ export default function Unit({
   );
 
   const handleFlipUnit: MouseEventHandler<HTMLButtonElement> = () => {
-    if (!inputRefDenominator.current || !inputRefNumerator.current)
-      throw new Error("Input references are not set.");
-
-    const numeratorValue = inputRefNumerator.current.inputString;
-    const denominatorValue = inputRefDenominator.current.inputString;
-
-    inputRefNumerator.current.setInputString(denominatorValue || "1");
-    inputRefDenominator.current.setInputString(numeratorValue || "1");
-
     onFlipUnit();
   };
 

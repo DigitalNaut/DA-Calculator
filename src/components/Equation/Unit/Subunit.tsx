@@ -1,8 +1,4 @@
-import type {
-  ChangeEventHandler,
-  FocusEventHandler,
-  KeyboardEventHandler,
-} from "react";
+import type { FocusEventHandler, KeyboardEventHandler } from "react";
 import {
   Fragment,
   useEffect,
@@ -23,7 +19,7 @@ import {
 } from "src/validation/input-parser";
 import type { SubunitProps } from "../types";
 
-function adjustInput(inputString: string) {
+function normalizeInput(inputString: string) {
   let adjustedInput = inputString.trim();
   adjustedInput = adjustedInput.replace(/\s+/g, " ");
   if (adjustedInput === "" || adjustedInput === "0") adjustedInput = "1";
@@ -41,26 +37,33 @@ function useInput({
 }: Omit<SubunitProps, "display">) {
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const [inputString, setInputString] = useState(() =>
-    stringifyQuantity(inputQuantity),
+  const inputString = useMemo(
+    () => stringifyQuantity(inputQuantity),
+    [inputQuantity],
   );
-
-  const changeHandler: ChangeEventHandler<HTMLInputElement> = ({
-    currentTarget,
-  }) => setInputString(currentTarget.value);
 
   const focusHandler: FocusEventHandler<HTMLInputElement> = (event) => {
     onFocused?.(event);
   };
 
+  const [displayText, setDisplayText] = useState(() =>
+    normalizeInput(inputString),
+  );
+
   const blurHandler: FocusEventHandler<HTMLInputElement> = (event) => {
-    const adjustedInput = adjustInput(inputString);
     onBlurred?.(event);
+
+    const adjustedInput = normalizeInput(event.currentTarget.value);
 
     if (adjustedInput === inputString) return;
 
-    setInputString(adjustedInput);
     onChangeInput(index, quantityPosition, adjustedInput);
+  };
+
+  const changeHandler: FocusEventHandler<HTMLInputElement> = (event) => {
+    if (!event.currentTarget) return;
+    event.currentTarget.size = event.currentTarget.value.length || 1;
+    setDisplayText(normalizeInput(event.currentTarget.value));
   };
 
   const keyDownHandler: KeyboardEventHandler<HTMLInputElement> = ({
@@ -69,6 +72,18 @@ function useInput({
   }) => {
     if (key === "Enter") currentTarget.blur();
   };
+
+  useEffect(
+    /**
+     * Updates the input element to reflect the current state of the expression when it changes.
+     */
+    function updateInput() {
+      if (!inputRef.current) return;
+      inputRef.current.value = inputString;
+      setDisplayText(normalizeInput(inputString));
+    },
+    [inputRef, inputString],
+  );
 
   useEffect(() => {
     if (!inputRef.current) return;
@@ -82,9 +97,9 @@ function useInput({
   return {
     inputString,
     inputRef,
-    setInputString,
-    changeHandler,
+    displayText,
     blurHandler,
+    changeHandler,
     focusHandler,
     keyDownHandler,
   };
@@ -136,9 +151,9 @@ export default function Subunit(inputParams: SubunitProps) {
   const {
     inputRef,
     inputString,
-    setInputString,
-    changeHandler,
+    displayText,
     focusHandler,
+    changeHandler,
     blurHandler,
     keyDownHandler,
   } = useInput(inputParams);
@@ -146,27 +161,25 @@ export default function Subunit(inputParams: SubunitProps) {
   useImperativeHandle(
     inputParams.ref,
     () => ({
-      inputString,
-      setInputString,
       focus: () => inputRef.current?.focus(),
     }),
-    [inputRef, inputString, setInputString],
+    [inputRef],
   );
 
   return (
     <div className="group/subunit relative grow">
       <div className="pointer-events-none absolute flex size-full items-center justify-center group-focus-within/subunit:hidden">
-        <StyledInput input={inputString} />
+        <StyledInput input={displayText} />
       </div>
       <input
         ref={inputRef}
         placeholder="No value"
         className="w-full grow rounded-md bg-transparent py-2 text-center text-transparent focus:bg-white focus:text-slate-900"
-        value={inputString}
-        onChange={changeHandler}
+        defaultValue={inputString}
         onFocus={focusHandler}
         onBlur={blurHandler}
         onKeyDown={keyDownHandler}
+        onChange={changeHandler}
         size={inputString.length || 1}
         maxLength={50}
       />
