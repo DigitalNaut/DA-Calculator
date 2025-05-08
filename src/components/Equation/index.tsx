@@ -167,12 +167,11 @@ function useEquation({
   };
 
   const result = useMemo(
-    () => (results ? stringifyRatio(results) : "---"),
+    () => (results ? stringifyRatio(results) : null),
     [results],
   );
 
-  // Used for indicating that the expression has probably changed and the results need to be recalculated
-  const [isInputDirty, setIsInputDirty] = useState(false);
+  // Used to focus an input when a unit is added
   const [focusIndex, setFocusIndex] = useState<number | null>(null);
 
   const handleClickResults = () => {
@@ -181,9 +180,6 @@ function useEquation({
 
     // Update data
     calculateResults();
-
-    // Reset flags
-    setIsInputDirty(false);
   };
 
   const handleClearFocusIndex = () => setFocusIndex(null);
@@ -198,19 +194,11 @@ function useEquation({
   };
 
   const handleDeleteUnit = (index: number) => {
-    if (deleteUnit(index)) {
-      setIsInputDirty(true);
-    }
-  };
-
-  const handleChangeInput: InputChangeHandler = (...args) => {
-    setExpressionTerm(...args);
-    setIsInputDirty(true);
+    deleteUnit(index);
   };
 
   const handleInvertUnit = (index: number) => {
     setExpression(flipUnit(expression, index));
-    setIsInputDirty(true);
   };
 
   const handleDragEnd = useCallback((event: DragEndEvent) => {
@@ -237,14 +225,14 @@ function useEquation({
   }, [expression, calculateResults, onExpressionChange]);
 
   return {
-    state: { expression, metadata, result, isInputDirty },
+    state: { expression, metadata, result },
     actions: { cleanupExpression, focusIndex },
     handlers: {
       handleClickResults,
       handleClearFocusIndex,
       handleInsertion,
       handleDeleteUnit,
-      handleChangeInput,
+      handleChangeInput: setExpressionTerm,
       handleDragEnd,
       handleInvertUnit,
     },
@@ -260,7 +248,7 @@ function Equation({
   onExpressionChange,
 }: EquationProps) {
   const {
-    state: { expression, metadata, result, isInputDirty },
+    state: { expression, metadata, result },
     actions: { cleanupExpression, focusIndex },
     handlers: {
       handleClickResults,
@@ -379,7 +367,7 @@ function Equation({
             className={cn(
               "min-w-24 rounded-lg p-2 text-center text-white hover:bg-slate-700",
               {
-                "text-gray-500 italic": result === "Result" || isInputDirty,
+                "text-gray-500 italic": !result,
               },
             )}
           >
@@ -387,15 +375,15 @@ function Equation({
               readOnly
               onFocus={onElementFocus}
               onBlur={onElementBlur}
-              value={result}
-              size={result.length || 1}
+              value={result || "---"}
+              size={result?.length || 1}
             />
           </div>
 
           <CopyButton
             className="p-2 opacity-0 group-hover:opacity-100"
-            content={result}
-            disabled={result === "Result" || isInputDirty}
+            content={result || "---"}
+            disabled={!result}
           />
         </div>
       </div>
