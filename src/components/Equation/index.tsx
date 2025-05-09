@@ -239,7 +239,7 @@ function useEquation({
   };
 }
 
-function Equation({
+function EquationInternal({
   input,
   actionButtons,
   ref,
@@ -420,11 +420,5 @@ export function ActionButton({
   );
 }
 
-type EquationComponent = typeof Equation & {
-  ActionButton: typeof ActionButton;
-};
-
-(Equation as EquationComponent).ActionButton = ActionButton;
-
-const EquationWithActionButton = Equation as EquationComponent;
-export default EquationWithActionButton;
+const Equation = Object.assign(EquationInternal, { ActionButton });
+export default Equation;
