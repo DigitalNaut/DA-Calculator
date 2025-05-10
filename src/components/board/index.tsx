@@ -14,18 +14,23 @@ import { useCallback, useRef, useState } from "react";
 
 import Draggable from "src/components/Draggable";
 import Equation from "src/components/Equation";
-import useExpressions from "src/hooks/expressions-context/useExpressions";
+import type { RootState } from "src/state/store";
 import type { Expression } from "src/types/expressions";
 import type { EquationHandle } from "../Equation/types";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  addExpression,
+  removeExpression,
+  updateExpression,
+} from "src/features/expressions/expressionsSlice";
 
 const NEW_EQUATION_HALF_WIDTH = 107.5; // Manually measured
 const NEW_EQUATION_HALF_HEIGHT = 44;
 
 export default function Board() {
-  const {
-    state: { expressions },
-    actions: { removeExpression, addExpression, updateExpression },
-  } = useExpressions();
+  const { expressions } = useSelector((state: RootState) => state.expressions);
+  const dispatch = useDispatch();
+
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
     useSensor(TouchSensor),
@@ -50,32 +55,37 @@ export default function Board() {
           currentTarget.offsetTop -
           NEW_EQUATION_HALF_HEIGHT;
 
-        addExpression({ coordinates: { x, y } });
+        dispatch(addExpression({ coordinates: { x, y } }));
       },
-      [addExpression],
+      [dispatch],
     );
 
   const dragEndHandler = useCallback(
     ({ active, delta }: DragEndEvent) =>
-      updateExpression(String(active.id), ({ coordinates: { x, y } }) => ({
-        coordinates: {
-          x: x + delta.x,
-          y: y + delta.y,
-        },
-      })),
-    [updateExpression],
+      updateExpression({
+        key: String(active.id),
+        callback: ({ coordinates: { x, y } }) => ({
+          coordinates: {
+            x: x + delta.x,
+            y: y + delta.y,
+          },
+        }),
+      }),
+    [],
   );
 
   const duplicateEquationHandler = useCallback(
     (expression: Expression, coordinates: Coordinates) =>
-      addExpression({
-        expression,
-        coordinates: {
-          x: coordinates.x,
-          y: coordinates.y + NEW_EQUATION_HALF_HEIGHT * 2,
-        },
-      }),
-    [addExpression],
+      dispatch(
+        addExpression({
+          expression,
+          coordinates: {
+            x: coordinates.x,
+            y: coordinates.y + NEW_EQUATION_HALF_HEIGHT * 2,
+          },
+        }),
+      ),
+    [dispatch],
   );
 
   const [hasFocus, setHasFocus] = useState(false);
@@ -108,6 +118,12 @@ export default function Board() {
               }}
               onElementFocus={() => setHasFocus(true)}
               onElementBlur={() => setHasFocus(false)}
+              // onExpressionChange={(expression) =>
+              // updateExpression(key, (prevExpression) => ({
+              //   expression,
+              //   coordinates: prevExpression.coordinates,
+              // }))
+              // }
               input={expression}
               actionButtons={
                 <>
@@ -132,7 +148,7 @@ export default function Board() {
                     icon={faTrash}
                     title="Delete equation"
                     onClick={() => {
-                      removeExpression(key);
+                      dispatch(removeExpression(key));
                       equationsMapRef.current.delete(key);
                     }}
                   />
