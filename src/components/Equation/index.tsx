@@ -111,14 +111,14 @@ function useEquation({
 
         if (!labels) return prevTerms;
 
-        for (const [label, count] of labels) {
-          const prevCount = prevTerms.get(label) || 0;
-          prevTerms.set(label, prevCount + count);
+        for (const [label, count] of Object.entries(labels)) {
+          const prevCount = prevTerms[label] || 0;
+          prevTerms[label] = prevCount + count;
         }
 
         return prevTerms;
       },
-      new Map<string, number>(),
+      {},
     );
 
     return reducedExpression;

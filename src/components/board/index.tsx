@@ -10,26 +10,28 @@ import { restrictToParentElement } from "@dnd-kit/modifiers";
 import type { Coordinates } from "@dnd-kit/utilities";
 import { faBroom, faClone, faTrash } from "@fortawesome/free-solid-svg-icons";
 import type { MouseEventHandler } from "react";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 
 import Draggable from "src/components/Draggable";
 import Equation from "src/components/Equation";
-import type { RootState } from "src/state/store";
-import type { Expression } from "src/types/expressions";
-import type { EquationHandle } from "../Equation/types";
-import { useDispatch, useSelector } from "react-redux";
 import {
   addExpression,
+  modifyExpression,
   removeExpression,
-  updateExpression,
-} from "src/features/expressions/expressionsSlice";
+} from "src/features/expressions/expressionRecordsSlice";
+import type { RootState } from "src/store";
+import { useAppDispatch, useAppSelector } from "src/store/hooks";
+import type { Expression } from "src/types/expressions";
+import type { EquationHandle } from "../Equation/types";
 
 const NEW_EQUATION_HALF_WIDTH = 107.5; // Manually measured
 const NEW_EQUATION_HALF_HEIGHT = 44;
 
 export default function Board() {
-  const { expressions } = useSelector((state: RootState) => state.expressions);
-  const dispatch = useDispatch();
+  const { expressions } = useAppSelector(
+    (state: RootState) => state.expressionRecords,
+  );
+  const dispatch = useAppDispatch();
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -62,16 +64,18 @@ export default function Board() {
 
   const dragEndHandler = useCallback(
     ({ active, delta }: DragEndEvent) =>
-      updateExpression({
-        key: String(active.id),
-        callback: ({ coordinates: { x, y } }) => ({
-          coordinates: {
-            x: x + delta.x,
-            y: y + delta.y,
-          },
+      dispatch(
+        modifyExpression({
+          key: String(active.id),
+          callback: ({ coordinates: { x, y } }) => ({
+            coordinates: {
+              x: x + delta.x,
+              y: y + delta.y,
+            },
+          }),
         }),
-      }),
-    [],
+      ),
+    [dispatch],
   );
 
   const duplicateEquationHandler = useCallback(
@@ -90,6 +94,8 @@ export default function Board() {
 
   const [hasFocus, setHasFocus] = useState(false);
 
+  const equations = useMemo(() => Object.entries(expressions), [expressions]);
+
   return (
     <article
       className="relative size-full gap-3 overflow-auto rounded-lg bg-gray-900 p-2"
@@ -100,7 +106,7 @@ export default function Board() {
         onDragEnd={dragEndHandler}
         modifiers={[restrictToParentElement]}
       >
-        {[...expressions].map(([key, { expression, coordinates }]) => (
+        {equations.map(([key, { expression, coordinates }]) => (
           <Draggable
             className="absolute flex size-max"
             key={key}

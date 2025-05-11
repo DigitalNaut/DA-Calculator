@@ -34,7 +34,7 @@ suite("expects to parse text into a quantity", () => {
   it("can parse a label", () => {
     expect(parseInput("m")).toEqual<Quantity>({
       factor: 1,
-      labels: new Map([["m", 1]]),
+      labels: { m: 1 },
     });
   });
 
@@ -51,24 +51,24 @@ suite("expects to parse text into a quantity", () => {
   it("can parse a factor and label", () => {
     expect(parseInput("12 roads")).toEqual<Quantity>({
       factor: 12,
-      labels: new Map([["roads", 1]]),
+      labels: { roads: 1 },
     });
 
     expect(parseInput("99.5 km")).toEqual<Quantity>({
       factor: 99.5,
-      labels: new Map([["km", 1]]),
+      labels: { km: 1 },
     });
 
     expect(parseInput("10% cake")).toEqual<Quantity>({
       factor: 0.1,
-      labels: new Map([["cake", 1]]),
+      labels: { cake: 1 },
     });
   });
 
   it("can parse an exponential label", () => {
     expect(parseInput("m^3")).toEqual<Quantity>({
       factor: 1,
-      labels: new Map([["m", 3]]),
+      labels: { m: 3 },
     });
   });
 
@@ -86,16 +86,11 @@ suite("expects to parse a quantity", () => {
   });
 
   it("can stringify a quantity", () => {
-    expect(stringifyQuantity({ factor: 1, labels: new Map([["m", 1]]) })).toBe(
-      "1 m",
-    );
+    expect(stringifyQuantity({ factor: 1, labels: { m: 1 } })).toBe("1 m");
     expect(
       stringifyQuantity({
         factor: 1.0,
-        labels: new Map([
-          ["km", 1],
-          ["h", 3],
-        ]),
+        labels: { km: 1, h: 3 },
       }),
     ).toBe("1 km h^3");
   });

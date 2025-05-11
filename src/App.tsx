@@ -2,7 +2,7 @@ import type { JSX } from "react";
 import { Provider } from "react-redux";
 
 import Home from "src/views/Home";
-import { store } from "./state/store.ts";
+import { store } from "./store/index.ts";
 
 import "src/index.css";
 

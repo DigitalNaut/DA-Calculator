@@ -2,11 +2,11 @@ import z from "zod";
 
 /**
  * A quantity is a number (factor) with optional labels
- * Labels are a map of strings to numbers, where the string is the label and the number is the exponent
+ * Labels are a table of strings to numbers, where the string is the label and the number is the exponent
  */
 const QuantitySchema = z.object({
   factor: z.number(),
-  labels: z.map(z.string(), z.number()).optional(),
+  labels: z.record(z.string(), z.number()).optional(),
 });
 
 /**

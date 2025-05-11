@@ -1,15 +1,15 @@
 import type { LabelCount, Quantity } from "src/types/expressions";
 import {
-  insertRatio,
-  isRatioTrivial,
+  cancelOutLabels,
   createExpression,
   createRatio,
+  insertRatio,
+  isRatioTrivial,
   quantityIsTrivial,
-  cancelOutLabels,
   removeRatio,
   simplifyExpression,
-  updateRatio,
   stringifyLabels,
+  updateRatio,
 } from "./expressions";
 
 it("expects to get a new default expression", () => {
@@ -28,8 +28,8 @@ it("expects to get a new default expression", () => {
 it("expects to get a new expression from an input object", () => {
   const testExpression = createExpression([
     {
-      numerator: { factor: 5, labels: new Map([["foo", 1]]) },
-      denominator: { factor: 1, labels: new Map([["bar", 1]]) },
+      numerator: { factor: 5, labels: { foo: 1 } },
+      denominator: { factor: 1, labels: { bar: 1 } },
     },
   ]);
 
@@ -44,13 +44,13 @@ it("expects to get a new expression from an input object", () => {
   // Numerator
   expect(testExpression[0].numerator).toEqual<Quantity>({
     factor: 5,
-    labels: new Map([["foo", 1]]),
+    labels: { foo: 1 },
   });
 
   // Denominator
   expect(testExpression[0].denominator).toEqual<Quantity>({
     factor: 1,
-    labels: new Map([["bar", 1]]),
+    labels: { bar: 1 },
   });
 });
 
@@ -84,7 +84,7 @@ suite("detect trivial quantities", () => {
     expect(
       quantityIsTrivial({
         factor: 1.0,
-        labels: new Map([["foo", 1]]),
+        labels: { foo: 1 },
       }),
     ).toBe(false);
   });
@@ -98,10 +98,7 @@ suite("detect trivial quantities", () => {
     expect(
       quantityIsTrivial({
         factor: 1.0,
-        labels: new Map([
-          ["foo", 1],
-          ["bar", 1],
-        ]),
+        labels: { foo: 1, bar: 1 },
       }),
     ).toBe(false);
   });
@@ -178,7 +175,7 @@ suite("detects trivial ratios", () => {
     expect(
       isRatioTrivial(
         createRatio({
-          numerator: { factor: 1, labels: new Map([["foo", 1]]) },
+          numerator: { factor: 1, labels: { foo: 1 } },
         }),
       ),
     ).toBe(false);
@@ -189,7 +186,7 @@ suite("detects trivial ratios", () => {
       isRatioTrivial(
         createRatio({
           numerator: { factor: 1 },
-          denominator: { factor: 1, labels: new Map([["foo", 1]]) },
+          denominator: { factor: 1, labels: { foo: 1 } },
         }),
       ),
     ).toBe(false);
@@ -197,7 +194,7 @@ suite("detects trivial ratios", () => {
 
   it("1 foo/1 is not trivial", () => {
     const testRatio = createRatio({
-      numerator: { factor: 1, labels: new Map([["foo", 1]]) },
+      numerator: { factor: 1, labels: { foo: 1 } },
       denominator: { factor: 1 },
     });
     expect(isRatioTrivial(testRatio)).toBe(false);
@@ -234,7 +231,7 @@ it("expects to remove trivial ratios", () => {
       numerator: { factor: 1 }, // Trivial
     },
     {
-      numerator: { factor: 1, labels: new Map([["foo", 1]]) }, // Has numerator labels
+      numerator: { factor: 1, labels: { foo: 1 } }, // Has numerator labels
     },
     {
       numerator: { factor: 1 }, // Trivial
@@ -244,7 +241,7 @@ it("expects to remove trivial ratios", () => {
     },
     {
       numerator: { factor: 1 },
-      denominator: { factor: 1, labels: new Map([["foo", 1]]) }, // Has denominator labels
+      denominator: { factor: 1, labels: { foo: 1 } }, // Has denominator labels
     },
     {
       numerator: { factor: 1 },
@@ -264,7 +261,7 @@ it("expects to insert a ratio in an expression", () => {
       numerator: { factor: 2 },
     },
     {
-      numerator: { factor: 1, labels: new Map([["foo", 1]]) },
+      numerator: { factor: 1, labels: { foo: 1 } },
     },
   ]);
 
@@ -272,14 +269,14 @@ it("expects to insert a ratio in an expression", () => {
     testExpression,
     1,
     createRatio({
-      numerator: { factor: 1, labels: new Map([["bar", 1]]) },
+      numerator: { factor: 1, labels: { bar: 1 } },
     }),
   );
 
   expect(modifiedExpression).toHaveLength(3);
   expect(modifiedExpression[1].numerator).toEqual<Quantity>({
     factor: 1,
-    labels: new Map([["bar", 1]]),
+    labels: { bar: 1 },
   });
   expect(modifiedExpression[1].denominator).toBe(undefined);
 });
@@ -290,7 +287,7 @@ suite("expects to update a ratio in an expression", () => {
       numerator: { factor: 2 },
     },
     {
-      numerator: { factor: 1, labels: new Map([["foo", 1]]) },
+      numerator: { factor: 1, labels: { foo: 1 } },
     },
   ]);
 
@@ -308,11 +305,11 @@ suite("expects to update a ratio in an expression", () => {
     });
     expect(modifiedExpression[0].denominator).toEqual<Quantity>({
       factor: 2,
-      labels: new Map([["foo", 1]]),
+      labels: { foo: 1 },
     });
     expect(modifiedExpression[1].numerator).toEqual<Quantity>({
       factor: 1,
-      labels: new Map([["foo", 1]]),
+      labels: { foo: 1 },
     });
     expect(modifiedExpression[1].denominator).toBe(undefined);
   });
@@ -374,7 +371,7 @@ it("can remove a ratio from an expression", () => {
       numerator: { factor: 2 },
     },
     {
-      numerator: { factor: 1, labels: new Map([["foo", 1]]) },
+      numerator: { factor: 1, labels: { foo: 1 } },
     },
   ]);
 
@@ -385,7 +382,7 @@ it("can remove a ratio from an expression", () => {
   expect(modifiedExpression).toHaveLength(1);
   expect(modifiedExpression[0].numerator).toEqual<Quantity>({
     factor: 1,
-    labels: new Map([["foo", 1]]),
+    labels: { foo: 1 },
   });
   expect(modifiedExpression[0].denominator).toBe(undefined);
 
@@ -398,7 +395,7 @@ it("can remove a ratio from an expression", () => {
   expect(modifiedExpression2).toHaveLength(1);
   expect(modifiedExpression2[0].numerator).toEqual<Quantity>({
     factor: 1,
-    labels: new Map([["foo", 1]]),
+    labels: { foo: 1 },
   });
   expect(modifiedExpression2[0].denominator).toBe(undefined);
 
@@ -411,126 +408,75 @@ it("can remove a ratio from an expression", () => {
 
 suite("expects to cancel out label overlaps in an expression", () => {
   it("can remove a label overlap in the denominator", () => {
-    const labels1 = new Map([
-      ["foo", 1],
-      ["bar", 1],
-    ]);
-    const labels2 = new Map([["foo", 1]]);
+    const labels1 = { foo: 1, bar: 1 };
+    const labels2 = { foo: 1 };
 
-    expect(cancelOutLabels(labels1, labels2)).toEqual<LabelCount>(
-      new Map([["bar", 1]]),
-    );
+    expect(cancelOutLabels(labels1, labels2)).toEqual<LabelCount>({ bar: 1 });
   });
 
   it("can remove a label overlap in the numerator", () => {
-    const labels1 = new Map([["foo", 1]]);
-    const labels2 = new Map([
-      ["foo", 1],
-      ["bar", 1],
-    ]);
+    const labels1 = { foo: 1 };
+    const labels2 = { foo: 1, bar: 1 };
 
-    expect(cancelOutLabels(labels1, labels2)).toEqual<LabelCount>(
-      new Map([["bar", -1]]),
-    );
+    expect(cancelOutLabels(labels1, labels2)).toEqual<LabelCount>({ bar: -1 });
   });
 
   it("can cancel out simple label overlaps", () => {
-    const labels1 = new Map([
-      ["bar", 1],
-      ["foo", 1],
-      ["baz", 1],
-      ["ace", 1],
-    ]);
-    const labels2 = new Map([
-      ["com", 1],
-      ["tar", 1],
-      ["gax", 1],
-    ]);
+    const labels1 = { bar: 1, foo: 1, baz: 1, ace: 1 };
+    const labels2 = { com: 1, tar: 1, gax: 1 };
 
-    expect(cancelOutLabels(labels1, labels2)).toEqual<LabelCount>(
-      new Map([
-        ["ace", 1],
-        ["bar", 1],
-        ["baz", 1],
-        ["foo", 1],
-        ["com", -1],
-        ["gax", -1],
-        ["tar", -1],
-      ]),
-    );
+    expect(cancelOutLabels(labels1, labels2)).toEqual<LabelCount>({
+      ace: 1,
+      bar: 1,
+      baz: 1,
+      foo: 1,
+      com: -1,
+      gax: -1,
+      tar: -1,
+    });
   });
 
   it("can handle complex label overlaps", () => {
-    const labels1 = new Map([
-      ["cod", 1],
-      ["bar", 2],
-      ["com", 3],
-      ["baz", 3],
-    ]); // ["cod", "bar", "com", "bar", "com", "baz", "baz", "baz", "com"]
-    const labels2 = new Map([
-      ["foo", 2],
-      ["goo", 2],
-      ["lue", 1],
-      ["roo", 3],
-    ]); // ["foo", "foo", "goo", "lue", "roo", "goo", "roo", "roo"]
+    const labels1 = { cod: 1, bar: 2, com: 3, baz: 3 }; // ["cod", "bar", "com", "bar", "com", "baz", "baz", "baz", "com"]
+    const labels2 = { foo: 2, goo: 2, lue: 1, roo: 3 }; // ["foo", "goo", "lue", "roo", "goo", "roo", "roo"]
 
-    expect(cancelOutLabels(labels1, labels2)).toEqual<LabelCount>(
-      new Map([
-        ["baz", 3],
-        ["com", 3],
-        ["bar", 2],
-        ["cod", 1],
-        ["roo", -3],
-        ["foo", -2],
-        ["goo", -2],
-        ["lue", -1],
-      ]),
-    );
+    expect(cancelOutLabels(labels1, labels2)).toEqual<LabelCount>({
+      baz: 3,
+      bar: 2,
+      com: 3,
+      cod: 1,
+      roo: -3,
+      foo: -2,
+      goo: -2,
+      lue: -1,
+    });
   });
 
   it("can handle empty labels", () => {
-    expect(cancelOutLabels(new Map(), new Map())).toEqual<LabelCount>(
-      new Map(),
-    );
+    expect(cancelOutLabels({}, {})).toEqual<LabelCount>({});
   });
 });
 
 suite("expects to stringify labels in order", () => {
   it("can stringify labels", () => {
-    expect(stringifyLabels(new Map([["foo", 1]]))).toEqual("foo");
-    expect(stringifyLabels(new Map([["foo", 0]]))).toEqual("");
+    expect(stringifyLabels({ foo: 1 })).toEqual("foo");
+    expect(stringifyLabels({ foo: 0 })).toEqual("");
+    expect(stringifyLabels({ foo: 1, bar: 1 })).toEqual("bar • foo");
+    expect(stringifyLabels({ foo: 1, bar: -1 })).toEqual("foo / bar");
     expect(
-      stringifyLabels(
-        new Map([
-          ["foo", 1],
-          ["bar", 1],
-        ]),
-      ),
-    ).toEqual("bar • foo");
-    expect(
-      stringifyLabels(
-        new Map([
-          ["foo", 1],
-          ["bar", -1],
-        ]),
-      ),
-    ).toEqual("foo / bar");
-    expect(
-      stringifyLabels(
-        new Map([
-          ["zoo", 3],
-          ["goo", 2],
-          ["foo", 2],
-          ["bar", 0],
-          ["baz", -1],
-          ["quux", -4],
-          ["tar", -3],
-        ]),
-      ),
+      stringifyLabels({
+        zoo: 3,
+        goo: 2,
+        foo: 2,
+        bar: 0,
+        baz: -1,
+        quux: -4,
+        tar: -3,
+      }),
     ).toEqual("zoo^3 • foo^2 • goo^2 / quux^4 • tar^3 • baz");
   });
 
   it("can handle empty labels", () => {
-    expect(stringifyLabels(new Map())).toEqual("");
+    expect(stringifyLabels({})).toEqual("");
   });
 });
