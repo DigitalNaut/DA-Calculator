@@ -1,17 +1,18 @@
 import type {
-  Quantity,
-  Ratio,
-  Expression,
-  QuantityPosition,
-  BaseRatio,
   BaseExpression,
+  BaseRatio,
+  Expression,
   LabelCount,
+  Quantity,
+  QuantityPosition,
+  Ratio,
 } from "src/types/expressions";
 import { randomId } from "src/utils/id";
+import { isEmptyObject } from "src/utils/objects";
 import { parseInput } from "src/validation/input-parser";
 
 const quantityHasNoLabels = (quantity?: Quantity) =>
-  (quantity?.labels?.size || 0) === 0;
+  !quantity?.labels ? true : (Object.keys(quantity.labels).length || 0) === 0;
 
 /**
  * Check if a quantity is non-trivial (contains labels or factors different from 1)
@@ -124,7 +125,8 @@ export function updateRatio(
   if (
     termPosition === "denominator" &&
     newQuantity.factor === 1 &&
-    newQuantity.labels?.size === 0
+    newQuantity.labels &&
+    isEmptyObject(newQuantity.labels)
   )
     return newExpression;
 
@@ -164,20 +166,20 @@ export function cancelOutLabels(
   denominatorLabels: LabelCount,
 ) {
   const keys = new Set([
-    ...numeratorLabels.keys(),
-    ...denominatorLabels.keys(),
+    ...Object.keys(numeratorLabels),
+    ...Object.keys(denominatorLabels),
   ]);
 
-  const reducedLabels = [...keys].reduce((reducedLabels, label) => {
-    const numeratorCount = numeratorLabels.get(label) || 0;
-    const denominatorCount = denominatorLabels.get(label) || 0;
+  const reducedLabels = [...keys].reduce<LabelCount>((reducedLabels, label) => {
+    const numeratorCount = numeratorLabels[label] || 0;
+    const denominatorCount = denominatorLabels[label] || 0;
 
     const newCount = numeratorCount - denominatorCount;
 
-    if (newCount !== 0) reducedLabels.set(label, newCount);
+    if (newCount !== 0) reducedLabels[label] = newCount;
 
     return reducedLabels;
-  }, new Map<string, number>());
+  }, {});
 
   return reducedLabels;
 }
@@ -195,13 +197,13 @@ const sortLabels = (
 /**
  * Convert a map of labels to a string
  * @param labels
- * @returns
+ * @returns A string representation of the labels
  */
 export function stringifyLabels(labels: LabelCount) {
   const numeratorLabels: [string, number][] = [];
   const denominatorLabels: [string, number][] = [];
 
-  labels.forEach((count, key) => {
+  Object.entries(labels).forEach(([key, count]) => {
     if (count > 0) numeratorLabels.push([key, count]);
     if (count < 0) denominatorLabels.push([key, -count]);
   });
@@ -244,8 +246,8 @@ export function stringifyRatio(ratio: BaseRatio) {
     .replace(/\.0+$/, "")}`;
 
   const resultsLabels = cancelOutLabels(
-    ratio.numerator.labels || new Map(),
-    ratio.denominator?.labels || new Map(),
+    ratio.numerator.labels || {},
+    ratio.denominator?.labels || {},
   );
 
   const stringifiedLabels = stringifyLabels(resultsLabels);

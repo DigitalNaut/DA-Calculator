@@ -5,4 +5,4 @@ export type ExpressionRecord = {
   expression: Expression;
   coordinates: Coordinates;
 };
-export type ExpressionRecords = Map<string, ExpressionRecord>;
+export type ExpressionRecords = { [key: string]: ExpressionRecord };

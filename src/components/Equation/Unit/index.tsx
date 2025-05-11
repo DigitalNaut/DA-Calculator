@@ -2,7 +2,7 @@ import { faArrowsRotate, faTimes } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import clsx from "clsx";
 import type { MouseEventHandler, PropsWithChildren } from "react";
-import { useMemo, useRef } from "react";
+import { useCallback, useMemo, useRef } from "react";
 
 import { quantityIsTrivial } from "src/logic/expressions";
 import { cn } from "src/utils/styles";
@@ -39,9 +39,10 @@ export default function Unit({
     [inputRatio.denominator],
   );
 
-  const handleFlipUnit: MouseEventHandler<HTMLButtonElement> = () => {
-    onFlipUnit();
-  };
+  const handleFlipUnit: MouseEventHandler<HTMLButtonElement> = useCallback(
+    onFlipUnit,
+    [onFlipUnit],
+  );
 
   return (
     <div
