@@ -19,7 +19,6 @@ import {
   modifyExpression,
   removeExpression,
 } from "src/features/expressions/expressionRecordsSlice";
-import type { RootState } from "src/store";
 import { useAppDispatch, useAppSelector } from "src/store/hooks";
 import type { Expression } from "src/types/expressions";
 import type { EquationHandle } from "../Equation/types";
@@ -28,9 +27,7 @@ const NEW_EQUATION_HALF_WIDTH = 107.5; // Manually measured
 const NEW_EQUATION_HALF_HEIGHT = 44;
 
 export default function Board() {
-  const { expressions } = useAppSelector(
-    (state: RootState) => state.expressionRecords,
-  );
+  const { expressions } = useAppSelector((state) => state.expressionRecords);
   const dispatch = useAppDispatch();
 
   const sensors = useSensors(
