@@ -1,8 +1,8 @@
 import type { PayloadAction } from "@reduxjs/toolkit";
-import { createSlice } from "@reduxjs/toolkit";
+import { createSelector, createSlice } from "@reduxjs/toolkit";
 
 import { createExpression } from "src/logic/expressions";
-import type { AppThunk } from "src/store";
+import type { AppThunk, RootState } from "src/store";
 import type { Expression } from "src/types/expressions";
 import { randomId } from "src/utils/id";
 import { expression1 } from "./presets";
@@ -97,6 +97,13 @@ export const {
 
 export default reducer;
 
+export function selectExpressionRecords() {
+  return createSelector(
+    (state: RootState) => state.expressionRecords,
+    (records) => records.expressions,
+  );
+}
+
 export function modifyExpression({
   key,
   callback,
@@ -104,7 +111,7 @@ export function modifyExpression({
   key: string;
   callback: (record: ExpressionRecord) => Partial<ExpressionRecord>;
 }): AppThunk {
-  return function (dispatch, getState) {
+  return function modify(dispatch, getState) {
     const newRecord = callback(getState().expressionRecords.expressions[key]);
     dispatch(updateExpression({ key, newRecord }));
   };
