@@ -219,10 +219,17 @@ function useEquation({
     }
   }, []);
 
-  useEffect(() => {
-    if (expression.length) calculateResults();
-    onExpressionChange?.(expression);
-  }, [expression, calculateResults, onExpressionChange]);
+  useEffect(
+    /**
+     * Calculate results when expression changes.
+     * Emits a change event.
+     */
+    function updateResultsOnChange() {
+      calculateResults();
+      onExpressionChange?.(expression);
+    },
+    [expression, calculateResults, onExpressionChange],
+  );
 
   return {
     state: { expression, metadata, result },
