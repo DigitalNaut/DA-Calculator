@@ -428,4 +428,5 @@ export function ActionButton({
 }
 
 const Equation = Object.assign(EquationInternal, { ActionButton });
+
 export default Equation;
