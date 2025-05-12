@@ -121,6 +121,12 @@ export default function Board() {
               }}
               onElementFocus={() => setHasFocus(true)}
               onElementBlur={() => setHasFocus(false)}
+              // onExpressionChange={(expression) =>
+              // updateExpression(key, (prevExpression) => ({
+              //   expression,
+              //   coordinates: prevExpression.coordinates,
+              // }))
+              // }
               input={expression}
               actionButtons={
                 <>

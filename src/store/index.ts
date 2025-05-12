@@ -1,7 +1,7 @@
 import type { Action, ThunkAction } from "@reduxjs/toolkit";
 import { configureStore } from "@reduxjs/toolkit";
 
-import expressionRecords from "src/features/expressions/expressionRecordsSlice";
+import expressionRecords from "src/store/features/expressionRecords/slice";
 
 export const store = configureStore({
   reducer: { expressionRecords },
