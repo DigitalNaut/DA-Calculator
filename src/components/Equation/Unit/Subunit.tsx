@@ -1,9 +1,12 @@
-import type {
-  ChangeEventHandler,
-  FocusEventHandler,
-  KeyboardEventHandler,
+import type { FocusEventHandler, KeyboardEventHandler } from "react";
+import {
+  Fragment,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  useState,
 } from "react";
-import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 
 import {
   factorNeedle,
@@ -16,29 +19,53 @@ import {
 } from "src/validation/input-parser";
 import type { SubunitProps } from "../types";
 
+/**
+ * Normalizes an input string to a valid quantity.
+ * @param inputString
+ * @returns The normalized string. If the string is invalid, returns "1".
+ */
+function normalizeInput(inputString: string) {
+  let adjustedInput = inputString.trim();
+  adjustedInput = adjustedInput.replace(/\s+/g, " ");
+  if (adjustedInput === "" || adjustedInput === "0") adjustedInput = "1";
+  return adjustedInput;
+}
+
 function useInput({
   index,
-  inputQuantity,
   quantityPosition,
   isFocused,
-  onChangeInput,
-}: Omit<SubunitProps, "display" | "onFocused">) {
-  const [inputString, setInputString] = useState(() =>
-    stringifyQuantity(inputQuantity),
-  );
+  input,
+  onChange,
+  onFocused,
+  onBlurred,
+}: Omit<SubunitProps, "display">) {
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const changeHandler: ChangeEventHandler<HTMLInputElement> = ({
-    currentTarget,
-  }) => setInputString(currentTarget.value);
+  const inputString = useMemo(() => stringifyQuantity(input), [input]);
 
-  const blurHandler: FocusEventHandler<HTMLInputElement> = () => {
-    let adjustedInput = inputString.trim();
-    adjustedInput = adjustedInput.replace(/\s+/g, " ");
-    if (adjustedInput === "" || adjustedInput === "0") adjustedInput = "1";
+  const [displayText, setDisplayText] = useState(() =>
+    normalizeInput(inputString),
+  );
 
-    setInputString(adjustedInput);
-    onChangeInput(index, quantityPosition, adjustedInput);
+  const focusHandler: FocusEventHandler<HTMLInputElement> = (event) => {
+    onFocused?.(event);
+  };
+
+  const blurHandler: FocusEventHandler<HTMLInputElement> = (event) => {
+    onBlurred?.(event);
+
+    const changedInput = normalizeInput(event.currentTarget.value);
+
+    if (changedInput === inputString) return;
+
+    onChange(index, quantityPosition, changedInput);
+  };
+
+  const changeHandler: FocusEventHandler<HTMLInputElement> = (event) => {
+    if (!event.currentTarget) return;
+    event.currentTarget.size = event.currentTarget.value.length || 1;
+    setDisplayText(normalizeInput(event.currentTarget.value));
   };
 
   const keyDownHandler: KeyboardEventHandler<HTMLInputElement> = ({
@@ -48,6 +75,18 @@ function useInput({
     if (key === "Enter") currentTarget.blur();
   };
 
+  useEffect(
+    /**
+     * Updates the input element to reflect the current state of the expression when it changes.
+     */
+    function updateInput() {
+      if (!inputRef.current) return;
+      inputRef.current.value = inputString;
+      setDisplayText(normalizeInput(inputString));
+    },
+    [inputRef, inputString],
+  );
+
   useEffect(() => {
     if (!inputRef.current) return;
 
@@ -55,23 +94,24 @@ function useInput({
       inputRef.current.focus();
       inputRef.current.select();
     }
-  }, [isFocused]);
+  }, [inputRef, isFocused]);
 
   return {
     inputString,
     inputRef,
-    changeHandler,
+    displayText,
     blurHandler,
+    changeHandler,
+    focusHandler,
     keyDownHandler,
   };
 }
 
-function useInputHighlight(inputString: string) {
-  const match = useMemo(() => separateFactorLabels(inputString), [inputString]);
-  if (!match) return <>{inputString}</>;
+function StyledInput({ input }: { input: string }) {
+  const match = useMemo(() => separateFactorLabels(input), [input]);
+  if (!match) return <>{input}</>;
 
   const [rawFactor, rawLabels] = match;
-
   const labels = rawLabels.match(labelSeparatorNeedle);
 
   return (
@@ -109,28 +149,41 @@ function useInputHighlight(inputString: string) {
   );
 }
 
-export default function Subunit({ onFocused, ...inputParams }: SubunitProps) {
-  const { inputString, inputRef, changeHandler, blurHandler, keyDownHandler } =
-    useInput(inputParams);
+export default function Subunit(inputParams: SubunitProps) {
+  const {
+    inputRef,
+    inputString,
+    displayText,
+    focusHandler,
+    changeHandler,
+    blurHandler,
+    keyDownHandler,
+  } = useInput(inputParams);
 
-  const highlightedInput = useInputHighlight(inputString);
+  useImperativeHandle(
+    inputParams.ref,
+    () => ({
+      focus: () => inputRef.current?.focus(),
+    }),
+    [inputRef],
+  );
 
   return (
     <div className="group/subunit relative grow">
       <div className="pointer-events-none absolute flex size-full items-center justify-center group-focus-within/subunit:hidden">
-        {highlightedInput}
+        <StyledInput input={displayText} />
       </div>
       <input
         ref={inputRef}
         placeholder="No value"
         className="w-full grow rounded-md bg-transparent py-2 text-center text-transparent focus:bg-white focus:text-slate-900"
-        value={inputString}
-        onChange={changeHandler}
+        defaultValue={inputString}
+        onFocus={focusHandler}
         onBlur={blurHandler}
         onKeyDown={keyDownHandler}
+        onChange={changeHandler}
         size={inputString.length || 1}
         maxLength={50}
-        onFocus={onFocused}
       />
     </div>
   );

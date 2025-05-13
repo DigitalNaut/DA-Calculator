@@ -1,10 +1,11 @@
 import type { LabelCount, Quantity } from "src/types/expressions";
 
+import { isEmptyObject } from "src/utils/objects";
 import {
   factorLabelNeedle,
-  labelSeparatorNeedle,
   factorNeedle,
   labelNeedle,
+  labelSeparatorNeedle,
 } from "./factor-labels";
 
 /**
@@ -37,7 +38,7 @@ function parseFactor(input: string): number {
 function parseLabels(input: string): LabelCount | undefined {
   if (input?.length === 0) return;
 
-  const results: LabelCount = new Map();
+  const results: LabelCount = {};
 
   // Run the search and store the labels
   // See: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp/exec
@@ -53,10 +54,10 @@ function parseLabels(input: string): LabelCount | undefined {
 
     if (!label) continue;
 
-    const prevCount = results.get(label) || 0;
+    const prevCount = results[label] || 0;
     const count = Number.parseInt(exponent, 10) || 1;
 
-    results.set(label, prevCount + count);
+    results[label] = prevCount + count;
 
     // if (!exponent) {
     //   results.set(labelSubstring, 1);
@@ -70,7 +71,7 @@ function parseLabels(input: string): LabelCount | undefined {
     // }
   }
 
-  if (results.size === 0) return;
+  if (isEmptyObject(results)) return;
 
   return results;
 }
@@ -91,7 +92,7 @@ export function parseInput(input: string): Quantity | undefined {
   const factor = parseFactor(rawFactor);
   const labels = parseLabels(rawLabels);
 
-  if (labels?.size === 0) return { factor };
+  if (labels && isEmptyObject(labels)) return { factor };
 
   return { factor, labels };
 }
@@ -104,9 +105,11 @@ export function parseInput(input: string): Quantity | undefined {
 export function stringifyQuantity(quantity?: Quantity) {
   if (!quantity) return "";
 
-  const formattedLabels = [...(quantity.labels || [])]
+  if (!quantity?.labels) return `${quantity.factor}`;
+
+  const formattedLabels = [...(Object.entries(quantity.labels) || [])]
     .map(([label, exponent]) => `${label}${exponent > 1 ? "^" + exponent : ""}`)
     .join(" ");
 
-  return `${quantity.factor} ${formattedLabels}`.trim();
+  return `${quantity.factor} ${formattedLabels}`;
 }

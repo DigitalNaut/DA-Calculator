@@ -10,28 +10,32 @@ import { restrictToParentElement } from "@dnd-kit/modifiers";
 import type { Coordinates } from "@dnd-kit/utilities";
 import { faBroom, faClone, faTrash } from "@fortawesome/free-solid-svg-icons";
 import type { MouseEventHandler } from "react";
-import { useCallback, useRef } from "react";
+import { useCallback, useRef, useState } from "react";
 
 import Draggable from "src/components/Draggable";
 import Equation from "src/components/Equation";
-import useExpressions from "src/hooks/expressions-context/useExpressions";
+import {
+  addExpression,
+  modifyCoordinatesById,
+  removeExpressionById,
+  selectExpressionRecordEntries,
+  setInput,
+} from "src/store/features/expressionRecords/slice";
+import { useAppDispatch, useAppSelector } from "src/store/hooks";
 import type { Expression } from "src/types/expressions";
+import type { EquationHandle } from "../Equation/types";
 
 const NEW_EQUATION_HALF_WIDTH = 107.5; // Manually measured
 const NEW_EQUATION_HALF_HEIGHT = 44;
 
 export default function Board() {
-  const {
-    state: { expressions },
-    actions: { removeExpression, addExpression, updateExpression },
-  } = useExpressions();
+  const dispatch = useAppDispatch();
+
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
     useSensor(TouchSensor),
   );
-  const equationsMapRef = useRef(
-    new Map<string, { cleanupExpression: () => void }>(),
-  );
+  const equationsMapRef = useRef(new Map<string, EquationHandle>());
 
   const doubleClickBoardHandler: MouseEventHandler<HTMLDivElement> =
     useCallback(
@@ -51,33 +55,42 @@ export default function Board() {
           currentTarget.offsetTop -
           NEW_EQUATION_HALF_HEIGHT;
 
-        addExpression({ coordinates: { x, y } });
+        dispatch(addExpression({ coordinates: { x, y } }));
       },
-      [addExpression],
+      [dispatch],
     );
 
   const dragEndHandler = useCallback(
     ({ active, delta }: DragEndEvent) =>
-      updateExpression(String(active.id), ({ coordinates: { x, y } }) => ({
-        coordinates: {
-          x: x + delta.x,
-          y: y + delta.y,
-        },
-      })),
-    [updateExpression],
+      dispatch(
+        modifyCoordinatesById({
+          id: `${active.id}`,
+          callback: ({ x, y }) => ({
+            x: x + delta.x,
+            y: y + delta.y,
+          }),
+        }),
+      ),
+    [dispatch],
   );
 
   const duplicateEquationHandler = useCallback(
     (expression: Expression, coordinates: Coordinates) =>
-      addExpression({
-        expression,
-        coordinates: {
-          x: coordinates.x,
-          y: coordinates.y + NEW_EQUATION_HALF_HEIGHT * 2,
-        },
-      }),
-    [addExpression],
+      dispatch(
+        addExpression({
+          expression,
+          coordinates: {
+            x: coordinates.x,
+            y: coordinates.y + NEW_EQUATION_HALF_HEIGHT * 2,
+          },
+        }),
+      ),
+    [dispatch],
   );
+
+  const [hasFocus, setHasFocus] = useState(false);
+
+  const recordEntries = useAppSelector(selectExpressionRecordEntries);
 
   return (
     <article
@@ -89,22 +102,26 @@ export default function Board() {
         onDragEnd={dragEndHandler}
         modifiers={[restrictToParentElement]}
       >
-        {[...expressions].map(([key, { expression, coordinates }]) => (
+        {recordEntries.map(({ id, expression, coordinates }) => (
           <Draggable
             className="absolute flex size-max"
-            key={key}
-            id={key}
+            key={id}
+            id={id}
             style={{ top: coordinates.y, left: coordinates.x }}
+            disabled={hasFocus}
           >
             <Equation
               ref={(ref) => {
-                if (ref) equationsMapRef.current.set(key, ref);
-                else equationsMapRef.current.delete(key);
+                if (ref) equationsMapRef.current.set(id, ref);
+                else equationsMapRef.current.delete(id);
                 return () => {
-                  equationsMapRef.current.delete(key);
+                  equationsMapRef.current.delete(id);
                 };
               }}
+              onElementFocus={() => setHasFocus(true)}
+              onElementBlur={() => setHasFocus(false)}
               input={expression}
+              setInput={(expression) => dispatch(setInput(id, expression))}
               actionButtons={
                 <>
                   <Equation.ActionButton
@@ -120,17 +137,14 @@ export default function Board() {
                     icon={faBroom}
                     title="Remove trivial units"
                     onClick={() =>
-                      equationsMapRef.current.get(key)?.cleanupExpression()
+                      equationsMapRef.current.get(id)?.cleanupExpression()
                     }
                   />
                   <Equation.ActionButton
                     mode="red"
                     icon={faTrash}
                     title="Delete equation"
-                    onClick={() => {
-                      removeExpression(key);
-                      equationsMapRef.current.delete(key);
-                    }}
+                    onClick={() => dispatch(removeExpressionById(id))}
                   />
                 </>
               }

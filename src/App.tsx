@@ -1,13 +1,15 @@
 import type { JSX } from "react";
-import ExpressionsProvider from "src/hooks/expressions-context/ExpressionsProvider";
+import { Provider } from "react-redux";
+
 import Home from "src/views/Home";
+import { store } from "./store/index.ts";
 
 import "src/index.css";
 
 export default function App(): JSX.Element {
   return (
-    <ExpressionsProvider>
+    <Provider store={store}>
       <Home />
-    </ExpressionsProvider>
+    </Provider>
   );
 }

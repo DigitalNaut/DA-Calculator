@@ -1,4 +1,17 @@
-import type { Quantity, QuantityPosition, Ratio } from "src/types/expressions";
+import type {
+  Dispatch,
+  FocusEventHandler,
+  ReactNode,
+  Ref,
+  RefObject,
+  SetStateAction,
+} from "react";
+import type {
+  Expression,
+  Quantity,
+  QuantityPosition,
+  Ratio,
+} from "src/types/expressions";
 
 export type InputChangeHandler = (
   index: number,
@@ -8,22 +21,42 @@ export type InputChangeHandler = (
 
 type InputHandlerProps = {
   index: number;
-  onChangeInput: InputChangeHandler;
+  onChange: InputChangeHandler;
 };
 
 type Focusable = {
   isFocused: boolean;
-  onFocused(): void;
+  onFocused?: FocusEventHandler<HTMLDivElement>;
+  onBlurred?: FocusEventHandler<HTMLDivElement>;
 };
 
 export type UnitProps = InputHandlerProps &
   Focusable & {
-    inputRatio: Ratio;
+    input: Ratio;
     onDeleteUnit(): void;
   };
 
+export type EquationHandle = {
+  cleanupExpression: () => void;
+};
+
+export type SubunitHandle = {
+  focus: () => void;
+};
+
 export type SubunitProps = InputHandlerProps &
   Partial<Focusable> & {
-    inputQuantity: Quantity;
+    input: Quantity;
     quantityPosition: QuantityPosition;
+    ref: RefObject<SubunitHandle | null>;
   };
+
+export type EquationProps = {
+  ref?: Ref<EquationHandle>;
+  actionButtons: ReactNode;
+  input: Expression;
+  setInput: Dispatch<SetStateAction<Expression>>;
+  onElementFocus?: FocusEventHandler<HTMLDivElement>;
+  onElementBlur?: FocusEventHandler<HTMLDivElement>;
+  onExpressionChange?: (expression: Expression) => void;
+};

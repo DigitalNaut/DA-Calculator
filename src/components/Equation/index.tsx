@@ -19,132 +19,112 @@ import {
 import type { IconDefinition } from "@fortawesome/free-solid-svg-icons";
 import { faEquals, faGripVertical } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import type { ComponentPropsWithoutRef, Ref } from "react";
-import { useCallback, useImperativeHandle, useMemo, useState } from "react";
-
-import Unit from "src/components/Equation/Unit/Unit";
+import type {
+  ComponentPropsWithoutRef,
+  FocusEventHandler,
+  SetStateAction,
+} from "react";
 import {
-  cancelOutLabels,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useState,
+} from "react";
+
+import Unit from "src/components/Equation/Unit";
+import {
+  calculateResults,
+  flipUnit,
   insertRatio,
+  quantityIsTrivial,
   removeRatio,
   simplifyExpression,
-  stringifyLabels,
+  stringifyRatio,
   updateRatio,
 } from "src/logic/expressions";
-import type {
-  BaseRatio,
-  Expression,
-  LabelCount,
-  QuantityPosition,
-} from "src/types/expressions";
+import type { BaseRatio, Expression } from "src/types/expressions";
 import { cn } from "src/utils/styles";
 import { SortableItem } from "../Sortable";
 import CopyButton from "./CopyButton";
 import Inserter from "./Inserter";
-import type { InputChangeHandler } from "./types";
+import Period from "./Period";
+import type { EquationProps, InputChangeHandler } from "./types";
 
-function useEquation(input: Expression) {
-  const [expression, setExpression] = useState(input);
+function useEquation({
+  input,
+  setInput,
+  onExpressionChange,
+}: {
+  input: Expression;
+  setInput: React.Dispatch<SetStateAction<Expression>>;
+  onExpressionChange?: (expression: Expression) => void;
+}) {
   const [results, setResults] = useState<BaseRatio | null>(null);
 
-  const multiplyFactors = (
-    expression: Expression,
-    subunit: QuantityPosition,
-  ) => {
-    const reducedExpression = expression.reduce(
-      (previousExpression, currentExpression) => {
-        const factor = currentExpression[subunit]?.factor ?? 1;
+  /**
+   * Keep track of whether the next item needs a period
+   */
+  const metadata = useMemo<Record<string, { needsPeriod: boolean }>>(
+    () =>
+      input.reduce((prev, current, index) => {
+        const isNotLastItem = index < input.length - 1;
 
-        return previousExpression * factor;
-      },
-      1,
-    );
+        if (!isNotLastItem) return prev;
 
-    return reducedExpression;
-  };
+        const currentHasTrivialRatio = quantityIsTrivial(current.denominator);
+        const nextHasTrivialRatio = quantityIsTrivial(
+          input[index + 1]?.denominator,
+        );
 
-  const compoundLabels = (
-    expression: Expression,
-    quantityPosition: QuantityPosition,
-  ) => {
-    const reducedExpression = expression.reduce<LabelCount>(
-      (prevTerms, currentTerm) => {
-        const labels = currentTerm[quantityPosition]?.labels;
+        return {
+          ...prev,
+          [current.id]: {
+            needsPeriod: currentHasTrivialRatio && nextHasTrivialRatio,
+          },
+        };
+      }, {}),
+    [input],
+  );
 
-        if (!labels) return prevTerms;
-
-        for (const [label, count] of labels) {
-          const prevCount = prevTerms.get(label) || 0;
-          prevTerms.set(label, prevCount + count);
-        }
-
-        return prevTerms;
-      },
-      new Map<string, number>(),
-    );
-
-    return reducedExpression;
-  };
+  const updateResults = useCallback(
+    () => setResults(calculateResults(input)),
+    [input],
+  );
 
   const cleanupExpression = () => {
-    setExpression(simplifyExpression(expression));
+    setInput(simplifyExpression(input));
   };
-
-  const calculateResults = () =>
-    setResults({
-      numerator: {
-        factor: multiplyFactors(expression, "numerator"),
-        labels: compoundLabels(expression, "numerator"),
-      },
-      denominator: {
-        factor: multiplyFactors(expression, "denominator"),
-        labels: compoundLabels(expression, "denominator"),
-      },
-    });
 
   const deleteUnit = (index: number) => {
-    if (expression.length === 0) return;
+    if (input.length === 0) return;
 
-    const modifiedExpression = removeRatio(expression, index);
-    setExpression(modifiedExpression);
+    const modifiedExpression = removeRatio(input, index);
+    setInput(modifiedExpression);
 
-    return expression.length > modifiedExpression.length;
+    return input.length > modifiedExpression.length;
   };
 
-  const updateExpression: InputChangeHandler = (
+  const setExpressionTerm: InputChangeHandler = (
     index,
-    termPosition,
+    position,
     userInput,
   ) => {
-    setExpression((prevExpression) =>
-      updateRatio(prevExpression, index, termPosition, userInput),
+    setInput((prevExpression) =>
+      updateRatio(prevExpression, index, position, userInput),
     );
   };
 
   const insertExpression = (index: number) => {
-    setExpression((prevExpression) => insertRatio(prevExpression, index));
+    setInput((prevExpression) => insertRatio(prevExpression, index));
   };
 
-  const result = useMemo(() => {
-    if (!results) return "Result";
+  const result = useMemo(
+    () => (results ? stringifyRatio(results) : null),
+    [results],
+  );
 
-    const resultFactor = `${(
-      results.numerator.factor / (results.denominator?.factor || 1)
-    )
-      .toFixed(2)
-      .replace(/\.0+$/, "")}`;
-
-    const resultsLabels = cancelOutLabels(
-      results.numerator.labels || new Map(),
-      results.denominator?.labels || new Map(),
-    );
-
-    const stringifiedLabels = stringifyLabels(resultsLabels);
-
-    return `${resultFactor} ${stringifiedLabels}`;
-  }, [results]);
-
-  const [wasInputChanged, setWasInputChanged] = useState(false);
+  // Used to focus an input when a unit is added
   const [focusIndex, setFocusIndex] = useState<number | null>(null);
 
   const handleClickResults = () => {
@@ -152,10 +132,7 @@ function useEquation(input: Expression) {
     cleanupExpression();
 
     // Update data
-    calculateResults();
-
-    // Reset flags
-    setWasInputChanged(false);
+    updateResults();
   };
 
   const handleClearFocusIndex = () => setFocusIndex(null);
@@ -170,12 +147,11 @@ function useEquation(input: Expression) {
   };
 
   const handleDeleteUnit = (index: number) => {
-    if (deleteUnit(index)) setWasInputChanged(true);
+    deleteUnit(index);
   };
 
-  const handleChangeInput: InputChangeHandler = (...args) => {
-    updateExpression(...args);
-    setWasInputChanged(true);
+  const handleInvertUnit = (index: number) => {
+    setInput(flipUnit(input, index));
   };
 
   const handleDragEnd = useCallback(
@@ -185,7 +161,7 @@ function useEquation(input: Expression) {
       if (!over) return;
 
       if (active.id !== over.id) {
-        setExpression((items) => {
+        setInput((items) => {
           const expressionIndices = items.map((item) => item.id);
           const oldIndex = expressionIndices.indexOf(String(active.id));
           const newIndex = expressionIndices.indexOf(String(over.id));
@@ -196,34 +172,47 @@ function useEquation(input: Expression) {
         });
       }
     },
-    [setExpression],
+    [setInput],
+  );
+
+  useEffect(
+    /**
+     * Calculate results when expression changes.
+     * Emits a change event.
+     */
+    function updateResultsOnChange() {
+      updateResults();
+      onExpressionChange?.(input);
+    },
+    [input, updateResults, onExpressionChange],
   );
 
   return {
-    state: { expression, result, wasInputChanged },
+    state: { metadata, result },
     actions: { cleanupExpression, focusIndex },
     handlers: {
       handleClickResults,
       handleClearFocusIndex,
       handleInsertion,
       handleDeleteUnit,
-      handleChangeInput,
+      handleChangeInput: setExpressionTerm,
       handleDragEnd,
+      handleInvertUnit,
     },
   };
 }
 
-function Equation({
-  input,
-  actionButtons,
+function EquationInternal({
   ref,
-}: {
-  ref?: Ref<{ cleanupExpression: () => void }>;
-  input: Expression;
-  actionButtons: ReturnType<typeof ActionButton>;
-}) {
+  actionButtons,
+  input,
+  setInput,
+  onElementFocus,
+  onElementBlur,
+  onExpressionChange,
+}: EquationProps) {
   const {
-    state: { expression, result, wasInputChanged },
+    state: { metadata, result },
     actions: { cleanupExpression, focusIndex },
     handlers: {
       handleClickResults,
@@ -233,7 +222,7 @@ function Equation({
       handleChangeInput,
       handleDragEnd,
     },
-  } = useEquation(input);
+  } = useEquation({ input, setInput, onExpressionChange });
 
   useImperativeHandle(
     ref,
@@ -248,10 +237,29 @@ function Equation({
     useSensor(TouchSensor),
   );
 
+  const [hasFocus, setHasFocus] = useState(false);
+
+  const handleUnitFocus: FocusEventHandler<HTMLDivElement> = useCallback(
+    (event) => {
+      handleClearFocusIndex();
+      onElementFocus?.(event);
+      setHasFocus(true);
+    },
+    [handleClearFocusIndex, onElementFocus],
+  );
+
+  const handleUnitBlur: FocusEventHandler<HTMLDivElement> = useCallback(
+    (event) => {
+      onElementBlur?.(event);
+      setHasFocus(false);
+    },
+    [onElementBlur],
+  );
+
   return (
     <div className="group/equation flex size-max items-stretch justify-center gap-2 rounded-lg p-2 focus-within:bg-slate-800 focus-within:shadow-lg focus-within:outline focus-within:outline-slate-700 hover:bg-slate-800 hover:shadow-lg">
       <div className="invisible flex items-center text-slate-600 group-hover/equation:visible">
-        <FontAwesomeIcon icon={faGripVertical} />
+        {!hasFocus && <FontAwesomeIcon icon={faGripVertical} />}
       </div>
 
       <div className="flex gap-0.5">
@@ -265,11 +273,12 @@ function Equation({
           onDragEnd={handleDragEnd}
         >
           <SortableContext
-            items={expression}
+            items={input}
             strategy={horizontalListSortingStrategy}
+            disabled={hasFocus}
           >
             <div className="flex w-full items-center justify-center gap-0.5">
-              {expression.map((ratio, index) => {
+              {input.map((ratio, index) => {
                 return (
                   <SortableItem
                     className="flex h-full w-max gap-0.5"
@@ -278,12 +287,20 @@ function Equation({
                     tabIndex={-1}
                   >
                     <Unit
-                      inputRatio={ratio}
-                      onChangeInput={handleChangeInput}
+                      input={ratio}
+                      onChange={handleChangeInput}
                       index={index}
                       onDeleteUnit={() => handleDeleteUnit(index)}
                       isFocused={focusIndex === index}
-                      onFocused={handleClearFocusIndex}
+                      onFocused={handleUnitFocus}
+                      onBlurred={handleUnitBlur}
+                    />
+                    <Period
+                      style={{
+                        visibility: metadata[ratio.id]?.needsPeriod
+                          ? "visible"
+                          : "hidden",
+                      }}
                     />
                     <Inserter
                       onClick={({ currentTarget }) =>
@@ -308,20 +325,27 @@ function Equation({
           onClick={handleClickResults}
         >
           <div
+            autoFocus
             className={cn(
               "min-w-24 rounded-lg p-2 text-center text-white hover:bg-slate-700",
               {
-                "text-gray-500 italic": result === "Result" || wasInputChanged,
+                "text-gray-500 italic": !result,
               },
             )}
           >
-            {result}
+            <input
+              readOnly
+              onFocus={onElementFocus}
+              onBlur={onElementBlur}
+              value={result || "---"}
+              size={result?.length || 1}
+            />
           </div>
 
           <CopyButton
             className="p-2 opacity-0 group-hover:opacity-100"
-            content={result}
-            disabled={result === "Result" || wasInputChanged}
+            content={result || "---"}
+            disabled={!result}
           />
         </div>
       </div>
@@ -358,11 +382,6 @@ export function ActionButton({
   );
 }
 
-type EquationComponent = typeof Equation & {
-  ActionButton: typeof ActionButton;
-};
+const Equation = Object.assign(EquationInternal, { ActionButton });
 
-(Equation as EquationComponent).ActionButton = ActionButton;
-
-const EquationWithActionButton = Equation as EquationComponent;
-export default EquationWithActionButton;
+export default Equation;
