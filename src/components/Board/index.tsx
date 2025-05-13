@@ -64,7 +64,7 @@ export default function Board() {
     ({ active, delta }: DragEndEvent) =>
       dispatch(
         modifyCoordinatesById({
-          id: String(active.id),
+          id: `${active.id}`,
           callback: ({ x, y }) => ({
             x: x + delta.x,
             y: y + delta.y,

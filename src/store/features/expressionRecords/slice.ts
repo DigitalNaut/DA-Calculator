@@ -160,6 +160,12 @@ export function removeExpressionById(id: string): AppThunk {
   };
 }
 
+/**
+ * This is the function that's drilled down to the components to change the input.
+ * @param id
+ * @param expression
+ * @returns
+ */
 export function setInput(
   id: string,
   expression: SetStateAction<Expression>,
