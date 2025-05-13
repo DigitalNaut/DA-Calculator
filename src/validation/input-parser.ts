@@ -103,11 +103,13 @@ export function parseInput(input: string): Quantity | undefined {
  * @returns A string representation of the quantity
  */
 export function stringifyQuantity(quantity?: Quantity) {
-  if (!quantity?.labels) return "";
+  if (!quantity) return "";
+
+  if (!quantity?.labels) return `${quantity.factor}`;
 
   const formattedLabels = [...(Object.entries(quantity.labels) || [])]
     .map(([label, exponent]) => `${label}${exponent > 1 ? "^" + exponent : ""}`)
     .join(" ");
 
-  return `${quantity.factor} ${formattedLabels}`.trim();
+  return `${quantity.factor} ${formattedLabels}`;
 }
