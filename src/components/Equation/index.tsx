@@ -258,8 +258,12 @@ function EquationInternal({
 
   return (
     <div className="group/equation flex size-max items-stretch justify-center gap-2 rounded-lg p-2 focus-within:bg-slate-800 focus-within:shadow-lg focus-within:outline focus-within:outline-slate-700 hover:bg-slate-800 hover:shadow-lg">
-      <div className="invisible flex items-center text-slate-600 group-hover/equation:visible">
-        {!hasFocus && <FontAwesomeIcon icon={faGripVertical} />}
+      <div
+        className={cn("invisible flex items-center text-slate-600", {
+          "group-hover/equation:visible": !hasFocus,
+        })}
+      >
+        {<FontAwesomeIcon icon={faGripVertical} />}
       </div>
 
       <div className="flex gap-0.5">
@@ -343,14 +347,14 @@ function EquationInternal({
           </div>
 
           <CopyButton
-            className="p-2 opacity-0 group-hover:opacity-100"
-            content={result || "---"}
+            className="p-2 opacity-0 group-focus-within:opacity-100 group-hover:opacity-100"
+            content={result || ""}
             disabled={!result}
           />
         </div>
       </div>
 
-      <div className="invisible flex h-full flex-col pl-1 text-slate-600 group-hover/equation:visible">
+      <div className="invisible flex h-full flex-col pl-1 text-slate-600 group-focus-within/equation:visible group-hover/equation:visible">
         {actionButtons}
       </div>
     </div>
