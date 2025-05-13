@@ -20,7 +20,8 @@ function normalizeExpressions(
   if (!initialExpressions) return {};
 
   return initialExpressions.reduce<ExpressionRecords>((acc, expression) => {
-    acc[randomId()] = { expression, coordinates: { x: 0, y: 0 } };
+    const key = randomId();
+    acc[key] = { key, expression, coordinates: { x: 0, y: 0 } };
     return acc;
   }, {});
 }
@@ -56,6 +57,7 @@ const expressionRecordsSlice = createSlice({
       const key = randomId();
 
       state.expressions[key] = {
+        key,
         expression: newExpression,
         coordinates: newCoordinates,
       };
