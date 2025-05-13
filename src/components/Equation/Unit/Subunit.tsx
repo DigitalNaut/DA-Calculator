@@ -19,6 +19,11 @@ import {
 } from "src/validation/input-parser";
 import type { SubunitProps } from "../types";
 
+/**
+ * Normalizes an input string to a valid quantity.
+ * @param inputString
+ * @returns The normalized string. If the string is invalid, returns "1".
+ */
 function normalizeInput(inputString: string) {
   let adjustedInput = inputString.trim();
   adjustedInput = adjustedInput.replace(/\s+/g, " ");

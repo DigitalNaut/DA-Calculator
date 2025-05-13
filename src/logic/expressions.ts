@@ -1,3 +1,4 @@
+import { produce } from "immer";
 import type {
   BaseExpression,
   BaseRatio,
@@ -119,25 +120,17 @@ export function updateRatio(
 
   if (!newQuantity) return expression;
 
-  const newExpression = [...expression];
-  const prevRatio = newExpression[index];
-
   if (
     termPosition === "denominator" &&
     newQuantity.factor === 1 &&
     newQuantity.labels &&
     isEmptyObject(newQuantity.labels)
   )
-    return newExpression;
+    return expression.slice();
 
-  newExpression[index] = {
-    ...prevRatio,
-    [termPosition]: {
-      ...newQuantity,
-    },
-  };
-
-  return newExpression;
+  return produce(expression, (draft) => {
+    draft[index][termPosition] = newQuantity;
+  });
 }
 
 /**
