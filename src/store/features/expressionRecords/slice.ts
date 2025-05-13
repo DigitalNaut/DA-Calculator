@@ -103,7 +103,7 @@ const selectRecords = (state: RootState) => state.expressionRecords.expressions;
 
 export const selectExpressionRecordEntries = createSelector(
   selectRecords,
-  (records) => Object.entries(records),
+  (records) => Object.values(records),
 );
 
 export function modifyExpression({

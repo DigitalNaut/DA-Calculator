@@ -103,7 +103,7 @@ export default function Board() {
         onDragEnd={dragEndHandler}
         modifiers={[restrictToParentElement]}
       >
-        {recordEntries.map(([key, { expression, coordinates }]) => (
+        {recordEntries.map(({ key, expression, coordinates }) => (
           <Draggable
             className="absolute flex size-max"
             key={key}
