@@ -18,8 +18,9 @@ import {
   addExpression,
   modifyExpression,
   removeExpression,
+  selectExpressionRecords,
 } from "src/store/features/expressionRecords/slice";
-import { useAppDispatch, useAppSelector } from "src/store/hooks";
+import { useAppDispatch } from "src/store/hooks";
 import type { Expression } from "src/types/expressions";
 import type { EquationHandle } from "../Equation/types";
 
@@ -27,7 +28,6 @@ const NEW_EQUATION_HALF_WIDTH = 107.5; // Manually measured
 const NEW_EQUATION_HALF_HEIGHT = 44;
 
 export default function Board() {
-  const { expressions } = useAppSelector((state) => state.expressionRecords);
   const dispatch = useAppDispatch();
 
   const sensors = useSensors(
@@ -91,7 +91,8 @@ export default function Board() {
 
   const [hasFocus, setHasFocus] = useState(false);
 
-  const equations = useMemo(() => Object.entries(expressions), [expressions]);
+  const records = selectExpressionRecords();
+  const equations = useMemo(() => Object.entries(records), [records]);
 
   return (
     <article
