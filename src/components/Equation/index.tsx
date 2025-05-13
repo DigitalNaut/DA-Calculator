@@ -347,8 +347,8 @@ function EquationInternal({
           </div>
 
           <CopyButton
-            className="p-2 opacity-0 group-focus-within:opacity-100 group-hover:opacity-100"
-            content={result || ""}
+            className="p-2 opacity-0 group-focus-within:opacity-50 group-hover:opacity-50"
+            content={result || "--"}
             disabled={!result}
           />
         </div>
