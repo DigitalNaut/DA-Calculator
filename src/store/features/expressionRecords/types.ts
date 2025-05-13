@@ -2,9 +2,9 @@ import type { Coordinates } from "@dnd-kit/utilities";
 import type { Expression } from "src/types/expressions";
 
 export type ExpressionRecord = {
-  key: string;
+  id: string;
   expression: Expression;
   coordinates: Coordinates;
 };
 
-export type ExpressionRecords = { [key: string]: ExpressionRecord };
+export type ExpressionRecords = { [id: string]: ExpressionRecord };

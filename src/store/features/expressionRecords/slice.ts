@@ -1,5 +1,8 @@
+import type { Coordinates } from "@dnd-kit/utilities";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import { createSelector, createSlice } from "@reduxjs/toolkit";
+import { produce } from "immer";
+import type { SetStateAction } from "react";
 
 import { createExpression } from "src/logic/expressions";
 import type { AppThunk, RootState } from "src/store";
@@ -20,8 +23,8 @@ function normalizeExpressions(
   if (!initialExpressions) return {};
 
   return initialExpressions.reduce<ExpressionRecords>((acc, expression) => {
-    const key = randomId();
-    acc[key] = { key, expression, coordinates: { x: 0, y: 0 } };
+    const id = randomId();
+    acc[id] = { id, expression, coordinates: { x: 0, y: 0 } };
     return acc;
   }, {});
 }
@@ -34,7 +37,7 @@ type AddExpressionPayload = {
 type RemoveExpressionPayload = string;
 
 type UpdateExpressionPayload = {
-  key: string;
+  id: string;
   newRecord: Partial<ExpressionRecord>;
 };
 
@@ -54,10 +57,10 @@ const expressionRecordsSlice = createSlice({
       const { expression, coordinates } = action.payload;
       const newExpression = createExpression(expression);
       const newCoordinates = coordinates ?? { x: 0, y: 0 };
-      const key = randomId();
+      const id = randomId();
 
-      state.expressions[key] = {
-        key,
+      state.expressions[id] = {
+        id,
         expression: newExpression,
         coordinates: newCoordinates,
       };
@@ -66,9 +69,9 @@ const expressionRecordsSlice = createSlice({
       state,
       action: PayloadAction<RemoveExpressionPayload>,
     ) => {
-      const key = action.payload;
-      if (!state.expressions[key]) return;
-      delete state.expressions[key];
+      const id = action.payload;
+      if (!state.expressions[id]) return;
+      delete state.expressions[id];
     },
     clearExpressions: (state) => {
       state.expressions = {};
@@ -77,13 +80,13 @@ const expressionRecordsSlice = createSlice({
       state,
       action: PayloadAction<UpdateExpressionPayload>,
     ) => {
-      const { key, newRecord } = action.payload;
-      if (!state.expressions[key]) return;
+      const { id, newRecord } = action.payload;
+      if (!state.expressions[id]) return;
 
-      const oldRecord = state.expressions[key];
+      const oldRecord = state.expressions[id];
       if (!oldRecord) return;
 
-      state.expressions[key] = { ...oldRecord, ...newRecord };
+      state.expressions[id] = { ...oldRecord, ...newRecord };
     },
   },
 });
@@ -106,15 +109,68 @@ export const selectExpressionRecordEntries = createSelector(
   (records) => Object.values(records),
 );
 
-export function modifyExpression({
-  key,
+export const selectExpressionRecordById = (id: string) =>
+  createSelector(selectRecords, (records) => records[id]);
+
+export function modifyExpressionById({
+  id,
   callback,
 }: {
-  key: string;
-  callback: (record: ExpressionRecord) => Partial<ExpressionRecord>;
+  id: string;
+  callback: (expression: Expression) => Expression;
 }): AppThunk {
-  return function modify(dispatch, getState) {
-    const newRecord = callback(getState().expressionRecords.expressions[key]);
-    dispatch(updateExpression({ key, newRecord }));
+  return function modifyExpression(dispatch, getState) {
+    const prevRecord = getState().expressionRecords.expressions[id];
+    const newExpression = callback(prevRecord.expression);
+    dispatch(
+      updateExpression({
+        id,
+        newRecord: produce(prevRecord, (draft) => {
+          draft.expression = newExpression;
+        }),
+      }),
+    );
+  };
+}
+
+export function modifyCoordinatesById({
+  id,
+  callback,
+}: {
+  id: string;
+  callback: (coordinates: Coordinates) => Coordinates;
+}): AppThunk {
+  return function modifyCoordinates(dispatch, getState) {
+    const prevRecord = getState().expressionRecords.expressions[id];
+    const newCoordinates = callback(prevRecord.coordinates);
+    dispatch(
+      updateExpression({
+        id,
+        newRecord: produce(prevRecord, (draft) => {
+          draft.coordinates = newCoordinates;
+        }),
+      }),
+    );
+  };
+}
+
+export function removeExpressionById(id: string): AppThunk {
+  return function remove(dispatch) {
+    dispatch(removeExpression(id));
+  };
+}
+
+export function setInput(
+  id: string,
+  expression: SetStateAction<Expression>,
+): AppThunk {
+  return function setInputThunk(dispatch) {
+    dispatch(
+      modifyExpressionById({
+        id,
+        callback: (record) =>
+          expression instanceof Function ? expression(record) : expression,
+      }),
+    );
   };
 }

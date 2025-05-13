@@ -19,7 +19,11 @@ import {
 import type { IconDefinition } from "@fortawesome/free-solid-svg-icons";
 import { faEquals, faGripVertical } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import type { ComponentPropsWithoutRef, FocusEventHandler } from "react";
+import type {
+  ComponentPropsWithoutRef,
+  FocusEventHandler,
+  SetStateAction,
+} from "react";
 import {
   useCallback,
   useEffect,
@@ -52,18 +56,17 @@ import Period from "./Period";
 import type { EquationProps, InputChangeHandler } from "./types";
 
 function useEquation({
-  input,
+  input: expression,
+  setInput: setExpression,
   onExpressionChange,
 }: {
   input: Expression;
+  setInput: React.Dispatch<SetStateAction<Expression>>;
   onExpressionChange?: (expression: Expression) => void;
 }) {
-  const [expression, setExpression] = useState(input);
   const [results, setResults] = useState<BaseRatio | null>(null);
 
-  const metadata = useMemo<{
-    [key: string]: { needsPeriod: boolean };
-  }>(
+  const metadata = useMemo<Record<string, { needsPeriod: boolean }>>(
     () =>
       expression.reduce((prev, current, index) => {
         const isNotLastItem = index < expression.length - 1;
@@ -201,23 +204,26 @@ function useEquation({
     setExpression(flipUnit(expression, index));
   };
 
-  const handleDragEnd = useCallback((event: DragEndEvent) => {
-    const { active, over } = event;
+  const handleDragEnd = useCallback(
+    (event: DragEndEvent) => {
+      const { active, over } = event;
 
-    if (!over) return;
+      if (!over) return;
 
-    if (active.id !== over.id) {
-      setExpression((items) => {
-        const expressionIndices = items.map((item) => item.id);
-        const oldIndex = expressionIndices.indexOf(String(active.id));
-        const newIndex = expressionIndices.indexOf(String(over.id));
+      if (active.id !== over.id) {
+        setExpression((items) => {
+          const expressionIndices = items.map((item) => item.id);
+          const oldIndex = expressionIndices.indexOf(String(active.id));
+          const newIndex = expressionIndices.indexOf(String(over.id));
 
-        if (oldIndex === -1 || newIndex === -1) return items;
+          if (oldIndex === -1 || newIndex === -1) return items;
 
-        return arrayMove(items, oldIndex, newIndex);
-      });
-    }
-  }, []);
+          return arrayMove(items, oldIndex, newIndex);
+        });
+      }
+    },
+    [setExpression],
+  );
 
   useEffect(
     /**
@@ -247,9 +253,10 @@ function useEquation({
 }
 
 function EquationInternal({
-  input,
-  actionButtons,
   ref,
+  actionButtons,
+  input,
+  setInput,
   onElementFocus,
   onElementBlur,
   onExpressionChange,
@@ -266,7 +273,7 @@ function EquationInternal({
       handleDragEnd,
       handleInvertUnit,
     },
-  } = useEquation({ input, onExpressionChange });
+  } = useEquation({ input, setInput, onExpressionChange });
 
   useImperativeHandle(
     ref,

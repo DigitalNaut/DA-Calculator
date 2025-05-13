@@ -16,9 +16,10 @@ import Draggable from "src/components/Draggable";
 import Equation from "src/components/Equation";
 import {
   addExpression,
-  modifyExpression,
-  removeExpression,
+  modifyCoordinatesById,
+  removeExpressionById,
   selectExpressionRecordEntries,
+  setInput,
 } from "src/store/features/expressionRecords/slice";
 import { useAppDispatch, useAppSelector } from "src/store/hooks";
 import type { Expression } from "src/types/expressions";
@@ -62,13 +63,11 @@ export default function Board() {
   const dragEndHandler = useCallback(
     ({ active, delta }: DragEndEvent) =>
       dispatch(
-        modifyExpression({
-          key: String(active.id),
-          callback: ({ coordinates: { x, y } }) => ({
-            coordinates: {
-              x: x + delta.x,
-              y: y + delta.y,
-            },
+        modifyCoordinatesById({
+          id: String(active.id),
+          callback: ({ x, y }) => ({
+            x: x + delta.x,
+            y: y + delta.y,
           }),
         }),
       ),
@@ -103,25 +102,26 @@ export default function Board() {
         onDragEnd={dragEndHandler}
         modifiers={[restrictToParentElement]}
       >
-        {recordEntries.map(({ key, expression, coordinates }) => (
+        {recordEntries.map(({ id, expression, coordinates }) => (
           <Draggable
             className="absolute flex size-max"
-            key={key}
-            id={key}
+            key={id}
+            id={id}
             style={{ top: coordinates.y, left: coordinates.x }}
             disabled={hasFocus}
           >
             <Equation
               ref={(ref) => {
-                if (ref) equationsMapRef.current.set(key, ref);
-                else equationsMapRef.current.delete(key);
+                if (ref) equationsMapRef.current.set(id, ref);
+                else equationsMapRef.current.delete(id);
                 return () => {
-                  equationsMapRef.current.delete(key);
+                  equationsMapRef.current.delete(id);
                 };
               }}
               onElementFocus={() => setHasFocus(true)}
               onElementBlur={() => setHasFocus(false)}
               input={expression}
+              setInput={(expression) => dispatch(setInput(id, expression))}
               actionButtons={
                 <>
                   <Equation.ActionButton
@@ -137,17 +137,14 @@ export default function Board() {
                     icon={faBroom}
                     title="Remove trivial units"
                     onClick={() =>
-                      equationsMapRef.current.get(key)?.cleanupExpression()
+                      equationsMapRef.current.get(id)?.cleanupExpression()
                     }
                   />
                   <Equation.ActionButton
                     mode="red"
                     icon={faTrash}
                     title="Delete equation"
-                    onClick={() => {
-                      dispatch(removeExpression(key));
-                      equationsMapRef.current.delete(key);
-                    }}
+                    onClick={() => dispatch(removeExpressionById(id))}
                   />
                 </>
               }

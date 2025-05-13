@@ -1,4 +1,11 @@
-import type { FocusEventHandler, ReactNode, Ref, RefObject } from "react";
+import type {
+  Dispatch,
+  FocusEventHandler,
+  ReactNode,
+  Ref,
+  RefObject,
+  SetStateAction,
+} from "react";
 import type {
   Expression,
   Quantity,
@@ -47,8 +54,9 @@ export type SubunitProps = InputHandlerProps &
 
 export type EquationProps = {
   ref?: Ref<EquationHandle>;
-  input: Expression;
   actionButtons: ReactNode;
+  input: Expression;
+  setInput: Dispatch<SetStateAction<Expression>>;
   onElementFocus?: FocusEventHandler<HTMLDivElement>;
   onElementBlur?: FocusEventHandler<HTMLDivElement>;
   onExpressionChange?: (expression: Expression) => void;
