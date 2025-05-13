@@ -287,3 +287,86 @@ export function createExpression(baseExpression?: BaseExpression): Expression {
 
   return baseExpression.map((term) => createRatio(term));
 }
+
+/**
+ * Multiply all factors in an expression
+ *
+ * @example
+ * ```ts
+ * const expression = [
+ *  { numerator: { factor: 2, labels: { m: 1 } }, denominator: { factor: 1, labels: { s: 1 } } },
+ *  { numerator: { factor: 2, labels: { m: 1 } }, denominator: { factor: 2, labels: { s: 1 } } },
+ * ];
+ *
+ * multiplyFactors(expression, "numerator"); // 4
+ * multiplyFactors(expression, "denominator"); // 2
+ * ```
+ * @param expression
+ * @param subunit
+ * @returns
+ */
+function multiplyFactors(expression: Expression, subunit: QuantityPosition) {
+  const reducedExpression = expression.reduce(
+    (previousExpression, currentExpression) => {
+      const factor = currentExpression[subunit]?.factor ?? 1;
+
+      return previousExpression * factor;
+    },
+    1,
+  );
+
+  return reducedExpression;
+}
+
+/**
+ * Compound all labels in an expression
+ *
+ * @example
+ * ```ts
+ * const expression = [
+ *  { numerator: { factor: 1, labels: { m: 1 } }, denominator: { factor: 2, labels: { s: 1 } } },
+ *  { numerator: { factor: 2, labels: { m: 1 } }, denominator: { factor: 1, labels: { s: 1 } } },
+ * ];
+ *
+ * compoundLabels(expression, "numerator"); // { m: 2 }
+ * compoundLabels(expression, "denominator"); // { s: 2 }
+ * ```
+ * @param expression
+ * @param quantityPosition
+ * @returns
+ */
+function compoundLabels(
+  expression: Expression,
+  quantityPosition: QuantityPosition,
+) {
+  const reducedExpression = expression.reduce<LabelCount>(
+    (prevTerms, currentTerm) => {
+      const labels = currentTerm[quantityPosition]?.labels;
+
+      if (!labels) return prevTerms;
+
+      for (const [label, count] of Object.entries(labels)) {
+        const prevCount = prevTerms[label] || 0;
+        prevTerms[label] = prevCount + count;
+      }
+
+      return prevTerms;
+    },
+    {},
+  );
+
+  return reducedExpression;
+}
+
+export function calculateResults(expression: Expression) {
+  return {
+    numerator: {
+      factor: multiplyFactors(expression, "numerator"),
+      labels: compoundLabels(expression, "numerator"),
+    },
+    denominator: {
+      factor: multiplyFactors(expression, "denominator"),
+      labels: compoundLabels(expression, "denominator"),
+    },
+  };
+}

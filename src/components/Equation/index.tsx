@@ -34,6 +34,7 @@ import {
 
 import Unit from "src/components/Equation/Unit";
 import {
+  calculateResults,
   flipUnit,
   insertRatio,
   quantityIsTrivial,
@@ -42,12 +43,7 @@ import {
   stringifyRatio,
   updateRatio,
 } from "src/logic/expressions";
-import type {
-  BaseRatio,
-  Expression,
-  LabelCount,
-  QuantityPosition,
-} from "src/types/expressions";
+import type { BaseRatio, Expression } from "src/types/expressions";
 import { cn } from "src/utils/styles";
 import { SortableItem } from "../Sortable";
 import CopyButton from "./CopyButton";
@@ -56,8 +52,8 @@ import Period from "./Period";
 import type { EquationProps, InputChangeHandler } from "./types";
 
 function useEquation({
-  input: expression,
-  setInput: setExpression,
+  input,
+  setInput,
   onExpressionChange,
 }: {
   input: Expression;
@@ -66,16 +62,19 @@ function useEquation({
 }) {
   const [results, setResults] = useState<BaseRatio | null>(null);
 
+  /**
+   * Keep track of whether the next item needs a period
+   */
   const metadata = useMemo<Record<string, { needsPeriod: boolean }>>(
     () =>
-      expression.reduce((prev, current, index) => {
-        const isNotLastItem = index < expression.length - 1;
+      input.reduce((prev, current, index) => {
+        const isNotLastItem = index < input.length - 1;
 
         if (!isNotLastItem) return prev;
 
         const currentHasTrivialRatio = quantityIsTrivial(current.denominator);
         const nextHasTrivialRatio = quantityIsTrivial(
-          expression[index + 1]?.denominator,
+          input[index + 1]?.denominator,
         );
 
         return {
@@ -85,74 +84,25 @@ function useEquation({
           },
         };
       }, {}),
-    [expression],
+    [input],
   );
 
-  const multiplyFactors = (
-    expression: Expression,
-    subunit: QuantityPosition,
-  ) => {
-    const reducedExpression = expression.reduce(
-      (previousExpression, currentExpression) => {
-        const factor = currentExpression[subunit]?.factor ?? 1;
-
-        return previousExpression * factor;
-      },
-      1,
-    );
-
-    return reducedExpression;
-  };
-
-  const compoundLabels = (
-    expression: Expression,
-    quantityPosition: QuantityPosition,
-  ) => {
-    const reducedExpression = expression.reduce<LabelCount>(
-      (prevTerms, currentTerm) => {
-        const labels = currentTerm[quantityPosition]?.labels;
-
-        if (!labels) return prevTerms;
-
-        for (const [label, count] of Object.entries(labels)) {
-          const prevCount = prevTerms[label] || 0;
-          prevTerms[label] = prevCount + count;
-        }
-
-        return prevTerms;
-      },
-      {},
-    );
-
-    return reducedExpression;
-  };
-
-  const calculateResults = useCallback(
-    () =>
-      setResults({
-        numerator: {
-          factor: multiplyFactors(expression, "numerator"),
-          labels: compoundLabels(expression, "numerator"),
-        },
-        denominator: {
-          factor: multiplyFactors(expression, "denominator"),
-          labels: compoundLabels(expression, "denominator"),
-        },
-      }),
-    [expression],
+  const updateResults = useCallback(
+    () => setResults(calculateResults(input)),
+    [input],
   );
 
   const cleanupExpression = () => {
-    setExpression(simplifyExpression(expression));
+    setInput(simplifyExpression(input));
   };
 
   const deleteUnit = (index: number) => {
-    if (expression.length === 0) return;
+    if (input.length === 0) return;
 
-    const modifiedExpression = removeRatio(expression, index);
-    setExpression(modifiedExpression);
+    const modifiedExpression = removeRatio(input, index);
+    setInput(modifiedExpression);
 
-    return expression.length > modifiedExpression.length;
+    return input.length > modifiedExpression.length;
   };
 
   const setExpressionTerm: InputChangeHandler = (
@@ -160,13 +110,13 @@ function useEquation({
     position,
     userInput,
   ) => {
-    setExpression((prevExpression) =>
+    setInput((prevExpression) =>
       updateRatio(prevExpression, index, position, userInput),
     );
   };
 
   const insertExpression = (index: number) => {
-    setExpression((prevExpression) => insertRatio(prevExpression, index));
+    setInput((prevExpression) => insertRatio(prevExpression, index));
   };
 
   const result = useMemo(
@@ -182,7 +132,7 @@ function useEquation({
     cleanupExpression();
 
     // Update data
-    calculateResults();
+    updateResults();
   };
 
   const handleClearFocusIndex = () => setFocusIndex(null);
@@ -201,7 +151,7 @@ function useEquation({
   };
 
   const handleInvertUnit = (index: number) => {
-    setExpression(flipUnit(expression, index));
+    setInput(flipUnit(input, index));
   };
 
   const handleDragEnd = useCallback(
@@ -211,7 +161,7 @@ function useEquation({
       if (!over) return;
 
       if (active.id !== over.id) {
-        setExpression((items) => {
+        setInput((items) => {
           const expressionIndices = items.map((item) => item.id);
           const oldIndex = expressionIndices.indexOf(String(active.id));
           const newIndex = expressionIndices.indexOf(String(over.id));
@@ -222,7 +172,7 @@ function useEquation({
         });
       }
     },
-    [setExpression],
+    [setInput],
   );
 
   useEffect(
@@ -231,14 +181,14 @@ function useEquation({
      * Emits a change event.
      */
     function updateResultsOnChange() {
-      calculateResults();
-      onExpressionChange?.(expression);
+      updateResults();
+      onExpressionChange?.(input);
     },
-    [expression, calculateResults, onExpressionChange],
+    [input, updateResults, onExpressionChange],
   );
 
   return {
-    state: { expression, metadata, result },
+    state: { expression: input, metadata, result },
     actions: { cleanupExpression, focusIndex },
     handlers: {
       handleClickResults,
