@@ -33,36 +33,33 @@ function normalizeInput(inputString: string) {
 
 function useInput({
   index,
-  inputQuantity,
   quantityPosition,
   isFocused,
-  onChangeInput,
+  input,
+  onChange,
   onFocused,
   onBlurred,
 }: Omit<SubunitProps, "display">) {
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const inputString = useMemo(
-    () => stringifyQuantity(inputQuantity),
-    [inputQuantity],
+  const inputString = useMemo(() => stringifyQuantity(input), [input]);
+
+  const [displayText, setDisplayText] = useState(() =>
+    normalizeInput(inputString),
   );
 
   const focusHandler: FocusEventHandler<HTMLInputElement> = (event) => {
     onFocused?.(event);
   };
 
-  const [displayText, setDisplayText] = useState(() =>
-    normalizeInput(inputString),
-  );
-
   const blurHandler: FocusEventHandler<HTMLInputElement> = (event) => {
     onBlurred?.(event);
 
-    const adjustedInput = normalizeInput(event.currentTarget.value);
+    const changedInput = normalizeInput(event.currentTarget.value);
 
-    if (adjustedInput === inputString) return;
+    if (changedInput === inputString) return;
 
-    onChangeInput(index, quantityPosition, adjustedInput);
+    onChange(index, quantityPosition, changedInput);
   };
 
   const changeHandler: FocusEventHandler<HTMLInputElement> = (event) => {

@@ -188,7 +188,7 @@ function useEquation({
   );
 
   return {
-    state: { expression: input, metadata, result },
+    state: { metadata, result },
     actions: { cleanupExpression, focusIndex },
     handlers: {
       handleClickResults,
@@ -212,7 +212,7 @@ function EquationInternal({
   onExpressionChange,
 }: EquationProps) {
   const {
-    state: { expression, metadata, result },
+    state: { metadata, result },
     actions: { cleanupExpression, focusIndex },
     handlers: {
       handleClickResults,
@@ -221,7 +221,6 @@ function EquationInternal({
       handleDeleteUnit,
       handleChangeInput,
       handleDragEnd,
-      handleInvertUnit,
     },
   } = useEquation({ input, setInput, onExpressionChange });
 
@@ -274,12 +273,12 @@ function EquationInternal({
           onDragEnd={handleDragEnd}
         >
           <SortableContext
-            items={expression}
+            items={input}
             strategy={horizontalListSortingStrategy}
             disabled={hasFocus}
           >
             <div className="flex w-full items-center justify-center gap-0.5">
-              {expression.map((ratio, index) => {
+              {input.map((ratio, index) => {
                 return (
                   <SortableItem
                     className="flex h-full w-max gap-0.5"
@@ -288,14 +287,13 @@ function EquationInternal({
                     tabIndex={-1}
                   >
                     <Unit
-                      inputRatio={ratio}
-                      onChangeInput={handleChangeInput}
+                      input={ratio}
+                      onChange={handleChangeInput}
                       index={index}
                       onDeleteUnit={() => handleDeleteUnit(index)}
                       isFocused={focusIndex === index}
                       onFocused={handleUnitFocus}
                       onBlurred={handleUnitBlur}
-                      onFlipUnit={() => handleInvertUnit(index)}
                     />
                     <Period
                       style={{

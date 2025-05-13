@@ -9,6 +9,7 @@ import { cn } from "src/utils/styles";
 import Parenthesis from "../Parenthesis";
 import type { SubunitHandle, UnitProps } from "../types";
 import Subunit from "./Subunit";
+import { stringifyQuantity } from "src/validation/input-parser";
 
 function Divider({
   children,
@@ -23,26 +24,29 @@ function Divider({
 
 export default function Unit({
   index,
-  inputRatio,
-  onChangeInput,
+  input,
+  onChange,
   onDeleteUnit,
   isFocused,
   onFocused,
   onBlurred,
-  onFlipUnit,
 }: UnitProps) {
   const inputRefNumerator = useRef<SubunitHandle | null>(null);
   const inputRefDenominator = useRef<SubunitHandle | null>(null);
 
   const isTrivialDenominator = useMemo(
-    () => quantityIsTrivial(inputRatio.denominator),
-    [inputRatio.denominator],
+    () => quantityIsTrivial(input.denominator),
+    [input.denominator],
   );
 
-  const handleFlipUnit: MouseEventHandler<HTMLButtonElement> = useCallback(
-    onFlipUnit,
-    [onFlipUnit],
-  );
+  const handleFlipUnit: MouseEventHandler<HTMLButtonElement> =
+    useCallback(() => {
+      if (!inputRefDenominator.current || !inputRefNumerator.current)
+        throw new Error("Missing subunits");
+
+      onChange(index, "denominator", stringifyQuantity(input.numerator) || "1");
+      onChange(index, "numerator", stringifyQuantity(input.denominator) || "1");
+    }, [index, input.denominator, input.numerator, onChange]);
 
   return (
     <div
@@ -56,8 +60,8 @@ export default function Unit({
         <div className="flex grow">
           <Subunit
             ref={inputRefNumerator}
-            inputQuantity={inputRatio.numerator}
-            onChangeInput={onChangeInput}
+            input={input.numerator}
+            onChange={onChange}
             index={index}
             quantityPosition={"numerator"}
             isFocused={isFocused}
@@ -75,7 +79,7 @@ export default function Unit({
           <Divider className="group relative">
             <button
               type="button"
-              className="absolute left-1/2 z-100 -translate-1/2 cursor-pointer opacity-0 group-hover:opacity-100 disabled:cursor-not-allowed disabled:opacity-50"
+              className="absolute left-1/2 z-100 -translate-1/2 cursor-pointer opacity-0 group-focus-within:opacity-100 group-hover:opacity-100 disabled:cursor-not-allowed disabled:opacity-50"
               onClick={handleFlipUnit}
             >
               <FontAwesomeIcon
@@ -87,8 +91,8 @@ export default function Unit({
           </Divider>
           <Subunit
             ref={inputRefDenominator}
-            inputQuantity={inputRatio.denominator || { factor: 1 }}
-            onChangeInput={onChangeInput}
+            input={input.denominator || { factor: 1 }}
+            onChange={onChange}
             index={index}
             quantityPosition={"denominator"}
             onFocused={onFocused}

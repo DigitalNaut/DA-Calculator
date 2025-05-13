@@ -21,7 +21,7 @@ export type InputChangeHandler = (
 
 type InputHandlerProps = {
   index: number;
-  onChangeInput: InputChangeHandler;
+  onChange: InputChangeHandler;
 };
 
 type Focusable = {
@@ -32,9 +32,8 @@ type Focusable = {
 
 export type UnitProps = InputHandlerProps &
   Focusable & {
-    inputRatio: Ratio;
+    input: Ratio;
     onDeleteUnit(): void;
-    onFlipUnit(): void;
   };
 
 export type EquationHandle = {
@@ -47,7 +46,7 @@ export type SubunitHandle = {
 
 export type SubunitProps = InputHandlerProps &
   Partial<Focusable> & {
-    inputQuantity: Quantity;
+    input: Quantity;
     quantityPosition: QuantityPosition;
     ref: RefObject<SubunitHandle | null>;
   };
