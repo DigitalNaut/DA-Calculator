@@ -25,6 +25,7 @@ import type {
   SetStateAction,
 } from "react";
 import {
+  memo,
   useCallback,
   useEffect,
   useImperativeHandle,
@@ -386,6 +387,6 @@ export function ActionButton({
   );
 }
 
-const Equation = Object.assign(EquationInternal, { ActionButton });
+const Equation = Object.assign(memo(EquationInternal), { ActionButton });
 
 export default Equation;

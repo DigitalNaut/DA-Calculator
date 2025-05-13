@@ -2,14 +2,14 @@ import { faArrowsRotate, faTimes } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import clsx from "clsx";
 import type { MouseEventHandler, PropsWithChildren } from "react";
-import { useCallback, useMemo, useRef } from "react";
+import { memo, useCallback, useMemo, useRef } from "react";
 
 import { quantityIsTrivial } from "src/logic/expressions";
 import { cn } from "src/utils/styles";
+import { stringifyQuantity } from "src/validation/input-parser";
 import Parenthesis from "../Parenthesis";
 import type { SubunitHandle, UnitProps } from "../types";
 import Subunit from "./Subunit";
-import { stringifyQuantity } from "src/validation/input-parser";
 
 function Divider({
   children,
@@ -22,7 +22,7 @@ function Divider({
   );
 }
 
-export default function Unit({
+const Unit = memo(function Unit({
   index,
   input,
   onChange,
@@ -112,4 +112,6 @@ export default function Unit({
       </button>
     </div>
   );
-}
+});
+
+export default Unit;

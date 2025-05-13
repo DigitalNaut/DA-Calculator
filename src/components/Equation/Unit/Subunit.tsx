@@ -1,6 +1,7 @@
 import type { FocusEventHandler, KeyboardEventHandler } from "react";
 import {
   Fragment,
+  memo,
   useEffect,
   useImperativeHandle,
   useMemo,
@@ -149,7 +150,7 @@ function StyledInput({ input }: { input: string }) {
   );
 }
 
-export default function Subunit(inputParams: SubunitProps) {
+const Subunit = memo(function Subunit(inputParams: SubunitProps) {
   const {
     inputRef,
     inputString,
@@ -187,4 +188,6 @@ export default function Subunit(inputParams: SubunitProps) {
       />
     </div>
   );
-}
+});
+
+export default Subunit;
