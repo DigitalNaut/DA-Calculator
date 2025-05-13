@@ -99,12 +99,12 @@ export const {
 
 export default reducer;
 
-export function selectExpressionRecords() {
-  return createSelector(
-    (state: RootState) => state.expressionRecords,
-    (records) => records.expressions,
-  );
-}
+const selectRecords = (state: RootState) => state.expressionRecords.expressions;
+
+export const selectExpressionRecordEntries = createSelector(
+  selectRecords,
+  (records) => Object.entries(records),
+);
 
 export function modifyExpression({
   key,

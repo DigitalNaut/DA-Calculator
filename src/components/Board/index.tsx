@@ -10,7 +10,7 @@ import { restrictToParentElement } from "@dnd-kit/modifiers";
 import type { Coordinates } from "@dnd-kit/utilities";
 import { faBroom, faClone, faTrash } from "@fortawesome/free-solid-svg-icons";
 import type { MouseEventHandler } from "react";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 
 import Draggable from "src/components/Draggable";
 import Equation from "src/components/Equation";
@@ -18,9 +18,9 @@ import {
   addExpression,
   modifyExpression,
   removeExpression,
-  selectExpressionRecords,
+  selectExpressionRecordEntries,
 } from "src/store/features/expressionRecords/slice";
-import { useAppDispatch } from "src/store/hooks";
+import { useAppDispatch, useAppSelector } from "src/store/hooks";
 import type { Expression } from "src/types/expressions";
 import type { EquationHandle } from "../Equation/types";
 
@@ -91,8 +91,7 @@ export default function Board() {
 
   const [hasFocus, setHasFocus] = useState(false);
 
-  const records = selectExpressionRecords();
-  const equations = useMemo(() => Object.entries(records), [records]);
+  const recordEntries = useAppSelector(selectExpressionRecordEntries);
 
   return (
     <article
@@ -104,7 +103,7 @@ export default function Board() {
         onDragEnd={dragEndHandler}
         modifiers={[restrictToParentElement]}
       >
-        {equations.map(([key, { expression, coordinates }]) => (
+        {recordEntries.map(([key, { expression, coordinates }]) => (
           <Draggable
             className="absolute flex size-max"
             key={key}
