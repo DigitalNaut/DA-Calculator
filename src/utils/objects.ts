@@ -3,17 +3,11 @@
  *
  * @example
  * ```ts
- * isEmptyObject({ a: 1, b: 2 }); // false
  * isEmptyObject({}); // true
+ * isEmptyObject({ a: 1 }); // false
  * ```
- * @param ad
+ * @param target
  * @returns
  */
-export function isEmptyObject(ad: object) {
-  for (const prop in ad) {
-    if (Object.prototype.hasOwnProperty.call(ad, prop)) {
-      return false;
-    }
-  }
-  return true;
-}
+export const isEmptyObject = (target: Record<string, unknown>) =>
+  Object.keys(target).length === 0;

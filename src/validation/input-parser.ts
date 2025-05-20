@@ -45,13 +45,10 @@ function parseLabels(input: string): LabelCount | undefined {
   let buffer: RegExpExecArray | null;
   while ((buffer = labelSeparatorNeedle.exec(input)) !== null) {
     const [labelSubstring] = buffer;
+    const matchedLabel = labelSubstring.match(labelNeedle);
+    if (!matchedLabel) continue;
 
-    const validatedLabel = labelSubstring.match(labelNeedle);
-
-    if (!validatedLabel) continue;
-
-    const [, label, exponent] = validatedLabel;
-
+    const [, label, exponent] = matchedLabel;
     if (!label) continue;
 
     const prevCount = results[label] || 0;
@@ -79,7 +76,7 @@ function parseLabels(input: string): LabelCount | undefined {
 /**
  * Parse a string into a quantity
  * @param input
- * @returns A quantity object
+ * @returns A quantity object or undefined if the input is invalid
  */
 export function parseInput(input: string): Quantity | undefined {
   if (input.length === 0) return undefined;
@@ -100,7 +97,7 @@ export function parseInput(input: string): Quantity | undefined {
 /**
  * Convert a quantity to a string
  * @param quantity
- * @returns A string representation of the quantity
+ * @returns A string representation of the quantity or an empty string if the quantity is undefined.
  */
 export function stringifyQuantity(quantity?: Quantity) {
   if (!quantity) return "";
