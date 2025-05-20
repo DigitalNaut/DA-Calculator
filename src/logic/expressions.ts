@@ -254,8 +254,11 @@ export function stringifyRatio(ratio: BaseRatio) {
  * @returns
  */
 export function stringifyExpression(expression: Expression) {
-  return expression.map(stringifyRatio).join(" * ");
+  return `(${expression.map(stringifyRatio).join(") (")})`;
 }
+
+// TODO: Implement string to expression
+// export function stringToExpression(string: string) { }
 
 /**
  * Create a new ratio
