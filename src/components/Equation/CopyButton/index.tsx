@@ -20,13 +20,13 @@ const stateIcon: Record<CopyButtonState, IconDefinition> = {
 };
 
 export default function CopyButton({
-  content,
   className,
+  content,
   disabled = false,
 }: {
-  content: string;
-  disabled: boolean;
   className?: string;
+  content: string;
+  disabled?: boolean;
 }) {
   const [state, setState] = useState<CopyButtonState>("idle");
 
