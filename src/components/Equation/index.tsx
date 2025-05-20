@@ -22,6 +22,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import type {
   ComponentPropsWithoutRef,
   FocusEventHandler,
+  HTMLAttributes,
   SetStateAction,
 } from "react";
 import {
@@ -30,6 +31,7 @@ import {
   useEffect,
   useImperativeHandle,
   useMemo,
+  useRef,
   useState,
 } from "react";
 
@@ -205,7 +207,7 @@ function useEquation({
 
 function EquationInternal({
   ref,
-  actionButtons,
+  children,
   input,
   setInput,
   onElementFocus,
@@ -356,7 +358,7 @@ function EquationInternal({
       </div>
 
       <div className="invisible flex h-full flex-col pl-1 text-slate-600 group-focus-within/equation:visible group-hover/equation:visible">
-        {actionButtons}
+        {children}
       </div>
     </div>
   );
@@ -367,7 +369,7 @@ const actionButtonStyles = {
   red: "hover:text-red-400 active:text-red-500",
 };
 
-export function ActionButton({
+function ActionButton({
   icon,
   mode,
   className,
@@ -387,6 +389,74 @@ export function ActionButton({
   );
 }
 
-const Equation = Object.assign(memo(EquationInternal), { ActionButton });
+function StringOutput({
+  expression,
+  className,
+  ...props
+}: HTMLAttributes<HTMLTextAreaElement> & {
+  expression: Expression;
+}) {
+  const elementRef = useRef<HTMLTextAreaElement>(null);
+  const [formatOutput, setFormatOutput] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const stringifiedExpression = useMemo(() => {
+    setError(null);
+
+    try {
+      return JSON.stringify(
+        expression.map(({ numerator, denominator }) => ({
+          numerator,
+          denominator,
+        })),
+        null,
+        formatOutput ? 2 : undefined,
+      );
+    } catch (error) {
+      setError(
+        error instanceof Error ? `Error: ${error.message}` : "Unknown error",
+      );
+      return null;
+    }
+  }, [expression, formatOutput]);
+
+  return (
+    <details className="w-max max-w-sm text-sm whitespace-pre-wrap">
+      <summary className="w-full cursor-pointer">JSON</summary>
+      <div className="flex flex-col gap-1">
+        <textarea
+          readOnly
+          ref={elementRef}
+          className={cn(
+            "min-h-10 max-w-full min-w-min resize-none overflow-hidden rounded-lg bg-slate-800 p-2 text-gray-400 focus-within:resize focus-within:overflow-y-auto",
+            {
+              "text-red-400": error,
+            },
+            className,
+          )}
+          value={stringifiedExpression ?? error ?? "Loading..."}
+          {...props}
+        />
+        <div className="flex justify-end">
+          <button
+            type="button"
+            className={cn(
+              formatOutput ? "bg-slate-600" : "bg-slate-700",
+              "rounded-md p-1 hover:bg-blend-lighten",
+            )}
+            onClick={() => setFormatOutput(!formatOutput)}
+          >
+            Format
+          </button>
+        </div>
+      </div>
+    </details>
+  );
+}
+
+const Equation = Object.assign(memo(EquationInternal), {
+  ActionButton,
+  StringOutput,
+});
 
 export default Equation;

@@ -9,8 +9,8 @@ import {
 import { restrictToParentElement } from "@dnd-kit/modifiers";
 import type { Coordinates } from "@dnd-kit/utilities";
 import { faBroom, faClone, faTrash } from "@fortawesome/free-solid-svg-icons";
-import type { MouseEventHandler } from "react";
-import { useCallback, useRef, useState } from "react";
+import type { MouseEventHandler, Ref } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 
 import Draggable from "src/components/Draggable";
 import Equation from "src/components/Equation";
@@ -92,6 +92,23 @@ export default function Board() {
 
   const recordEntries = useAppSelector(selectExpressionRecordEntries);
 
+  const { setFocusTrue, setFocusFalse } = useMemo(
+    () => ({
+      setFocusTrue: () => setHasFocus(true),
+      setFocusFalse: () => setHasFocus(false),
+    }),
+    [],
+  );
+
+  const equationRefHandler: (id: string) => Ref<EquationHandle> =
+    (id) => (ref) => {
+      if (ref) equationsMapRef.current.set(id, ref);
+      else equationsMapRef.current.delete(id);
+      return () => {
+        equationsMapRef.current.delete(id);
+      };
+    };
+
   return (
     <article
       className="relative size-full gap-3 overflow-auto rounded-lg bg-gray-900 p-2"
@@ -104,51 +121,49 @@ export default function Board() {
       >
         {recordEntries.map(({ id, expression, coordinates }) => (
           <Draggable
-            className="absolute flex size-max"
+            className="absolute flex size-max flex-col gap-1"
             key={id}
             id={id}
             style={{ top: coordinates.y, left: coordinates.x }}
             disabled={hasFocus}
           >
-            <Equation
-              ref={(ref) => {
-                if (ref) equationsMapRef.current.set(id, ref);
-                else equationsMapRef.current.delete(id);
-                return () => {
-                  equationsMapRef.current.delete(id);
-                };
-              }}
-              onElementFocus={() => setHasFocus(true)}
-              onElementBlur={() => setHasFocus(false)}
-              input={expression}
-              setInput={(expression) => dispatch(setInput(id, expression))}
-              actionButtons={
-                <>
-                  <Equation.ActionButton
-                    mode="blue"
-                    icon={faClone}
-                    title="Duplicate equation"
-                    onClick={() =>
-                      duplicateEquationHandler(expression, coordinates)
-                    }
-                  />
-                  <Equation.ActionButton
-                    mode="blue"
-                    icon={faBroom}
-                    title="Remove trivial units"
-                    onClick={() =>
-                      equationsMapRef.current.get(id)?.cleanupExpression()
-                    }
-                  />
-                  <Equation.ActionButton
-                    mode="red"
-                    icon={faTrash}
-                    title="Delete equation"
-                    onClick={() => dispatch(removeExpressionById(id))}
-                  />
-                </>
-              }
-            />
+            <section className="size-full">
+              <Equation
+                ref={equationRefHandler(id)}
+                onElementFocus={setFocusTrue}
+                onElementBlur={setFocusFalse}
+                input={expression}
+                setInput={(expression) => dispatch(setInput(id, expression))}
+              >
+                <Equation.ActionButton
+                  mode="blue"
+                  icon={faClone}
+                  title="Duplicate equation"
+                  onClick={() =>
+                    duplicateEquationHandler(expression, coordinates)
+                  }
+                />
+                <Equation.ActionButton
+                  mode="blue"
+                  icon={faBroom}
+                  title="Remove trivial units"
+                  onClick={() =>
+                    equationsMapRef.current.get(id)?.cleanupExpression()
+                  }
+                />
+                <Equation.ActionButton
+                  mode="red"
+                  icon={faTrash}
+                  title="Delete equation"
+                  onClick={() => dispatch(removeExpressionById(id))}
+                />
+              </Equation>
+              <Equation.StringOutput
+                expression={expression}
+                onFocus={setFocusTrue}
+                onBlur={setFocusFalse}
+              />
+            </section>
           </Draggable>
         ))}
       </DndContext>

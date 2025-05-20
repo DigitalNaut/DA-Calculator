@@ -53,7 +53,7 @@ export type SubunitProps = InputHandlerProps &
 
 export type EquationProps = {
   ref?: Ref<EquationHandle>;
-  actionButtons: ReactNode;
+  children?: ReactNode;
   input: Expression;
   setInput: Dispatch<SetStateAction<Expression>>;
   onElementFocus?: FocusEventHandler<HTMLDivElement>;
