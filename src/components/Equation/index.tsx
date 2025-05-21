@@ -43,6 +43,7 @@ import {
   quantityIsTrivial,
   removeRatio,
   simplifyExpression,
+  stringifyExpression,
   stringifyRatio,
   updateRatio,
 } from "src/logic/expressions";
@@ -284,7 +285,7 @@ function EquationInternal({
             strategy={horizontalListSortingStrategy}
             disabled={hasFocus}
           >
-            <div className="flex w-full items-center justify-center gap-0.5">
+            <div className="group/expression flex w-full items-center justify-center gap-0.5">
               {input.map((ratio, index) => {
                 return (
                   <SortableItem
@@ -317,6 +318,10 @@ function EquationInternal({
                   </SortableItem>
                 );
               })}
+              <CopyButton
+                className="p-2 opacity-0 group-focus-within/expression:opacity-50 group-hover/expression:opacity-50"
+                content={stringifyExpression(input)}
+              />
             </div>
           </SortableContext>
         </DndContext>
