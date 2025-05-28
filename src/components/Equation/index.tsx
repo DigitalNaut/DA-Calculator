@@ -260,6 +260,16 @@ function EquationInternal({
     [onElementBlur],
   );
 
+  const stringifiedExpression = useMemo(
+    () => stringifyExpression(input),
+    [input],
+  );
+
+  const deleteUnitHandlers = useMemo(
+    () => input.map((_, index) => () => handleDeleteUnit(index)),
+    [handleDeleteUnit, input],
+  );
+
   return (
     <div className="group/equation flex size-max items-stretch justify-center gap-2 rounded-lg p-2 focus-within:bg-slate-800 focus-within:shadow-lg focus-within:outline focus-within:outline-slate-700 hover:bg-slate-800 hover:shadow-lg">
       <div
@@ -286,41 +296,39 @@ function EquationInternal({
             disabled={hasFocus}
           >
             <div className="group/expression flex w-full items-center justify-center gap-0.5">
-              {input.map((ratio, index) => {
-                return (
-                  <SortableItem
-                    className="flex h-full w-max gap-0.5"
-                    key={ratio.id}
-                    id={ratio.id}
-                    tabIndex={-1}
-                  >
-                    <Unit
-                      input={ratio}
-                      onChange={handleChangeInput}
-                      index={index}
-                      onDeleteUnit={() => handleDeleteUnit(index)}
-                      isFocused={focusIndex === index}
-                      onFocused={handleUnitFocus}
-                      onBlurred={handleUnitBlur}
-                    />
-                    <Period
-                      style={{
-                        visibility: metadata[ratio.id]?.needsPeriod
-                          ? "visible"
-                          : "hidden",
-                      }}
-                    />
-                    <Inserter
-                      onClick={({ currentTarget }) =>
-                        handleInsertion(currentTarget, index + 1)
-                      }
-                    />
-                  </SortableItem>
-                );
-              })}
+              {input.map((ratio, index) => (
+                <SortableItem
+                  className="flex h-full w-max gap-0.5"
+                  key={ratio.id}
+                  id={ratio.id}
+                  tabIndex={-1}
+                >
+                  <Unit
+                    input={ratio}
+                    onChange={handleChangeInput}
+                    index={index}
+                    onDeleteUnit={deleteUnitHandlers[index]}
+                    isFocused={focusIndex === index}
+                    onFocused={handleUnitFocus}
+                    onBlurred={handleUnitBlur}
+                  />
+                  <Period
+                    style={{
+                      visibility: metadata[ratio.id]?.needsPeriod
+                        ? "visible"
+                        : "hidden",
+                    }}
+                  />
+                  <Inserter
+                    onClick={({ currentTarget }) =>
+                      handleInsertion(currentTarget, index + 1)
+                    }
+                  />
+                </SortableItem>
+              ))}
               <CopyButton
                 className="p-2 opacity-0 group-focus-within/expression:opacity-50 group-hover/expression:opacity-50"
-                content={stringifyExpression(input)}
+                content={stringifiedExpression}
               />
             </div>
           </SortableContext>
@@ -349,14 +357,14 @@ function EquationInternal({
               readOnly
               onFocus={onElementFocus}
               onBlur={onElementBlur}
-              value={result || "---"}
+              value={result || ""}
               size={result?.length || 1}
             />
           </div>
 
           <CopyButton
             className="p-2 opacity-0 group-focus-within:opacity-50 group-hover:opacity-50"
-            content={result || "--"}
+            content={result || ""}
             disabled={!result}
           />
         </div>
